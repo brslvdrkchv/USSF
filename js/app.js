@@ -217,6 +217,8 @@ function closeRegistrationModal(resetForm = false) {
   if (regModal) {
     regModal.classList.remove('open');
     document.body.style.overflow = '';
+    const modalWindow = document.querySelector('.modal-window');
+    if (modalWindow) modalWindow.classList.remove('has-preview');
     // Reset view states after animation completes
     setTimeout(() => {
       if (formContent) formContent.style.display = 'block';
@@ -320,73 +322,95 @@ function handleFormSubmit(e) {
     console.warn('LocalStorage error:', err);
   }
 
-  // If thesis data was provided, configure the abstract download & mailto link
-  const successAbstractBox = document.getElementById('successAbstractBox');
-  const successEmailLink = document.getElementById('successEmailLink');
+  // Expand modal window to fit preview
+  const modalWindow = document.querySelector('.modal-window');
+  if (modalWindow) modalWindow.classList.add('has-preview');
 
-  if (abstractIntro || abstractAim || abstractResults || abstractTitle) {
-    if (successAbstractBox) successAbstractBox.style.display = 'block';
-
-    if (successEmailLink) {
-      const subject = encodeURIComponent(`[USSF 2026 Тези] ${fullName} - ${abstractTitle || 'Наукова робота'}`);
-      const bodyLines = [
-        `Шановний оргкомітет USSF 2026!`,
-        ``,
-        `Надсилаю наукові тези на розгляд для участі у форумі за офіційним шаблоном.`,
-        ``,
-        `--- ДАНІ АВТОРА ТА КАФЕДРИ ---`,
-        `ПІБ Автора: ${fullName}`,
-        `Установа: ${institution}`,
-        `Кафедра: ${department}`,
-        `Завідувач кафедри: ${headOfDepartment}`,
-        `Науковий керівник: ${scientificSupervisor}`,
-        `Місто, Країна: ${cityCountry}`,
-        `Статус: ${academicStatusText}`,
-        `Форма участі: ${partFormatText}`,
-        `Секція: ${sectionText}`,
-        `Email: ${email}`,
-        `Телефон: ${phone}`,
-        ``,
-        `--- ТЕЗИ ДОПОВІДІ ---`,
-        `НАЗВА: ${abstractTitle}`,
-        ``,
-        `ВСТУП:`,
-        `${abstractIntro}`,
-        ``,
-        `МЕТА:`,
-        `${abstractAim}`,
-        ``,
-        `МАТЕРІАЛИ І МЕТОДИ:`,
-        `${abstractMaterials}`,
-        ``,
-        `РЕЗУЛЬТАТИ:`,
-        `${abstractResults}`,
-        ``,
-        `ВИСНОВОК:`,
-        `${abstractConclusion}`,
-        ``,
-        `КЛЮЧОВІ СЛОВА:`,
-        `${abstractKeywords}`,
-        ``,
-        `СПИСОК ЛІТЕРАТУРИ:`,
-        `${abstractReferences}`,
-        ``,
-        `--`,
-        `Сформовано автоматично на сайті USSF (НМУ імені О.О. Богомольця)`
-      ];
-      successEmailLink.href = `mailto:derk.boryslav@gmail.com?subject=${subject}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
-    }
-  } else {
-    if (successAbstractBox) successAbstractBox.style.display = 'none';
+  // Immediately render live visual preview in iframe
+  const previewFrame = document.getElementById('abstractPreviewFrame');
+  if (previewFrame) {
+    previewFrame.srcdoc = buildAbstractHTML(currentSubmission);
   }
 
-  // Optionally post to local automation server if running
+  // Update save status indicator
+  const savedFilePathDisplay = document.getElementById('savedFilePathDisplay');
+  if (savedFilePathDisplay) {
+    savedFilePathDisplay.textContent = 'Збереження у папку заявки_тези на вашому пристрої...';
+  }
+
+  // Configure mailto link
+  const successEmailLink = document.getElementById('successEmailLink');
+  if (successEmailLink) {
+    const subject = encodeURIComponent(`[USSF 2026 Тези] ${fullName} - ${abstractTitle || 'Наукова робота'}`);
+    const bodyLines = [
+      `Шановний оргкомітет USSF 2026!`,
+      ``,
+      `Надсилаю наукові тези на розгляд для участі у форумі за офіційним шаблоном.`,
+      ``,
+      `--- ДАНІ АВТОРА ТА КАФЕДРИ ---`,
+      `ПІБ Автора: ${fullName}`,
+      `Установа: ${institution}`,
+      `Кафедра: ${department}`,
+      `Завідувач кафедри: ${headOfDepartment}`,
+      `Науковий керівник: ${scientificSupervisor}`,
+      `Місто, Країна: ${cityCountry}`,
+      `Статус: ${academicStatusText}`,
+      `Форма участі: ${partFormatText}`,
+      `Секція: ${sectionText}`,
+      `Email: ${email}`,
+      `Телефон: ${phone}`,
+      ``,
+      `--- ТЕЗИ ДОПОВІДІ ---`,
+      `НАЗВА: ${abstractTitle}`,
+      ``,
+      `ВСТУП:`,
+      `${abstractIntro}`,
+      ``,
+      `МЕТА:`,
+      `${abstractAim}`,
+      ``,
+      `МАТЕРІАЛИ І МЕТОДИ:`,
+      `${abstractMaterials}`,
+      ``,
+      `РЕЗУЛЬТАТИ:`,
+      `${abstractResults}`,
+      ``,
+      `ВИСНОВОК:`,
+      `${abstractConclusion}`,
+      ``,
+      `КЛЮЧОВІ СЛОВА:`,
+      `${abstractKeywords}`,
+      ``,
+      `СПИСОК ЛІТЕРАТУРИ:`,
+      `${abstractReferences}`,
+      ``,
+      `--`,
+      `Сформовано автоматично на сайті USSF (НМУ імені О.О. Богомольця)`
+    ];
+    successEmailLink.href = `mailto:derk.boryslav@gmail.com?subject=${subject}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+  }
+
+  // Post to local automation server to automatically write the PDF to device disk with timestamp
   try {
     fetch('http://localhost:5050/api/submit-abstract', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(currentSubmission)
-    }).catch(() => {});
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success' && data.pdf_path) {
+        if (savedFilePathDisplay) {
+          savedFilePathDisplay.innerHTML = `<strong>${data.pdf_path}</strong>`;
+        }
+      }
+    })
+    .catch(err => {
+      console.warn('Backend server note:', err);
+      if (savedFilePathDisplay) {
+        savedFilePathDisplay.innerHTML = 'Файл скомпільовано у браузері. Натисніть <strong>«Завантажити PDF»</strong> для збереження на диск.';
+      }
+    });
   } catch (err) {}
 
   // Show animated success message
@@ -394,22 +418,8 @@ function handleFormSubmit(e) {
   if (formSuccessMessage) formSuccessMessage.style.display = 'block';
 }
 
-// Generate & download / print structured abstract document formatted strictly to academic template:
-// Font: Times New Roman, Size: 14pt, Line Spacing: 1.5, Margins: Left 30mm, Right 15mm, Top 20mm, Bottom 20mm, Indent: 1.25cm
-function downloadCurrentSubmissionDoc() {
-  if (!currentSubmission) {
-    alert('Дані для формування тез відсутні.');
-    return;
-  }
-
-  const s = currentSubmission;
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) {
-    alert('Будь ласка, дозвольте відкриття спливаючих вікон для друку/збереження документа.');
-    return;
-  }
-
-  // Build academic affiliation lines
+// Build standardized academic HTML document matching NMU template
+function buildAbstractHTML(s) {
   const affilLines = [];
   if (s.scientificSupervisor) {
     const p = s.scientificSupervisor.toLowerCase().startsWith('науковий керівник') ? '' : 'Науковий керівник: ';
@@ -430,17 +440,16 @@ function downloadCurrentSubmissionDoc() {
     affilLines.push(s.cityCountry);
   }
 
-  // Process reference lines
   const refItems = (s.abstractReferences || '').split('\n').filter(r => r.trim());
   const refHtml = refItems.length > 0
     ? `<p class="ref-heading">Список літератури:</p>` + refItems.map(item => `<p class="ref-para">${item}</p>`).join('')
     : '';
 
-  const html = `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="uk">
 <head>
   <meta charset="utf-8">
-  <title>Тези_USSF_${s.fullName.replace(/\s+/g, '_')}</title>
+  <title>Тези_USSF_${(s.fullName || 'Учасник').replace(/\\s+/g, '_')}</title>
   <style>
     @page {
       size: A4;
@@ -455,9 +464,10 @@ function downloadCurrentSubmissionDoc() {
       line-height: 1.5;
       color: #000;
       margin: 0;
-      padding: 20mm 15mm 20mm 30mm;
+      padding: 24px 20px 24px 32px;
       background: #fff;
       text-rendering: optimizeLegibility;
+      box-sizing: border-box;
     }
     .paper-title {
       font-weight: bold;
@@ -514,7 +524,7 @@ function downloadCurrentSubmissionDoc() {
 <body>
   <div class="paper-title">${s.abstractTitle || 'НАЗВА НАУКОВОЇ РОБОТИ'}</div>
 
-  <div class="author-name">${s.fullName}</div>
+  <div class="author-name">${s.fullName || 'Прізвище Ім\'я'}</div>
 
   ${affilLines.length > 0 ? `<div class="affiliation-block">${affilLines.join('<br>')}</div>` : ''}
 
@@ -526,7 +536,37 @@ function downloadCurrentSubmissionDoc() {
   ${s.abstractKeywords ? `<p class="section-para"><span class="section-label">Ключові слова:</span> ${s.abstractKeywords}</p>` : ''}
 
   ${refHtml}
+</body>
+</html>`;
+}
 
+// Print currently displayed preview iframe
+function printCurrentPreview() {
+  const iframe = document.getElementById('abstractPreviewFrame');
+  if (iframe && iframe.contentWindow) {
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+  } else {
+    downloadCurrentSubmissionDoc();
+  }
+}
+
+// Generate & download / print structured abstract document formatted strictly to academic template:
+// Font: Times New Roman, Size: 14pt, Line Spacing: 1.5, Margins: Left 30mm, Right 15mm, Top 20mm, Bottom 20mm, Indent: 1.25cm
+function downloadCurrentSubmissionDoc() {
+  if (!currentSubmission) {
+    alert('Дані для формування тез відсутні.');
+    return;
+  }
+
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    alert('Будь ласка, дозвольте відкриття спливаючих вікон для друку/збереження документа.');
+    return;
+  }
+
+  let html = buildAbstractHTML(currentSubmission);
+  html = html.replace('</body>', `
   <script>
     window.onload = function() {
       setTimeout(function() {
@@ -534,8 +574,7 @@ function downloadCurrentSubmissionDoc() {
       }, 250);
     };
   <\/script>
-</body>
-</html>`;
+</body>`);
 
   printWindow.document.open();
   printWindow.document.write(html);

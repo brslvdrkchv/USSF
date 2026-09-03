@@ -15,12 +15,18 @@ import os
 import json
 import http.server
 import socketserver
+from datetime import datetime
+import urllib.parse
 from generate_abstract_pdf import create_abstract_pdf, send_abstract_email
 
 PORT = int(os.environ.get('PORT', 5050))
 RECIPIENT = "derk.boryslav@gmail.com"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=BASE_DIR, **kwargs)
+
     def end_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
@@ -39,20 +45,35 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
             try:
                 data = json.loads(post_body.decode('utf-8'))
                 
-                # 1. Generate PDF
-                safe_name = "".join(c for c in data.get('fullName', 'Учасник') if c.isalnum() or c in (' ', '_', '-')).strip().replace(' ', '_')
-                pdf_filename = f"Тези_USSF_{safe_name}.pdf"
-                pdf_path = os.path.join(os.path.dirname(__file__), pdf_filename)
+                # Timestamp & directory
+                timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+                safe_name = "".join(c for c in data.get('fullName', 'Учасник') if c.isalnum() or c in (' ', '_', '-')).strip().replace(' ', '_') or 'Учасник'
+                submissions_dir = os.path.join(BASE_DIR, 'заявки_тези')
+                os.makedirs(submissions_dir, exist_ok=True)
                 
+                pdf_filename = f"Тези_{safe_name}_{timestamp}.pdf"
+                pdf_path = os.path.join(submissions_dir, pdf_filename)
+                
+                json_filename = f"Заявка_{safe_name}_{timestamp}.json"
+                json_path = os.path.join(submissions_dir, json_filename)
+                
+                # Save raw json
+                with open(json_path, 'w', encoding='utf-8') as jf:
+                    json.dump(data, jf, ensure_ascii=False, indent=2)
+                
+                # Generate PDF strictly by template
                 generated_pdf = create_abstract_pdf(data, pdf_path)
                 print(f"[SERVER] Generated abstract PDF: {generated_pdf}")
                 
-                # 2. Attempt email dispatch
+                # Optional email dispatch
                 email_sent = send_abstract_email(generated_pdf, data, RECIPIENT)
                 
                 response_data = {
                     "status": "success",
-                    "pdf_file": pdf_filename,
+                    "pdf_filename": pdf_filename,
+                    "pdf_path": generated_pdf,
+                    "pdf_url": f"http://localhost:{PORT}/заявки_тези/{urllib.parse.quote(pdf_filename)}",
+                    "timestamp": timestamp,
                     "email_sent": email_sent,
                     "recipient": RECIPIENT
                 }

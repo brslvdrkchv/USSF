@@ -33,6 +33,7 @@ import os
 import json
 import argparse
 import smtplib
+from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
@@ -98,9 +99,19 @@ def create_abstract_pdf(data: dict, output_path: str = None) -> str:
     keywords = data.get('abstractKeywords', '').strip()
     references = data.get('abstractReferences', '').strip()
 
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    submissions_dir = os.path.join(base_dir, 'заявки_тези')
+    os.makedirs(submissions_dir, exist_ok=True)
+
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    safe_name = "".join(c for c in full_name if c.isalnum() or c in (' ', '_', '-')).strip().replace(' ', '_') or 'Учасник'
+
     if not output_path:
-        safe_name = "".join(c for c in full_name if c.isalnum() or c in (' ', '_', '-')).strip().replace(' ', '_')
-        output_path = f"Тези_USSF_{safe_name}.pdf"
+        output_path = os.path.join(submissions_dir, f"Тези_{safe_name}_{timestamp}.pdf")
+    elif os.path.isdir(output_path):
+        output_path = os.path.join(output_path, f"Тези_{safe_name}_{timestamp}.pdf")
+
+    os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
 
     doc = SimpleDocTemplate(
         output_path,
