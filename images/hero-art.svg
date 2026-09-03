@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" width="800" height="560">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="45%" r="75%">
+      <stop offset="0%" stop-color="#1B2E48" />
+      <stop offset="50%" stop-color="#0F1B2C" />
+      <stop offset="100%" stop-color="#070B12" />
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F2D785" />
+      <stop offset="40%" stop-color="#D4A843" />
+      <stop offset="80%" stop-color="#9E731B" />
+      <stop offset="100%" stop-color="#D4A843" />
+    </linearGradient>
+    <linearGradient id="goldSoft" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#A07B1E" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#D4A843" stop-opacity="0.8" />
+    </linearGradient>
+    <filter id="canvasGrain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" result="noise" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.07 0" />
+      <feBlend mode="multiply" in="SourceGraphic" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="560" fill="url(#bgGlow)" filter="url(#canvasGrain)" />
+
+  <!-- Classical Architectural Arches in Background -->
+  <g stroke="url(#goldGrad)" stroke-width="1" opacity="0.25" fill="none">
+    <path d="M100 520 V220 A300 300 0 0 1 700 220 V520" />
+    <path d="M140 520 V240 A260 260 0 0 1 660 240 V520" />
+    <path d="M180 520 V260 A220 220 0 0 1 620 260 V520" />
+    <path d="M220 520 V280 A180 180 0 0 1 580 280 V520" />
+    <!-- Pillars -->
+    <line x1="100" y1="220" x2="100" y2="520" stroke-width="2" />
+    <line x1="700" y1="220" x2="700" y2="520" stroke-width="2" />
+    <line x1="220" y1="280" x2="220" y2="520" stroke-width="1.5" />
+    <line x1="580" y1="280" x2="580" y2="520" stroke-width="1.5" />
+  </g>
+
+  <!-- Central Starburst & Divine Illumination -->
+  <g stroke="url(#goldGrad)" opacity="0.35" stroke-width="0.8">
+    <circle cx="400" cy="240" r="140" fill="none" stroke-dasharray="4,6" />
+    <circle cx="400" cy="240" r="190" fill="none" stroke-dasharray="2,8" />
+    <circle cx="400" cy="240" r="230" fill="none" stroke-opacity="0.2" />
+    <line x1="400" y1="30" x2="400" y2="450" />
+    <line x1="190" y1="240" x2="610" y2="240" />
+    <line x1="250" y1="90" x2="550" y2="390" />
+    <line x1="250" y1="390" x2="550" y2="90" />
+  </g>
+
+  <!-- Laurel Wreath & Ornamental Crest -->
+  <g fill="none" stroke="url(#goldGrad)" stroke-width="1.8" opacity="0.85">
+    <!-- Left Wreath Leaf Clusters -->
+    <path d="M320 160 C260 210 260 300 320 350" stroke-width="2" />
+    <path d="M305 180 Q280 175 295 160 Q315 175 305 180 Z" fill="url(#goldSoft)" />
+    <path d="M285 215 Q260 215 270 195 Q295 210 285 215 Z" fill="url(#goldSoft)" />
+    <path d="M275 255 Q250 260 260 240 Q285 250 275 255 Z" fill="url(#goldSoft)" />
+    <path d="M285 295 Q260 305 270 320 Q295 305 285 295 Z" fill="url(#goldSoft)" />
+    <path d="M305 330 Q285 345 300 360 Q320 340 305 330 Z" fill="url(#goldSoft)" />
+
+    <!-- Right Wreath Leaf Clusters -->
+    <path d="M480 160 C540 210 540 300 480 350" stroke-width="2" />
+    <path d="M495 180 Q520 175 505 160 Q485 175 495 180 Z" fill="url(#goldSoft)" />
+    <path d="M515 215 Q540 215 530 195 Q505 210 515 215 Z" fill="url(#goldSoft)" />
+    <path d="M525 255 Q550 260 540 240 Q515 250 525 255 Z" fill="url(#goldSoft)" />
+    <path d="M515 295 Q540 305 530 320 Q505 305 515 295 Z" fill="url(#goldSoft)" />
+    <path d="M495 330 Q515 345 500 360 Q480 340 495 330 Z" fill="url(#goldSoft)" />
+  </g>
+
+  <!-- Central Surgical & Anatomical Emblems -->
+  <!-- Asclepius Rod & Crossed Scalpels -->
+  <g stroke="url(#goldGrad)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Scalpel Left -->
+    <path d="M310 330 L450 150 L465 165 L325 345 Z" fill="url(#goldSoft)" stroke-width="1.5" />
+    <path d="M450 150 C465 130 485 125 490 135 C495 145 480 160 465 165" stroke-width="2" fill="url(#goldGrad)" opacity="0.9" />
+
+    <!-- Scalpel Right -->
+    <path d="M490 330 L350 150 L335 165 L475 345 Z" fill="url(#goldSoft)" stroke-width="1.5" />
+    <path d="M350 150 C335 130 315 125 310 135 C305 145 320 160 335 165" stroke-width="2" fill="url(#goldGrad)" opacity="0.9" />
+
+    <!-- Asclepius Staff (Vertical center) -->
+    <line x1="400" y1="110" x2="400" y2="380" stroke-width="5" stroke="url(#goldGrad)" />
+    <circle cx="400" cy="100" r="10" fill="url(#goldGrad)" stroke="none" />
+    <circle cx="400" cy="385" r="7" fill="url(#goldGrad)" stroke="none" />
+
+    <!-- Coiled Serpent of Healing -->
+    <path d="M400 360 C380 345 375 325 400 305 C425 285 425 265 400 245 C375 225 375 205 400 185 C425 165 420 140 400 130 C388 124 380 115 390 108 C398 102 408 108 402 118" stroke-width="3" stroke="url(#goldGrad)" fill="none" />
+  </g>
+
+  <!-- Ornate Scroll Banner at the Bottom -->
+  <g fill="none" stroke="url(#goldGrad)">
+    <path d="M220 420 Q400 440 580 420 L570 460 Q400 480 230 460 Z" fill="#0C1524" stroke-width="2" />
+    <!-- Scroll fold ends -->
+    <path d="M220 420 L195 435 L230 460 L210 440 Z" fill="#D4A843" opacity="0.7" />
+    <path d="M580 420 L605 435 L570 460 L590 440 Z" fill="#D4A843" opacity="0.7" />
+  </g>
+
+  <!-- Inscription Text on Banner -->
+  <text x="400" y="448" text-anchor="middle" font-family="'Cormorant Garamond', Georgia, serif" font-size="20" font-weight="600" letter-spacing="4" fill="url(#goldGrad)">
+    SALUS AEGROTI SUPREMA LEX
+  </text>
+  <text x="400" y="492" text-anchor="middle" font-family="'DM Sans', sans-serif" font-size="11" font-weight="700" letter-spacing="3" fill="#ECCB7B" opacity="0.9">
+    UNIVERSITAS MEDICA BOGOMOLETSII · KYIV 1841
+  </text>
+  <text x="400" y="520" text-anchor="middle" font-family="'DM Sans', sans-serif" font-size="10" font-weight="600" letter-spacing="2" fill="#D4A843" opacity="0.7">
+    I ALL-UKRAINIAN STUDENT SURGICAL FORUM (USSF)
+  </text>
+
+  <!-- Corner Filigree Ornaments -->
+  <g stroke="url(#goldGrad)" stroke-width="1.2" fill="none" opacity="0.6">
+    <!-- Top Left -->
+    <path d="M25 65 H65 V25" />
+    <path d="M35 55 H55 V35" />
+    <circle cx="45" cy="45" r="4" fill="url(#goldGrad)" />
+
+    <!-- Top Right -->
+    <path d="M775 65 H735 V25" />
+    <path d="M765 55 H745 V35" />
+    <circle cx="755" cy="45" r="4" fill="url(#goldGrad)" />
+
+    <!-- Bottom Left -->
+    <path d="M25 495 H65 V535" />
+    <path d="M35 505 H55 V525" />
+    <circle cx="45" cy="515" r="4" fill="url(#goldGrad)" />
+
+    <!-- Bottom Right -->
+    <path d="M775 495 H735 V535" />
+    <path d="M765 505 H745 V525" />
+    <circle cx="755" cy="515" r="4" fill="url(#goldGrad)" />
+  </g>
+</svg>
