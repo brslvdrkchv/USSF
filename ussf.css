@@ -3223,3 +3223,136 @@ footer#contacts {
   min-height: 105px;
 }
 
+/* ========================================================
+   EMAIL DISPATCH & SMTP STYLES
+======================================================== */
+.smtp-help-box {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 6px;
+  padding: 0.85rem 1.1rem;
+  font-size: 0.84rem;
+  color: #1E40AF;
+  margin-bottom: 1.2rem;
+  line-height: 1.5;
+}
+
+.email-options-panel {
+  background: #F8FAFC;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 8px;
+  padding: 1.2rem;
+  text-align: left;
+  animation: fadeIn 0.3s ease;
+}
+
+.email-options-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-headings);
+  font-size: 0.96rem;
+  font-weight: 800;
+  color: var(--nmu-navy);
+  margin-bottom: 0.4rem;
+}
+
+.email-options-desc {
+  font-size: 0.84rem;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 0.9rem;
+}
+
+.email-options-btns {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.btn-email-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.95rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-email-option.btn-gmail {
+  background: #EA4335;
+  color: #FFFFFF;
+  border: 1px solid #D93025;
+}
+
+.btn-email-option.btn-gmail:hover {
+  background: #D93025;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3);
+}
+
+.btn-email-option.btn-client {
+  background: #FFFFFF;
+  color: var(--nmu-navy);
+  border: 1px solid var(--cream-dark);
+}
+
+.btn-email-option.btn-client:hover {
+  background: #F1F5F9;
+  border-color: var(--nmu-blue);
+  color: var(--nmu-blue);
+}
+
+.btn-email-option.btn-smtp {
+  background: #F1F5F9;
+  color: #334155;
+  border: 1px solid #CBD5E1;
+}
+
+.btn-email-option.btn-smtp:hover {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
+.email-status-success {
+  background: #ECFDF5;
+  border: 1.5px solid #10B981;
+  color: #065F46;
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  animation: fadeIn 0.3s ease;
+}
+
+.email-status-error {
+  background: #FEF2F2;
+  border: 1.5px solid #EF4444;
+  color: #991B1B;
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  animation: fadeIn 0.3s ease;
+}
+
+.spinner-small {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: -2px;
+  margin-right: 0.35rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+

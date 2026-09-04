@@ -23,6 +23,7 @@ import http.server
 import socketserver
 from datetime import datetime
 import urllib.parse
+import smtplib
 from generate_abstract_pdf import create_abstract_pdf, send_abstract_email, load_email_config
 
 PORT = int(os.environ.get('PORT', 5050))
@@ -208,11 +209,9 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
                 response_data = {
                     "status": "success",
                     "pdf_filename": pdf_filename,
-                    "pdf_path": generated_pdf,
-                    "pdf_url": f"/api/sync?action=download&file={urllib.parse.quote(pdf_filename)}&token={SYNC_TOKEN}",
                     "timestamp": timestamp,
                     "email_result": email_result,
-                    "recipient": RECIPIENT
+                    "delivered_to_owner": True
                 }
                 
                 self.send_response(200)
@@ -222,6 +221,134 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
                 return
             except Exception as e:
                 print(f"[SERVER ERROR] {e}")
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+                return
+
+        # 2. STANDALONE SEND-EMAIL API (/api/send-email)
+        if self.path in ('/api/send-email', '/api/email/send'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_body = self.rfile.read(content_length)
+            try:
+                data = json.loads(post_body.decode('utf-8'))
+                cfg = load_email_config()
+
+                if not cfg.get('smtp_user') or not cfg.get('smtp_pass'):
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "status": "error",
+                        "email_result": {
+                            "sent": False,
+                            "error": "SMTP_NOT_CONFIGURED",
+                            "message": "SMTP не налаштовано. Потрібно вказати логін та пароль додатку у налаштуваннях."
+                        }
+                    }, ensure_ascii=False).encode('utf-8'))
+                    return
+
+                pdf_filename = data.get('pdf_filename', '')
+                pdf_path = os.path.join(SUBMISSIONS_DIR, os.path.basename(pdf_filename)) if pdf_filename else None
+
+                if not pdf_path or not os.path.isfile(pdf_path):
+                    safe_name = "".join(c for c in data.get('fullName', 'Учасник') if c.isalnum() or c in (' ', '_', '-')).strip().replace(' ', '_') or 'Учасник'
+                    candidates = [f for f in os.listdir(SUBMISSIONS_DIR) if f.startswith(f"Тези_{safe_name}") and f.endswith('.pdf')] if os.path.exists(SUBMISSIONS_DIR) else []
+                    if candidates:
+                        candidates.sort(reverse=True)
+                        pdf_path = os.path.join(SUBMISSIONS_DIR, candidates[0])
+                    else:
+                        timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+                        pdf_filename = f"Тези_{safe_name}_{timestamp}.pdf"
+                        pdf_path = os.path.join(SUBMISSIONS_DIR, pdf_filename)
+                        try:
+                            create_abstract_pdf(data, pdf_path)
+                        except Exception as pe:
+                            print(f"[SERVER WARN] Could not compile PDF on disk: {pe}")
+                            pdf_path = None
+
+                if pdf_path and os.path.isfile(pdf_path):
+                    email_result = send_abstract_email(pdf_path, data, RECIPIENT)
+                else:
+                    email_result = {
+                        "sent": False,
+                        "error": "PDF_NOT_FOUND",
+                        "message": "Не знайдено скомпільований PDF файл тез для вкладення."
+                    }
+
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "success" if email_result.get("sent") else "error",
+                    "email_result": email_result,
+                    "pdf_filename": os.path.basename(pdf_path) if pdf_path else ""
+                }, ensure_ascii=False).encode('utf-8'))
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+                return
+
+        # 3. SAVE & VERIFY SMTP CONFIGURATION (/api/save-smtp-config)
+        if self.path in ('/api/save-smtp-config', '/api/smtp/save'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_body = self.rfile.read(content_length)
+            try:
+                data = json.loads(post_body.decode('utf-8'))
+                smtp_user = data.get('smtp_user', '').strip()
+                smtp_pass = data.get('smtp_pass', '').strip().replace(' ', '')
+                smtp_host = data.get('smtp_host', 'smtp.gmail.com').strip()
+                smtp_port = int(data.get('smtp_port', 587))
+                
+                if not smtp_user or not smtp_pass:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"status": "error", "message": "Email та пароль додатку обов'язкові."}, ensure_ascii=False).encode('utf-8'))
+                    return
+                
+                # Test credentials live
+                try:
+                    if smtp_port == 465:
+                        test_conn = smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=12)
+                    else:
+                        test_conn = smtplib.SMTP(smtp_host, smtp_port, timeout=12)
+                        test_conn.starttls()
+                    test_conn.login(smtp_user, smtp_pass)
+                    test_conn.quit()
+                except Exception as auth_err:
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "status": "auth_error",
+                        "message": f"Помилка авторизації SMTP: {auth_err}. Перевірте правильність 16-значного паролю додатку Google або паролю Ukr.net."
+                    }, ensure_ascii=False).encode('utf-8'))
+                    return
+                
+                # Update email_config.json
+                cfg_path = os.path.join(BASE_DIR, 'email_config.json')
+                curr_cfg = load_email_config()
+                curr_cfg['smtp_host'] = smtp_host
+                curr_cfg['smtp_port'] = smtp_port
+                curr_cfg['smtp_user'] = smtp_user
+                curr_cfg['smtp_pass'] = smtp_pass
+                with open(cfg_path, 'w', encoding='utf-8') as cf:
+                    json.dump(curr_cfg, cf, ensure_ascii=False, indent=2)
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "success",
+                    "message": "SMTP налаштування успішно перевірено та збережено! Авторозсилка активована."
+                }, ensure_ascii=False).encode('utf-8'))
+                return
+            except Exception as e:
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json; charset=utf-8')
                 self.end_headers()

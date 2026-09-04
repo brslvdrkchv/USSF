@@ -1037,12 +1037,15 @@
         </div>
         <h3 style="margin-bottom: 0.5rem;"><span class="ua">Вашу заявку успішно зареєстровано!</span><span class="en">Registration Submitted Successfully!</span></h3>
 
-        <!-- Device storage status -->
-        <div class="success-device-box" id="successDeviceBox">
-          <div class="device-box-icon">💾</div>
+        <!-- Committee Receipt & Privacy Shield Box -->
+        <div class="success-device-box" id="successDeviceBox" style="background: rgba(37, 99, 235, 0.05); border-color: rgba(37, 99, 235, 0.2);">
+          <div class="device-box-icon" style="background: rgba(37, 99, 235, 0.12); color: #1D4ED8;">🔒</div>
           <div class="device-box-content">
-            <strong><span class="ua">Файл тез автоматично збережено на пристрої:</span><span class="en">File saved locally on device:</span></strong>
-            <code class="saved-file-path" id="savedFilePathDisplay">MOROZU/заявки_тези/Тези_...pdf</code>
+            <strong><span class="ua">Матеріали та анкету передано оргкомітету:</span><span class="en">Materials and application submitted to committee:</span></strong>
+            <div class="saved-file-path" id="savedFilePathDisplay" style="font-family: inherit; font-size: 0.84rem; background: transparent; padding: 0; color: #475569; margin-top: 0.25rem;">
+              <span class="ua">Документи (.pdf) та анкета (.json) захищені й надходять виключно в архів оргкомітету форуму. На вашому пристрої жодні файли не зберігаються.</span>
+              <span class="en">Documents (.pdf) and form data (.json) are secured and delivered exclusively to the forum committee. No files are stored on your device.</span>
+            </div>
           </div>
         </div>
 
@@ -1069,16 +1072,62 @@
             <svg viewBox="0 0 24 24" style="width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; margin-right: 0.4rem; vertical-align: -2px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             <span class="ua">Друк</span><span class="en">Print</span>
           </button>
-          <a id="successEmailLink" href="mailto:derk.boryslav@gmail.com" class="btn-outline-dark" target="_blank">
+          <button type="button" id="btnSendEmail" class="btn-outline-dark" onclick="handleSendEmailClick()">
             <svg viewBox="0 0 24 24" style="width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; margin-right: 0.4rem; vertical-align: -2px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            <span class="ua">Надіслати на пошту</span><span class="en">Email</span>
-          </a>
+            <span id="btnSendEmailText"><span class="ua">Надіслати на пошту</span><span class="en">Send to Email</span></span>
+          </button>
         </div>
+
+        <!-- Dynamic Email Dispatch Panel & Options Container -->
+        <div id="emailDispatchArea" style="margin-top: 1.2rem; display: none;"></div>
 
         <button class="btn-outline-dark" onclick="closeRegistrationModal(false)" style="margin-top: 1.4rem; width: 100%;">
           <span class="ua">Закрити вікно</span><span class="en">Close Window</span>
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ============ SMTP CONFIGURATION MODAL ============ -->
+  <div class="modal-overlay" id="smtpModal">
+    <div class="modal-window" style="max-width: 520px;">
+      <button class="modal-close-btn" onclick="closeSmtpModal()" aria-label="Закрити">&times;</button>
+      <div class="modal-header">
+        <h3 class="modal-title"><span class="ua">Налаштування пошти (SMTP)</span><span class="en">SMTP Email Settings</span></h3>
+        <p class="modal-subtitle"><span class="ua">Для прямої відправки PDF-файлів тез та програми учасникам</span><span class="en">For direct automated email dispatch with PDF</span></p>
+      </div>
+
+      <div class="smtp-help-box">
+        <div style="font-weight: 700; margin-bottom: 0.4rem; color: #1E3A8A;">💡 Швидке налаштування Gmail:</div>
+        <ol style="padding-left: 1.2rem; margin: 0; font-size: 0.82rem; line-height: 1.45; color: #1E40AF;">
+          <li>Увімкніть 2-етапну перевірку в Google акаунті.</li>
+          <li>Відкрийте <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" style="color:#2563EB; font-weight:700; text-decoration:underline;">Паролі додатків (App Passwords)</a>.</li>
+          <li>Створіть пароль для додатку «USSF» (16 літер) та вставте його нижче:</li>
+        </ol>
+      </div>
+
+      <form id="smtpConfigForm" onsubmit="saveSmtpConfig(event)">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label" style="font-size:0.85rem; font-weight:700;">Email відправника (Gmail або Ukr.net): *</label>
+          <input type="email" id="smtpUser" required placeholder="derk.boryslav@gmail.com" value="derk.boryslav@gmail.com" class="form-control">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label" style="font-size:0.85rem; font-weight:700;">16-значний пароль додатку Google (або пароль Ukr.net): *</label>
+          <input type="password" id="smtpPass" required placeholder="xxxx xxxx xxxx xxxx" class="form-control" autocomplete="new-password">
+        </div>
+
+        <div style="display: flex; gap: 0.8rem; margin-top: 1.4rem;">
+          <button type="submit" id="btnSaveSmtp" class="btn-primary" style="flex: 1; padding: 0.8rem 1.2rem;">
+            <span id="btnSaveSmtpText">Зберегти та перевірити</span>
+          </button>
+          <button type="button" class="btn-outline-dark" onclick="closeSmtpModal()" style="padding: 0.8rem 1.2rem;">
+            Скасувати
+          </button>
+        </div>
+
+        <div id="smtpStatusMsg" style="margin-top: 0.9rem; font-size: 0.85rem; line-height: 1.4; display: none;"></div>
+      </form>
     </div>
   </div>
 

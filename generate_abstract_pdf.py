@@ -346,10 +346,9 @@ def send_abstract_email(pdf_path: str, data: dict, recipient: str = None) -> dic
 успішно прийнято та передано науковому комітету форуму.
 
 📎 У додатку до цього листа надсилаємо:
-1. Офіційну програму форуму (USSF2026_Program.pdf) — розклад доповідей, практичних майстер-класів та хірургічних секцій.
-2. Скомпільований PDF-файл Ваших тез ({pdf_filename}) — оформлений за стандартом наукових збірників NMU (Times New Roman 14 pt, 1.5 інтервал).
+• Офіційну програму форуму (USSF2026_Program.pdf) — розклад доповідей, практичних майстер-класів та хірургічних секцій заходу.
 
-Зверніть увагу: це повідомлення сформовано автоматично (no-reply). З усіх питань звертайтеся до оргкомітету за адресою: derk.boryslav@gmail.com.
+Зверніть увагу: це повідомлення сформовано автоматично (no-reply). Всі матеріали надійшли оргкомітету на розгляд. З усіх питань звертайтеся до оргкомітету за адресою: derk.boryslav@gmail.com.
 
 З повагою,
 Оргкомітет USSF 2026
@@ -357,16 +356,11 @@ def send_abstract_email(pdf_path: str, data: dict, recipient: str = None) -> dic
 """
             p_msg.attach(MIMEText(p_body, 'plain', 'utf-8'))
 
-            # Attach program PDF
+            # Attach program PDF exclusively to participant
             if program_bytes:
                 p_attach = MIMEApplication(program_bytes, _subtype='pdf')
                 p_attach.add_header('Content-Disposition', 'attachment', filename='USSF2026_Program.pdf')
                 p_msg.attach(p_attach)
-
-            # Attach participant abstract PDF
-            a_attach = MIMEApplication(abstract_pdf_bytes, _subtype='pdf')
-            a_attach.add_header('Content-Disposition', 'attachment', filename=pdf_filename)
-            p_msg.attach(a_attach)
 
             try:
                 server.sendmail(smtp_user, [author_email], p_msg.as_string())
