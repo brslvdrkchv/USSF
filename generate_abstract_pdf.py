@@ -65,15 +65,39 @@ def register_times_fonts():
             try:
                 pdfmetrics.registerFont(TTFont('TimesNewRoman', reg))
                 pdfmetrics.registerFont(TTFont('TimesNewRoman-Bold', bold))
+                it_font = 'TimesNewRoman-Italic' if os.path.exists(it) else 'TimesNewRoman'
+                bi_font = 'TimesNewRoman-BoldItalic' if os.path.exists(bi) else 'TimesNewRoman-Bold'
                 if os.path.exists(it):
                     pdfmetrics.registerFont(TTFont('TimesNewRoman-Italic', it))
                 if os.path.exists(bi):
                     pdfmetrics.registerFont(TTFont('TimesNewRoman-BoldItalic', bi))
+                pdfmetrics.registerFontFamily(
+                    'TimesNewRoman',
+                    normal='TimesNewRoman',
+                    bold='TimesNewRoman-Bold',
+                    italic=it_font,
+                    boldItalic=bi_font
+                )
                 return 'TimesNewRoman'
             except Exception as e:
                 continue
 
     return 'Helvetica'
+
+
+def clean_section_text(text: str, label: str, aliases: list = None) -> str:
+    """Strip any duplicate label or prefix the user may have typed into the textarea."""
+    if not text:
+        return ""
+    t = text.strip()
+    prefixes = [label] + (aliases or [])
+    for p in prefixes:
+        clean_p = p.rstrip(':').strip().lower()
+        if t.lower().startswith(clean_p):
+            sub = t[len(clean_p):].lstrip(': -–—\t')
+            t = sub.strip()
+            break
+    return t
 
 
 def create_abstract_pdf(data: dict, output_path: str = None) -> str:
@@ -214,23 +238,28 @@ def create_abstract_pdf(data: dict, output_path: str = None) -> str:
 
     # 4. Structured sections (Justified, 14pt, 1.5 spacing, 1.25 cm indent)
     if intro:
-        story.append(Paragraph(f"<b>Вступ:</b> {intro}", body_style))
+        clean_intro = clean_section_text(intro, "Вступ", ["Вступ:"])
+        story.append(Paragraph(f"<b>Вступ:</b> {clean_intro}", body_style))
 
     if aim:
-        story.append(Paragraph(f"<b>Мета:</b> {aim}", body_style))
+        clean_aim = clean_section_text(aim, "Мета", ["Мета:"])
+        story.append(Paragraph(f"<b>Мета:</b> {clean_aim}", body_style))
 
     if materials:
-        story.append(Paragraph(f"<b>Матеріали і методи:</b> {materials}", body_style))
+        clean_mat = clean_section_text(materials, "Матеріали і методи", ["Матеріали та методи", "Матеріали і методи:", "Матеріали та методи:"])
+        story.append(Paragraph(f"<b>Матеріали і методи:</b> {clean_mat}", body_style))
 
     if results:
-        story.append(Paragraph(f"<b>Результати:</b> {results}", body_style))
+        clean_res = clean_section_text(results, "Результати", ["Результати:"])
+        story.append(Paragraph(f"<b>Результати:</b> {clean_res}", body_style))
 
     if conclusion:
-        story.append(Paragraph(f"<b>Висновок:</b> {conclusion}", body_style))
+        clean_concl = clean_section_text(conclusion, "Висновок", ["Висновки", "Висновок:", "Висновки:"])
+        story.append(Paragraph(f"<b>Висновок:</b> {clean_concl}", body_style))
 
     if keywords:
-        prefix = "" if keywords.lower().startswith("ключові слова") else "<b>Ключові слова:</b> "
-        story.append(Paragraph(f"{prefix}{keywords}", body_style))
+        clean_kw = clean_section_text(keywords, "Ключові слова", ["Ключові слова:"])
+        story.append(Paragraph(f"<b>Ключові слова:</b> {clean_kw}", body_style))
 
     if references:
         story.append(Paragraph("<b>Список літератури:</b>", ref_heading_style))
@@ -339,7 +368,7 @@ def send_abstract_email(pdf_path: str, data: dict, recipient: str = None) -> dic
 
             p_body = f"""Шановний(-а) {full_name}!
 
-Щиро дякуємо за участь та реєстрацію на I Всеукраїнському студентському хірургічному форумі (USSF 2026), який відбудеться 16–17 травня 2026 року в Національному медичному університеті імені О. О. Богомольця (м. Київ).
+Щиро дякуємо за участь та реєстрацію на I Всеукраїнському студентському хірургічному форумі (USSF 2026) в Національному медичному університеті імені О. О. Богомольця (м. Київ).
 
 Вашу заявку та тези наукової доповіді на тему:
 «{title}»
@@ -394,6 +423,7 @@ def send_abstract_email(pdf_path: str, data: dict, recipient: str = None) -> dic
 Секція: {data.get('sectionText', '')}
 Email автора: {author_email}
 Телефон автора: {data.get('phone', '')}
+Telegram автора: {data.get('telegram', 'Не вказано')}
 
 Тема наукової роботи: {title}
 ---------------------------------------------------------

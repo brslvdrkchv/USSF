@@ -1,0 +1,20 @@
+{
+  "fullName": "Тест Перевірки Папки",
+  "institution": "НМУ імені О.О. Богомольця",
+  "email": "derk.boryslav@gmail.com",
+  "phone": "+380991112233",
+  "department": "Кафедра хірургії №1",
+  "scientificSupervisor": "проф. Іваненко І.І.",
+  "headOfDepartment": "проф. Ковальчук К.К.",
+  "cityCountry": "м. Київ, Україна",
+  "academicStatusText": "Студент",
+  "partFormatText": "Усна доповідь + публікація тез",
+  "sectionText": "Бойова хірургічна травма",
+  "abstractTitle": "Тестова перевірка збереження у папку",
+  "abstractIntro": "Вступ тез для перевірки запису...",
+  "abstractAim": "Мета роботи...",
+  "abstractMaterials": "Матеріали та методи...",
+  "abstractResults": "Результати дослідження...",
+  "abstractConclusion": "Висновки...",
+  "abstractKeywords": "Тест, Папка, PDF"
+}

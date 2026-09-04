@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   const progressBar = document.getElementById('scrollProgressBar');
   const backToTopBtn = document.getElementById('backToTopBtn');
+  const mobileStickyBar = document.getElementById('mobileStickyBar');
 
   window.addEventListener('scroll', () => {
     const scrollTop = window.scrollY;
@@ -91,6 +92,15 @@ document.addEventListener('DOMContentLoaded', () => {
         backToTopBtn.classList.add('visible');
       } else {
         backToTopBtn.classList.remove('visible');
+      }
+    }
+
+    if (mobileStickyBar) {
+      const isModalOpen = regModal && regModal.classList.contains('open');
+      if (scrollTop > 380 && !isModalOpen) {
+        mobileStickyBar.classList.add('visible');
+      } else {
+        mobileStickyBar.classList.remove('visible');
       }
     }
   }, { passive: true });
@@ -364,6 +374,9 @@ function openRegistrationModal() {
   if (regModal) {
     regModal.classList.add('open');
     document.body.style.overflow = 'hidden';
+    const mobileStickyBar = document.getElementById('mobileStickyBar');
+    if (mobileStickyBar) mobileStickyBar.classList.remove('visible');
+    updateAbstractCharCounter();
   }
 }
 
@@ -373,11 +386,16 @@ function closeRegistrationModal(resetForm = false) {
     document.body.style.overflow = '';
     const modalWindow = document.querySelector('.modal-window');
     if (modalWindow) modalWindow.classList.remove('has-preview');
+    const mobileStickyBar = document.getElementById('mobileStickyBar');
+    if (mobileStickyBar && window.scrollY > 380) {
+      mobileStickyBar.classList.add('visible');
+    }
     // Reset view states after animation completes
     setTimeout(() => {
       if (formContent) formContent.style.display = 'block';
       if (formSuccessMessage) formSuccessMessage.style.display = 'none';
       if (resetForm && forumRegForm) forumRegForm.reset();
+      updateAbstractCharCounter();
     }, 350);
   }
 }
@@ -400,6 +418,180 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// ==========================================
+// 8.1. PHONE & TELEGRAM INPUT RULES
+// ==========================================
+function setupPhoneInputMask(input) {
+  if (!input) return;
+
+  function formatUkrainianPhone(digits) {
+    // Digits must begin with 380
+    if (digits.startsWith('0')) {
+      digits = '38' + digits;
+    } else if (!digits.startsWith('380') && digits.length > 0) {
+      digits = '380' + digits;
+    }
+    digits = digits.slice(0, 12);
+
+    let res = '+380';
+    if (digits.length > 3) {
+      res += ' (' + digits.slice(3, Math.min(5, digits.length));
+    }
+    if (digits.length >= 5) {
+      res += ') ';
+    }
+    if (digits.length > 5) {
+      res += digits.slice(5, Math.min(8, digits.length));
+    }
+    if (digits.length >= 8) {
+      res += '-' + digits.slice(8, Math.min(10, digits.length));
+    }
+    if (digits.length >= 10) {
+      res += '-' + digits.slice(10, 12);
+    }
+    return res;
+  }
+
+  input.addEventListener('focus', () => {
+    if (!input.value.trim()) {
+      input.value = '+380 ';
+    }
+  });
+
+  input.addEventListener('input', () => {
+    const digits = input.value.replace(/\D/g, '');
+    if (digits.length === 0) {
+      input.value = '+380 ';
+      return;
+    }
+    input.value = formatUkrainianPhone(digits);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace') {
+      const pos = input.selectionStart;
+      if (pos <= 5 && input.selectionEnd <= 5) {
+        e.preventDefault();
+      }
+    }
+  });
+
+  input.addEventListener('blur', () => {
+    const digits = input.value.replace(/\D/g, '');
+    if (digits === '380' || digits.length <= 3) {
+      input.value = '';
+    }
+  });
+}
+
+function setupTelegramInputMask(input) {
+  if (!input) return;
+
+  function formatTelegramUsername(raw) {
+    if (!raw) return '';
+    // Strip URL links like https://t.me/nick or t.me/nick
+    let clean = raw.replace(/^https?:\/\/(www\.)?t\.me\//i, '').replace(/^t\.me\//i, '');
+    clean = clean.replace(/^@+/, '');
+    // Telegram handles only alphanumeric and underscores
+    clean = clean.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 32);
+    return clean ? '@' + clean : '@';
+  }
+
+  input.addEventListener('focus', () => {
+    if (!input.value.trim()) {
+      input.value = '@';
+    }
+  });
+
+  input.addEventListener('input', () => {
+    input.value = formatTelegramUsername(input.value);
+  });
+
+  input.addEventListener('blur', () => {
+    if (input.value.trim() === '@' || input.value.trim() === '') {
+      input.value = '';
+    }
+  });
+}
+
+// ==========================================
+// 8.2. ABSTRACT 3200 CHARACTERS LIMIT (EXCL. SPACES)
+// ==========================================
+const ABSTRACT_CHAR_LIMIT = 3200;
+const ABSTRACT_SECTION_IDS = [
+  'abstractIntro',
+  'abstractAim',
+  'abstractMaterials',
+  'abstractResults',
+  'abstractConclusion'
+];
+
+function countAbstractCharsWithoutSpaces() {
+  let count = 0;
+  ABSTRACT_SECTION_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.value) {
+      // Exclude all whitespace (spaces, tabs, newlines)
+      count += el.value.replace(/\s/g, '').length;
+    }
+  });
+  return count;
+}
+
+function updateAbstractCharCounter() {
+  const currentCount = countAbstractCharsWithoutSpaces();
+  const counterDigits = document.getElementById('abstractCharsDigits');
+  const bar = document.getElementById('abstractCharBar');
+  const warning = document.getElementById('abstractCharWarning');
+  const limitBadge = document.getElementById('abstractLimitBadge');
+
+  if (counterDigits) {
+    const isExceeded = currentCount > ABSTRACT_CHAR_LIMIT;
+    const isWarning = currentCount > 2800 && !isExceeded;
+
+    const strongClass = isExceeded ? 'limit-exceeded' : (isWarning ? 'limit-warning' : '');
+    counterDigits.innerHTML = `<strong class="${strongClass}">${currentCount.toLocaleString()}</strong> / ${ABSTRACT_CHAR_LIMIT} <span class="counter-unit"><span class="ua">симв. (без пробілів)</span><span class="en">chars (excl. spaces)</span></span>`;
+
+    if (bar) {
+      const pct = Math.min(100, Math.round((currentCount / ABSTRACT_CHAR_LIMIT) * 100));
+      bar.style.width = pct + '%';
+      bar.className = 'counter-bar-fill' + (isExceeded ? ' bar-exceeded' : (isWarning ? ' bar-warning' : ''));
+    }
+
+    if (warning) {
+      if (isExceeded) {
+        const diff = currentCount - ABSTRACT_CHAR_LIMIT;
+        warning.style.display = 'block';
+        warning.innerHTML = `⚠️ <span class="ua"><strong>Перевищено ліміт на ${diff} симв.</strong> Сумарний обсяг 5 розділів без пробілів становить <strong>${currentCount}</strong> (максимум ${ABSTRACT_CHAR_LIMIT}). Будь ласка, скоротіть текст перед надсиланням.</span><span class="en"><strong>Limit exceeded by ${diff} chars.</strong> Total length of 5 sections without spaces is <strong>${currentCount}</strong> (max ${ABSTRACT_CHAR_LIMIT}). Please shorten text before submitting.</span>`;
+      } else {
+        warning.style.display = 'none';
+        warning.innerHTML = '';
+      }
+    }
+
+    if (limitBadge) {
+      if (isExceeded) {
+        limitBadge.classList.add('badge-exceeded');
+      } else {
+        limitBadge.classList.remove('badge-exceeded');
+      }
+    }
+  }
+
+  return currentCount;
+}
+
+function initAbstractCharCounter() {
+  ABSTRACT_SECTION_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', updateAbstractCharCounter);
+      el.addEventListener('paste', () => setTimeout(updateAbstractCharCounter, 50));
+    }
+  });
+  updateAbstractCharCounter();
+}
+
 // Toggle abstract fields based on selected format
 function toggleAbstractField(format) {
   const sectionGroup = document.getElementById('sectionSelectGroup');
@@ -414,6 +606,7 @@ function toggleAbstractField(format) {
     if (sectionGroup) sectionGroup.style.display = 'block';
     if (titleGroup) titleGroup.style.display = 'block';
     if (fileGroup) fileGroup.style.display = 'block';
+    updateAbstractCharCounter();
   }
 }
 
@@ -449,9 +642,52 @@ function handleFormSubmit(e) {
 
   const email = document.getElementById('email').value.trim();
   const phone = document.getElementById('phone').value.trim();
+  const telegram = document.getElementById('telegram') ? document.getElementById('telegram').value.trim() : '';
+
+  // VALIDATION 1: Phone number (+380 and 9 digits)
+  const phoneDigits = phone.replace(/\D/g, '');
+  if (phoneDigits.length !== 12 || !phoneDigits.startsWith('380')) {
+    alert('Будь ласка, введіть дійсний номер телефону у форматі +380 (XX) XXX-XX-XX');
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+      phoneInput.focus();
+    }
+    return;
+  }
+
+  // VALIDATION 2: Telegram username (@ and 3-32 characters)
+  if (!telegram || !/^@[a-zA-Z0-9_]{3,32}$/.test(telegram)) {
+    alert('Будь ласка, вкажіть ваш нікнейм у Telegram у форматі @username (від 3 до 32 символів)');
+    const telegramInput = document.getElementById('telegram');
+    if (telegramInput) {
+      telegramInput.focus();
+    }
+    return;
+  }
+
+  // VALIDATION 3: 3200 characters limit without spaces for 5 abstract sections
+  if (partFormat !== 'listener') {
+    const totalCharsWithoutSpaces = countAbstractCharsWithoutSpaces();
+    if (totalCharsWithoutSpaces > ABSTRACT_CHAR_LIMIT) {
+      const over = totalCharsWithoutSpaces - ABSTRACT_CHAR_LIMIT;
+      alert(`⚠️ Перевищено ліміт обсягу тез!\n\nСумарна кількість символів (без врахування пробілів) у 5 розділах («Вступ», «Мета», «Матеріали і методи», «Результати», «Висновок») становить ${totalCharsWithoutSpaces} симв., що перевищує дозволений ліміт у ${ABSTRACT_CHAR_LIMIT} символів на ${over} симв.\n\nБудь ласка, скоротіть текст дослідження для успішного надсилання.`);
+      const tipBanner = document.querySelector('.abstract-tip-banner');
+      if (tipBanner) {
+        tipBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+  }
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const formattedDate = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const submissionId = `USSF-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${Math.floor(1000 + Math.random() * 9000)}`;
 
   currentSubmission = {
-    date: new Date().toISOString(),
+    submissionId,
+    formattedDate,
+    date: now.toISOString(),
     fullName,
     institution,
     department,
@@ -471,7 +707,8 @@ function handleFormSubmit(e) {
     abstractKeywords,
     abstractReferences,
     email,
-    phone
+    phone,
+    telegram
   };
 
   // Expand modal window to fit preview
@@ -507,11 +744,25 @@ function handleFormSubmit(e) {
     btnSendEmailText.innerHTML = '<span class="ua">Надіслати на пошту</span><span class="en">Send to Email</span>';
   }
 
-  // Post to automation server to automatically write the PDF and send email
+  // Optional direct client-side fallback sync to Google Sheets (if configured locally)
+  try {
+    const clientSheetsUrl = localStorage.getItem('ussf_google_sheet_url') || window.GOOGLE_SHEET_WEBHOOK_URL;
+    if (clientSheetsUrl && clientSheetsUrl.startsWith('http')) {
+      fetch(clientSheetsUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentSubmission)
+      }).catch(e => console.log('Client sheet sync note:', e));
+    }
+  } catch (err) {}
+
+  // Post to automation server to automatically write the PDF, send email and sync to Google Sheets
   try {
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+    const localBase = window.location.port ? window.location.origin : 'http://127.0.0.1:5050';
     const apiUrl = isLocal
-      ? 'http://localhost:5050/api/submit-abstract'
+      ? `${localBase}/api/submit-abstract`
       : (window.location.origin.includes('onrender.com') ? '/api/submit-abstract' : 'https://ussf-n7ui.onrender.com/api/submit-abstract');
 
     fetch(apiUrl, {
@@ -531,7 +782,13 @@ function handleFormSubmit(e) {
           } else {
             emailStatus = `<br><span style="color:#475569;font-size:0.82rem;">🔒 Файли тез (.pdf) та анкета (.json) надійно зафіксовані в базі оргкомітету.</span>`;
           }
-          savedFilePathDisplay.innerHTML = `<span style="color:#1E3A8A;font-weight:600;">Матеріали успішно надійшли оргкомітету.</span>${emailStatus}`;
+
+          let sheetsStatus = '';
+          if (data.google_sheets_result && data.google_sheets_result.synced) {
+            sheetsStatus = `<br><span style="color:#15803D;font-weight:600;font-size:0.83rem;">📊 Дані учасника успішно скопійовано новим рядком у Google Таблицю оргкомітету.</span>`;
+          }
+
+          savedFilePathDisplay.innerHTML = `<span style="color:#1E3A8A;font-weight:600;">Матеріали успішно надійшли оргкомітету.</span>${emailStatus}${sheetsStatus}`;
         }
       }
     })
@@ -574,6 +831,23 @@ function buildAbstractHTML(s) {
   const refHtml = refItems.length > 0
     ? `<p class="ref-heading">Список літератури:</p>` + refItems.map(item => `<p class="ref-para">${item}</p>`).join('')
     : '';
+
+  const cleanPrefix = (text, prefixes) => {
+    if (!text) return '';
+    let res = text.trim();
+    for (const p of prefixes) {
+      const reg = new RegExp('^' + p.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&') + '\\s*[:\\-–—]?\\s*', 'i');
+      res = res.replace(reg, '');
+    }
+    return res.trim();
+  };
+
+  const cleanIntro = cleanPrefix(s.abstractIntro, ['вступ']);
+  const cleanAim = cleanPrefix(s.abstractAim, ['мета']);
+  const cleanMaterials = cleanPrefix(s.abstractMaterials, ['матеріали і методи', 'матеріали та методи', 'матеріали']);
+  const cleanResults = cleanPrefix(s.abstractResults || s.abstractBody, ['результати']);
+  const cleanConclusion = cleanPrefix(s.abstractConclusion, ['висновок', 'висновки']);
+  const cleanKeywords = cleanPrefix(s.abstractKeywords, ['ключові слова']);
 
   return `<!DOCTYPE html>
 <html lang="uk">
@@ -658,12 +932,12 @@ function buildAbstractHTML(s) {
 
   ${affilLines.length > 0 ? `<div class="affiliation-block">${affilLines.join('<br>')}</div>` : ''}
 
-  ${s.abstractIntro ? `<p class="section-para"><span class="section-label">Вступ:</span> ${s.abstractIntro}</p>` : ''}
-  ${s.abstractAim ? `<p class="section-para"><span class="section-label">Мета:</span> ${s.abstractAim}</p>` : ''}
-  ${s.abstractMaterials ? `<p class="section-para"><span class="section-label">Матеріали і методи:</span> ${s.abstractMaterials}</p>` : ''}
-  ${s.abstractResults ? `<p class="section-para"><span class="section-label">Результати:</span> ${s.abstractResults}</p>` : ''}
-  ${s.abstractConclusion ? `<p class="section-para"><span class="section-label">Висновок:</span> ${s.abstractConclusion}</p>` : ''}
-  ${s.abstractKeywords ? `<p class="section-para"><span class="section-label">Ключові слова:</span> ${s.abstractKeywords}</p>` : ''}
+  ${cleanIntro ? `<p class="section-para"><span class="section-label">Вступ:</span> ${cleanIntro}</p>` : ''}
+  ${cleanAim ? `<p class="section-para"><span class="section-label">Мета:</span> ${cleanAim}</p>` : ''}
+  ${cleanMaterials ? `<p class="section-para"><span class="section-label">Матеріали і методи:</span> ${cleanMaterials}</p>` : ''}
+  ${cleanResults ? `<p class="section-para"><span class="section-label">Результати:</span> ${cleanResults}</p>` : ''}
+  ${cleanConclusion ? `<p class="section-para"><span class="section-label">Висновок:</span> ${cleanConclusion}</p>` : ''}
+  ${cleanKeywords ? `<p class="section-para"><span class="section-label">Ключові слова:</span> ${cleanKeywords}</p>` : ''}
 
   ${refHtml}
 </body>
@@ -951,3 +1225,264 @@ window.closeSmtpModal = closeSmtpModal;
 window.saveSmtpConfig = saveSmtpConfig;
 window.downloadCurrentSubmissionDoc = downloadCurrentSubmissionDoc;
 window.printCurrentPreview = printCurrentPreview;
+
+// ============ GOOGLE SHEETS INTEGRATION LOGIC ============
+const GOOGLE_APPS_SCRIPT_CODE = `/**
+ * Google Apps Script для автоматичної синхронізації з сайтом USSF 2026
+ */
+var COLUMN_HEADERS = [
+  "№ / ID Заявки", "Дата і час реєстрації", "ПІБ учасника", "Email адреса",
+  "Контактний телефон", "Telegram", "Навчальний заклад / Установа", "Статус учасника",
+  "Форма участі", "Секція форуму", "Тема наукової роботи / тез",
+  "Науковий керівник", "Кафедра", "Завідувач кафедри", "Місто, країна",
+  "Вступ", "Мета", "Матеріали і методи", "Результати", "Висновок",
+  "Ключові слова", "Список літератури"
+];
+
+function ensureHeaders(sheet) {
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(COLUMN_HEADERS);
+    var hr = sheet.getRange(1, 1, 1, COLUMN_HEADERS.length);
+    hr.setFontWeight("bold").setBackground("#1D428A").setFontColor("#FFFFFF").setHorizontalAlignment("center");
+    sheet.setRowHeight(1, 38);
+    sheet.setFrozenRows(1);
+  }
+}
+
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    ensureHeaders(sheet);
+
+    var data = {};
+    if (e && e.postData && e.postData.contents) {
+      try { data = JSON.parse(e.postData.contents); } catch (err) { data = e.parameter || {}; }
+    } else if (e && e.parameter) {
+      data = e.parameter;
+    }
+
+    var rowNumber = sheet.getLastRow() + 1;
+    var now = new Date();
+    var defaultTimestamp = Utilities.formatDate(now, "GMT+3", "dd.MM.yyyy HH:mm:ss");
+    var defaultId = "USSF-" + Utilities.formatDate(now, "GMT+3", "yyyyMMdd") + "-" + ("000" + (rowNumber - 1)).slice(-4);
+
+    var newRow = [
+      data.submissionId || defaultId,
+      data.formattedDate || defaultTimestamp,
+      data.fullName || "",
+      data.email || "",
+      data.phone || "",
+      data.telegram || "",
+      data.institution || "",
+      data.academicStatusText || data.academicStatus || "",
+      data.partFormatText || data.partFormat || "",
+      data.sectionText || (data.targetSection ? "Секція " + data.targetSection : ""),
+      data.abstractTitle || "",
+      data.scientificSupervisor || "",
+      data.department || "",
+      data.headOfDepartment || "",
+      data.cityCountry || "",
+      data.abstractIntro || "",
+      data.abstractAim || "",
+      data.abstractMaterials || "",
+      data.abstractResults || "",
+      data.abstractConclusion || "",
+      data.abstractKeywords || "",
+      data.abstractReferences || ""
+    ];
+
+    sheet.appendRow(newRow);
+    var lastRowIdx = sheet.getLastRow();
+    sheet.getRange(lastRowIdx, 1, 1, 2).setHorizontalAlignment("center");
+    sheet.getRange(lastRowIdx, 5, 1, 2).setHorizontalAlignment("center");
+
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "success",
+      message: "Заявку успішно додано до таблиці",
+      id: data.submissionId || defaultId,
+      row: lastRowIdx
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "error",
+      message: error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function doGet(e) {
+  return ContentService.createTextOutput(JSON.stringify({
+    status: "active",
+    name: "USSF 2026 Google Sheets Sync Webhook",
+    message: "Вебхук USSF Google Sheets активний і готовий приймати реєстрації!"
+  })).setMimeType(ContentService.MimeType.JSON);
+}`;
+
+async function openGoogleSheetsModal() {
+  const modal = document.getElementById('googleSheetsModal');
+  if (modal) modal.classList.add('active');
+
+  const input = document.getElementById('sheetsWebhookUrl');
+  const statusMsg = document.getElementById('sheetsStatusMsg');
+  if (statusMsg) {
+    statusMsg.style.display = 'none';
+    statusMsg.innerHTML = '';
+  }
+
+  // Prepopulate with local or server value
+  const localUrl = localStorage.getItem('ussf_google_sheet_url');
+  if (localUrl && input && !input.value) {
+    input.value = localUrl;
+  }
+
+  try {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+    const apiBase = isLocal
+      ? 'http://localhost:5050'
+      : (window.location.origin.includes('onrender.com') ? '' : 'https://ussf-n7ui.onrender.com');
+
+    const res = await fetch(`${apiBase}/api/get-sheets-config`);
+    if (res.ok) {
+      const d = await res.json();
+      if (d.webhook_url && input) {
+        input.value = d.webhook_url;
+        localStorage.setItem('ussf_google_sheet_url', d.webhook_url);
+        if (statusMsg) {
+          statusMsg.style.display = 'block';
+          statusMsg.className = 'email-status-success';
+          statusMsg.innerHTML = '🟢 <strong>Google Таблиця підключена:</strong> вебхук активний для всіх нових реєстрацій.';
+        }
+      }
+    }
+  } catch (err) {}
+}
+
+function closeGoogleSheetsModal() {
+  const modal = document.getElementById('googleSheetsModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function copyGoogleAppsScriptCode() {
+  const btnText = document.getElementById('btnCopyScriptText');
+  navigator.clipboard.writeText(GOOGLE_APPS_SCRIPT_CODE).then(() => {
+    if (btnText) {
+      const orig = btnText.innerHTML;
+      btnText.innerHTML = '✅ Код скопійовано у буфер обміну!';
+      setTimeout(() => { btnText.innerHTML = orig; }, 3000);
+    }
+  }).catch(() => {
+    alert('Не вдалося автоматично скопіювати. Скрипт знаходиться у файлі google_apps_script.js у папці сайту.');
+  });
+}
+
+async function saveGoogleSheetsConfig(e) {
+  if (e) e.preventDefault();
+  const webhookUrl = document.getElementById('sheetsWebhookUrl')?.value.trim();
+  const statusMsg = document.getElementById('sheetsStatusMsg');
+  const btn = document.getElementById('btnSaveSheets');
+  const btnText = document.getElementById('btnSaveSheetsText');
+
+  if (!webhookUrl) {
+    if (statusMsg) {
+      statusMsg.style.display = 'block';
+      statusMsg.className = 'email-status-error';
+      statusMsg.textContent = 'Вкажіть URL-адресу веб-додатка Google Apps Script.';
+    }
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  if (btnText) btnText.innerHTML = '<span class="spinner-small"></span> Перевірка та відправка тест-рядка...';
+
+  try {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+    const apiBase = isLocal
+      ? 'http://localhost:5050'
+      : (window.location.origin.includes('onrender.com') ? '' : 'https://ussf-n7ui.onrender.com');
+
+    const res = await fetch(`${apiBase}/api/save-sheets-config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        webhook_url: webhookUrl,
+        test_now: true
+      })
+    });
+
+    const data = await res.json();
+    if (btn) btn.disabled = false;
+    if (btnText) btnText.textContent = 'Зберегти та протестувати (надіслати тест-рядок)';
+
+    if (data.status === 'success') {
+      localStorage.setItem('ussf_google_sheet_url', webhookUrl);
+      if (statusMsg) {
+        statusMsg.style.display = 'block';
+        statusMsg.className = 'email-status-success';
+        statusMsg.innerHTML = '✅ <strong>Google Таблицю успішно підключено!</strong><br>Тестовий рядок відправлено та збережено. Всі наступні гості автоматично з\'являтимуться у вашій таблиці.';
+      }
+      setTimeout(() => {
+        closeGoogleSheetsModal();
+      }, 2500);
+    } else {
+      if (statusMsg) {
+        statusMsg.style.display = 'block';
+        statusMsg.className = 'email-status-error';
+        statusMsg.innerHTML = `❌ <strong>Помилка підключення:</strong> ${data.message || 'Не вдалося надіслати запит до таблиці.'}<br><small style="color:#64748B;">Переконайтеся, що при розгортанні веб-додатка параметр <strong>Хто має доступ</strong> встановлено у <strong>«Усі» (Anyone)</strong>.</small>`;
+      }
+    }
+  } catch (err) {
+    if (btn) btn.disabled = false;
+    if (btnText) btnText.textContent = 'Зберегти та протестувати (надіслати тест-рядок)';
+    try {
+      localStorage.setItem('ussf_google_sheet_url', webhookUrl);
+      fetch(webhookUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          submissionId: "USSF-CLIENT-TEST",
+          formattedDate: new Date().toLocaleString('uk-UA'),
+          fullName: "Тестовий Учасник (Client Mode)",
+          email: "test@example.com",
+          phone: "+380500000000",
+          institution: "НМУ імені О. О. Богомольця",
+          academicStatusText: "Студент"
+        })
+      });
+      if (statusMsg) {
+        statusMsg.style.display = 'block';
+        statusMsg.className = 'email-status-success';
+        statusMsg.innerHTML = '✅ <strong>URL збережено локально!</strong> Надіслано прямий тестовий сигнал до Google Apps Script.';
+      }
+      setTimeout(() => closeGoogleSheetsModal(), 2000);
+    } catch (cErr) {
+      if (statusMsg) {
+        statusMsg.style.display = 'block';
+        statusMsg.className = 'email-status-error';
+        statusMsg.textContent = 'Помилка збереження. Перевірте з\'єднання з інтернетом.';
+      }
+    }
+  }
+}
+
+window.openGoogleSheetsModal = openGoogleSheetsModal;
+window.closeGoogleSheetsModal = closeGoogleSheetsModal;
+window.copyGoogleAppsScriptCode = copyGoogleAppsScriptCode;
+window.saveGoogleSheetsConfig = saveGoogleSheetsConfig;
+
+// Initialize phone, telegram masks and abstract character counter
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    setupPhoneInputMask(document.getElementById('phone'));
+    setupTelegramInputMask(document.getElementById('telegram'));
+    initAbstractCharCounter();
+  });
+} else {
+  setupPhoneInputMask(document.getElementById('phone'));
+  setupTelegramInputMask(document.getElementById('telegram'));
+  initAbstractCharCounter();
+}

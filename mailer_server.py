@@ -24,6 +24,7 @@ import socketserver
 from datetime import datetime
 import urllib.parse
 import smtplib
+import requests
 from generate_abstract_pdf import create_abstract_pdf, send_abstract_email, load_email_config
 
 PORT = int(os.environ.get('PORT', 5050))
@@ -35,6 +36,91 @@ os.makedirs(SUBMISSIONS_DIR, exist_ok=True)
 cfg = load_email_config()
 RECIPIENT = cfg.get('committee_email', 'derk.boryslav@gmail.com')
 SYNC_TOKEN = os.environ.get('SYNC_SECRET_TOKEN', cfg.get('sync_secret_token', 'ussf_secure_sync_2026_med_nmu'))
+
+
+def send_to_google_sheet(data, webhook_url=None):
+    """
+    Send registration text fields to administrator's Google Apps Script Webhook.
+    Returns dict: {'synced': bool, 'status': str, 'message': str, 'response': dict}
+    """
+    if not webhook_url:
+        c = load_email_config()
+        webhook_url = c.get('google_sheet_webhook_url', '') or os.environ.get('GOOGLE_SHEET_WEBHOOK_URL', '')
+    
+    webhook_url = webhook_url.strip() if webhook_url else ''
+    if not webhook_url:
+        return {
+            'synced': False,
+            'status': 'NOT_CONFIGURED',
+            'message': 'URL Google Таблиці не налаштовано.'
+        }
+    
+    # Build payload with clean text strings
+    now = datetime.now()
+    default_id = f"USSF-{now.strftime('%Y%m%d')}-{now.strftime('%H%M%S')}"
+    default_date = now.strftime('%d.%m.%Y %H:%M:%S')
+
+    payload = {
+        'submissionId': data.get('submissionId') or default_id,
+        'formattedDate': data.get('formattedDate') or default_date,
+        'fullName': data.get('fullName', ''),
+        'email': data.get('email', ''),
+        'phone': data.get('phone', ''),
+        'telegram': data.get('telegram', ''),
+        'institution': data.get('institution', ''),
+        'academicStatusText': data.get('academicStatusText') or data.get('academicStatus', ''),
+        'partFormatText': data.get('partFormatText') or data.get('partFormat', ''),
+        'sectionText': data.get('sectionText') or (f"Секція {data.get('targetSection')}" if data.get('targetSection') else ''),
+        'abstractTitle': data.get('abstractTitle', ''),
+        'scientificSupervisor': data.get('scientificSupervisor', ''),
+        'department': data.get('department', ''),
+        'headOfDepartment': data.get('headOfDepartment', ''),
+        'cityCountry': data.get('cityCountry', ''),
+        'abstractIntro': data.get('abstractIntro', ''),
+        'abstractAim': data.get('abstractAim', ''),
+        'abstractMaterials': data.get('abstractMaterials', ''),
+        'abstractResults': data.get('abstractResults') or data.get('abstractBody', ''),
+        'abstractConclusion': data.get('abstractConclusion', ''),
+        'abstractKeywords': data.get('abstractKeywords', ''),
+        'abstractReferences': data.get('abstractReferences', '')
+    }
+
+    try:
+        resp = requests.post(
+            webhook_url,
+            json=payload,
+            headers={'Content-Type': 'application/json'},
+            timeout=15,
+            allow_redirects=True
+        )
+        if resp.status_code in (200, 201, 302):
+            try:
+                res_data = resp.json()
+            except Exception:
+                res_data = {'raw': resp.text[:200]}
+            
+            print(f"[GOOGLE SHEETS] Successfully synchronized submission to Google Sheet: {res_data}")
+            return {
+                'synced': True,
+                'status': 'SUCCESS',
+                'message': 'Дані успішно додано до вашої Google Таблиці!',
+                'response': res_data
+            }
+        else:
+            print(f"[GOOGLE SHEETS WARN] HTTP {resp.status_code}: {resp.text[:300]}")
+            return {
+                'synced': False,
+                'status': f"HTTP_{resp.status_code}",
+                'message': f"Google Apps Script повернув код HTTP {resp.status_code}"
+            }
+    except Exception as exc:
+        print(f"[GOOGLE SHEETS ERROR] Failed sending to sheet: {exc}")
+        return {
+            'synced': False,
+            'status': 'CONNECTION_ERROR',
+            'message': f"Помилка з'єднання з Google Таблицею: {exc}"
+        }
+
 
 
 class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
@@ -171,7 +257,25 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps(forbidden_resp, ensure_ascii=False).encode('utf-8'))
                 return
 
-        # 3. DEFAULT STATIC FILE SERVING (index.html, ussf.css, js/, images/, USSF2026_Program.pdf)
+        # 3. GET GOOGLE SHEETS CONFIG STATUS
+        if path in ('/api/get-sheets-config', '/api/sheets/config'):
+            c = load_email_config()
+            s_url = c.get('google_sheet_webhook_url', '') or os.environ.get('GOOGLE_SHEET_WEBHOOK_URL', '')
+            masked = ''
+            if s_url:
+                masked = (s_url[:32] + '...' + s_url[-10:]) if len(s_url) > 45 else s_url
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "status": "success",
+                "configured": bool(s_url),
+                "webhook_url": s_url,
+                "masked_url": masked
+            }, ensure_ascii=False).encode('utf-8'))
+            return
+
+        # 4. DEFAULT STATIC FILE SERVING (index.html, ussf.css, js/, images/, USSF2026_Program.pdf)
         return super().do_GET()
 
     def do_POST(self):
@@ -206,11 +310,16 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
                 email_result = send_abstract_email(generated_pdf, data, RECIPIENT)
                 print(f"[SERVER] Email dispatch result: {email_result}")
                 
+                # 4. Instant Google Sheet synchronization (Row append)
+                sheets_result = send_to_google_sheet(data)
+                print(f"[SERVER] Google Sheets sync result: {sheets_result}")
+                
                 response_data = {
                     "status": "success",
                     "pdf_filename": pdf_filename,
                     "timestamp": timestamp,
                     "email_result": email_result,
+                    "google_sheets_result": sheets_result,
                     "delivered_to_owner": True
                 }
                 
@@ -354,6 +463,129 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
                 return
+
+        # 4. SAVE & VERIFY GOOGLE SHEETS CONFIG (/api/save-sheets-config)
+        if self.path in ('/api/save-sheets-config', '/api/sheets/save'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_body = self.rfile.read(content_length)
+            try:
+                data = json.loads(post_body.decode('utf-8'))
+                webhook_url = data.get('webhook_url', '').strip()
+                test_now = data.get('test_now', True)
+                
+                if not webhook_url:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"status": "error", "message": "URL-адреса вебхука Google Apps Script обов'язкова."}, ensure_ascii=False).encode('utf-8'))
+                    return
+                
+                # Test connection if requested
+                test_result = None
+                if test_now:
+                    dummy_test_data = {
+                        "submissionId": "USSF-TEST-0001",
+                        "formattedDate": datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
+                        "fullName": "Тестовий Учасник (Перевірка з'єднання)",
+                        "email": "test@example.com",
+                        "phone": "+380 (99) 000-00-00",
+                        "telegram": "@test_student",
+                        "institution": "НМУ імені О. О. Богомольця",
+                        "academicStatusText": "Студент",
+                        "partFormatText": "Усна доповідь + публікація тез",
+                        "sectionText": "Секція 1: Сучасні питання лікування бойової травми",
+                        "abstractTitle": "Тестова тема наукової роботи",
+                        "scientificSupervisor": "д.мед.н., проф. Шевченко Т. Г.",
+                        "department": "Кафедра хірургії №1",
+                        "headOfDepartment": "д.мед.н., проф. Франко І. Я.",
+                        "cityCountry": "м. Київ, Україна",
+                        "abstractIntro": "Тестовий запис створено під час перевірки налаштувань.",
+                        "abstractAim": "Перевірка інтеграції веб-сайту з Google Sheets.",
+                        "abstractMaterials": "HTTP POST via Google Apps Script Webhook.",
+                        "abstractResults": "З'єднання встановлено успішно, стовпці створені.",
+                        "abstractConclusion": "Система готова до запису реальних учасників.",
+                        "abstractKeywords": "тест, ussf, sheets",
+                        "abstractReferences": "1. Тестове джерело."
+                    }
+                    test_result = send_to_google_sheet(dummy_test_data, webhook_url=webhook_url)
+                    if not test_result.get('synced'):
+                        self.send_response(200)
+                        self.send_header('Content-Type', 'application/json; charset=utf-8')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({
+                            "status": "test_failed",
+                            "message": f"Не вдалося надіслати тестовий запис: {test_result.get('message')}. Переконайтеся, що при розгортанні у полі 'Хто має доступ' вибрано 'Усі' (Anyone).",
+                            "test_result": test_result
+                        }, ensure_ascii=False).encode('utf-8'))
+                        return
+
+                # Save to email_config.json
+                cfg_path = os.path.join(BASE_DIR, 'email_config.json')
+                curr_cfg = load_email_config()
+                curr_cfg['google_sheet_webhook_url'] = webhook_url
+                with open(cfg_path, 'w', encoding='utf-8') as cf:
+                    json.dump(curr_cfg, cf, ensure_ascii=False, indent=2)
+
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "success",
+                    "message": "URL Google Таблиці успішно збережено та перевірено! Тестовий рядок з'явився у вашій таблиці.",
+                    "test_result": test_result
+                }, ensure_ascii=False).encode('utf-8'))
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+                return
+
+        # 5. SEND TEST ROW TO EXISTING GOOGLE SHEET (/api/test-sheets-connection)
+        if self.path in ('/api/test-sheets-connection', '/api/sheets/test'):
+            curr_cfg = load_email_config()
+            s_url = curr_cfg.get('google_sheet_webhook_url', '') or os.environ.get('GOOGLE_SHEET_WEBHOOK_URL', '')
+            if not s_url:
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "not_configured",
+                    "message": "URL Google Таблиці ще не збережено."
+                }, ensure_ascii=False).encode('utf-8'))
+                return
+
+            dummy_test_data = {
+                "submissionId": f"USSF-TEST-{datetime.now().strftime('%H%M%S')}",
+                "formattedDate": datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
+                "fullName": "Тестовий Учасник (Тест)",
+                "email": "test@example.com",
+                "phone": "+380 (99) 000-00-00",
+                "telegram": "@test_student",
+                "institution": "НМУ імені О. О. Богомольця",
+                "academicStatusText": "Студент",
+                "partFormatText": "Усна доповідь + публікація тез",
+                "sectionText": "Секція 1",
+                "abstractTitle": "Тестова перевірка каналу",
+                "scientificSupervisor": "д.мед.н., проф. Ковальчук В. М.",
+                "department": "Кафедра хірургії №1",
+                "headOfDepartment": "д.мед.н., проф. Ткаченко І. І.",
+                "cityCountry": "м. Київ, Україна",
+                "abstractIntro": "Перевірка зв'язку з таблицею успішна.",
+                "abstractAim": "Тест зв'язку.",
+                "abstractMaterials": "Google Apps Script.",
+                "abstractResults": "OK.",
+                "abstractConclusion": "Готово.",
+                "abstractKeywords": "тест, ussf",
+                "abstractReferences": "1. USSF 2026."
+            }
+            res = send_to_google_sheet(dummy_test_data, webhook_url=s_url)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
+            return
 
         self.send_response(404)
         self.end_headers()

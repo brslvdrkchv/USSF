@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-04T04:48:40.051Z",
+  "fullName": "Бьякуган Андрей Виталиевич",
+  "institution": "НМУ",
+  "department": "test",
+  "headOfDepartment": "test",
+  "scientificSupervisor": "test",
+  "cityCountry": "м. Київ, Україна",
+  "academicStatusText": "Практикуючий лікар",
+  "partFormat": "abstract_only",
+  "partFormatText": "Публікація тез без виступу",
+  "sectionText": "Секція 1: Сучасні питання лікування бойової травми",
+  "abstractTitle": "Тема",
+  "abstractIntro": "test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test",
+  "abstractAim": "test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test",
+  "abstractMaterials": "test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test",
+  "abstractResults": "test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test",
+  "abstractConclusion": "test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test",
+  "abstractKeywords": "test test test test test test",
+  "abstractReferences": "1 test test test \n2 test test test \n3 test test test \n4 test test test",
+  "email": "derk.boryslav@gmail.com",
+  "phone": "+38 (095) 606-54-31"
+}

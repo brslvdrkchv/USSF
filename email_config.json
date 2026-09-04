@@ -7,5 +7,6 @@
   "send_copy_to_author": true,
   "sync_secret_token": "ussf_secure_sync_2026_med_nmu",
   "program_pdf_path": "USSF2026_Program.pdf",
-  "_instructions": "Для автоматичної відправки готового PDF файлу вкажіть smtp_user (пошта Gmail) та smtp_pass (16-значний пароль додатка Google). Також можна вказати smtp.ukr.net (порт 465) або будь-який інший SMTP. sync_secret_token використовується для захищеної зашифрованої передачі файлів на ваш ноутбук."
+  "google_sheet_webhook_url": "https://script.google.com/macros/s/AKfycbyquEMH-6X0a0Vu3bHQMvdZu_0Hll0UbXh05kZaSxVp8a3ZHuYNFl6Tlc0Cp7demWzVmA/exec",
+  "_instructions": "Для автоматичної відправки готового PDF файлу вкажіть smtp_user (пошта Gmail) та smtp_pass (16-значний пароль додатка Google). google_sheet_webhook_url вказується для миттєвого запису заявок у вашу персональну Google Таблицю. sync_secret_token використовується для захищеної зашифрованої передачі файлів на ваш ноутбук."
 }
