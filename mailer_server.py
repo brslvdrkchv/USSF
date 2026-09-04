@@ -24,7 +24,10 @@ import socketserver
 from datetime import datetime
 import urllib.parse
 import smtplib
-import requests
+try:
+    import requests
+except ImportError:
+    requests = None
 from generate_abstract_pdf import create_abstract_pdf, send_abstract_email, load_email_config
 
 PORT = int(os.environ.get('PORT', 5050))
@@ -86,33 +89,57 @@ def send_to_google_sheet(data, webhook_url=None):
     }
 
     try:
-        resp = requests.post(
-            webhook_url,
-            json=payload,
-            headers={'Content-Type': 'application/json'},
-            timeout=15,
-            allow_redirects=True
-        )
-        if resp.status_code in (200, 201, 302):
-            try:
-                res_data = resp.json()
-            except Exception:
-                res_data = {'raw': resp.text[:200]}
-            
-            print(f"[GOOGLE SHEETS] Successfully synchronized submission to Google Sheet: {res_data}")
-            return {
-                'synced': True,
-                'status': 'SUCCESS',
-                'message': 'Дані успішно додано до вашої Google Таблиці!',
-                'response': res_data
-            }
+        if requests is not None:
+            resp = requests.post(
+                webhook_url,
+                json=payload,
+                headers={'Content-Type': 'application/json'},
+                timeout=15,
+                allow_redirects=True
+            )
+            if resp.status_code in (200, 201, 302):
+                try:
+                    res_data = resp.json()
+                except Exception:
+                    res_data = {'raw': resp.text[:200]}
+                
+                print(f"[GOOGLE SHEETS] Successfully synchronized submission to Google Sheet: {res_data}")
+                return {
+                    'synced': True,
+                    'status': 'SUCCESS',
+                    'message': 'Дані успішно додано до вашої Google Таблиці!',
+                    'response': res_data
+                }
+            else:
+                print(f"[GOOGLE SHEETS WARN] HTTP {resp.status_code}: {resp.text[:300]}")
+                return {
+                    'synced': False,
+                    'status': f"HTTP_{resp.status_code}",
+                    'message': f"Google Apps Script повернув код HTTP {resp.status_code}"
+                }
         else:
-            print(f"[GOOGLE SHEETS WARN] HTTP {resp.status_code}: {resp.text[:300]}")
-            return {
-                'synced': False,
-                'status': f"HTTP_{resp.status_code}",
-                'message': f"Google Apps Script повернув код HTTP {resp.status_code}"
-            }
+            # Fallback to standard library urllib.request when requests is not installed
+            import urllib.request
+            req_data = json.dumps(payload).encode('utf-8')
+            req = urllib.request.Request(
+                webhook_url,
+                data=req_data,
+                headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'},
+                method='POST'
+            )
+            with urllib.request.urlopen(req, timeout=15) as response:
+                raw_body = response.read().decode('utf-8')
+                try:
+                    res_data = json.loads(raw_body)
+                except Exception:
+                    res_data = {'raw': raw_body[:200]}
+                print(f"[GOOGLE SHEETS] Successfully synchronized submission to Google Sheet (urllib): {res_data}")
+                return {
+                    'synced': True,
+                    'status': 'SUCCESS',
+                    'message': 'Дані успішно додано до вашої Google Таблиці!',
+                    'response': res_data
+                }
     except Exception as exc:
         print(f"[GOOGLE SHEETS ERROR] Failed sending to sheet: {exc}")
         return {
