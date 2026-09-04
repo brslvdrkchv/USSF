@@ -17,6 +17,8 @@
 </head>
 
 <body class="lang-ua">
+  <!-- Scroll Reading Progress Bar -->
+  <div id="scrollProgressBar"></div>
 
   <!-- ============ MOBILE MENU OVERLAY ============ -->
   <div class="mobile-menu" id="mobileMenu">
@@ -66,7 +68,7 @@
       <div class="hero-content">
         <div class="hero-date-badge">
           <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          <span style="white-space: nowrap;" class="ua">хх.хх.2026 · Київ · Національний медичний університет ім. О. О. Богомольця</span>
+          <span style="white-space: nowrap;" class="ua">хх.хх.2026 · Київ · Національний медичний університет імені О. О. Богомольця</span>
           <span style="white-space: nowrap;" class="en">хх.хх.2026 · Kyiv · Bogomolets National Medical University</span>
         </div>
 
@@ -77,7 +79,7 @@
 
         <!-- Logo leha.jpg immediately under the heading -->
         <div class="hero-logo-box">
-          <img src="images/leha.jpg" alt="USSF Logo" class="hero-sub-logo">
+          <img src="images/nastia.jpeg" alt="USSF Logo" class="hero-sub-logo">
         </div>
 
         <p class="hero-subtitle">
@@ -100,7 +102,7 @@
       <!-- Framed Hero Element (liveronco style) with leha.jpg -->
       <div class="hero-image-wrapper">
         <div class="hero-image-container">
-          <img src="images/leha.jpg" alt="USSF Hero Image" class="hero-image">
+          <img src="images/nastia.jpeg" alt="USSF Hero Image" class="hero-image">
         </div>
       </div>
     </div>
@@ -112,7 +114,7 @@
       <div class="about-grid">
         <!-- Sticky Welcome Leadership Column -->
         <div class="about-left reveal-left">
-          <img src="images/leha.jpg">
+          <img src="images/nastia.jpeg" alt="Наукове керівництво">
         </div>
 
         <!-- Welcome Speech & Overview -->
@@ -135,17 +137,6 @@
           <div class="en">
             <p>Department of Surgery with the Course of Hepatobiliary and Vascular Surgery cordially invites you to participate in the premier surgical event of the year for medical youth — <br>the <strong>1st All-Ukrainian Student Surgical Forum (USSF)</strong>.</p>
             <p>Modern surgery is rapidly evolving: at the intersection of classical operative techniques, digital technologies, molecular pathomorphology, and evidence-based medicine, new benchmarks for life-saving care are established. Our Forum is a unique multidisciplinary hub designed to unite the future surgical elite of Ukraine, offering a stage for daring research presentations, dynamic discussions, and rigorous practical training guided by national leaders in the field.</p>
-          </div>
-
-          <div class="about-highlights">
-            <div class="about-highlight-box">
-              <h4><span class="ua">Мультидисциплінарність</span><span class="en">Multidisciplinary</span></h4>
-              <p><span class="ua">Об'єднання загальної, судинної, торакальної хірургії, травматології та онкології.</span><span class="en">Uniting general, vascular, thoracic surgery, traumatology, and oncology.</span></p>
-            </div>
-            <div class="about-highlight-box">
-              <h4><span class="ua">Практична спрямованість</span><span class="en">Hands-On Practice</span></h4>
-              <p><span class="ua">Окремий день інтенсивних хірургічних воркшопів у симуляційному центрі НМУ.</span><span class="en">A dedicated day of intensive workshops at the NMU simulation center.</span></p>
-            </div>
           </div>
         </div>
       </div>
@@ -170,10 +161,10 @@
         <!-- SNT / Patronage -->
         <div class="organizer-card reveal delay-1">
           <div class="organizer-logo-box">
-            <img src='images/leha.jpg'>
+            <img src='images/nastia.jpeg'>
           </div>
           <h3><span class="ua">СНТ імені О.А. Киселя</span><span class="en">SSP named after O.A. Kysil</span></h3>
-          <p><span class="ua">Студентське наукове товариство та патронат розвитку молодіжної хірургічної науки в Україні</span><span class="en">Student Scientific Society and patronage of surgical medical science in Ukraine</span></p>
+          <p><span class="ua">Найстаріше студентське наукове товариство Східної Європи, яке цього року відзначає 145-річчя</span><span class="en">The oldest student scientific society in Eastern Europe, which is celebrating its 145th anniversary this year</span></p>
         </div>
 
         <!-- Bogomolets NMU -->
@@ -188,9 +179,9 @@
         <!-- Surgery Department -->
         <div class="organizer-card reveal delay-3">
           <div class="organizer-logo-box">
-            <img src='images/leha.jpg'>
+            <img src='images/nastia.jpeg'>
           </div>
-          <h3><span class="ua">Кафедра хірургії з курсом ГБСХ</span><span class="en">Dept. of Surgery with HBP & Vascular Surgery</span></h3>
+          <h3><span class="ua">Кафедра хірургії з курсом гепатобіліарної та судинної хірургії</span><span class="en">Dept. of Surgery with HBP & Vascular Surgery</span></h3>
           <p><span class="ua">Опорна кафедра хірургічного профілю, центр інновацій та підготовки молодих хірургів</span><span class="en">Reference surgical department, hub of innovation and surgical training</span></p>
         </div>
       </div>
@@ -274,6 +265,7 @@
   </a>
 
         <!-- Format 2 -->
+        <a href="#registration" style="text-decoration: none; color: inherit; display: block;">
         <div class="format-card reveal delay-2">
           <div class="format-icon">
             <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -282,8 +274,10 @@
           <p><span class="ua">Заочна участь з публікацією авторського дослідження чи клінічного спостереження в офіційному збірнику форуму.</span><span class="en">Distant participation with publication of original research or clinical case in the digital book of abstracts.</span></p>
           <span class="format-badge"><span class="ua">Сертифікат за публікацію</span><span class="en">Certificate of Publication</span></span>
         </div>
+      </a>
 
         <!-- Format 3 -->
+        <a href="#registration" style="text-decoration: none; color: inherit; display: block;">
         <div class="format-card reveal delay-3">
           <div class="format-icon">
             <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -292,6 +286,7 @@
           <p><span class="ua">Очна або онлайн присутність на секційних засіданнях, участь у наукових дискусіях та нетворкінг з провідними фахівцями.</span><span class="en">On-site or online attendance across plenary and sectional sessions, active participation in scientific discussions and networking.</span></p>
           <span class="format-badge"><span class="ua">Очно або Zoom</span><span class="en">In-person or Zoom</span></span>
         </div>
+      </a>
       </div>
     </div>
   </section>
@@ -313,229 +308,8 @@
         </div>
       </div>
 
-      <!-- ============ 1. УМОВНИЙ ПЛАН БУДІВЛІ ============ -->
-      <div class="building-plan-block reveal">
-        <div class="building-plan-header">
-          <div class="plan-badge">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-            <span class="ua">План локацій</span>
-            <span class="en">Floor Layout</span>
-          </div>
-          <h3 class="plan-title">
-            <span class="ua">Умовний план Морфологічного корпусу НМУ</span>
-            <span class="en">Schematic Floor Plan of NMU Morphological Building</span>
-          </h3>
-          <p class="plan-desc">
-            <span class="ua">Схема розташування аудиторій секційних засідань, симуляційного центру воркшопів та зон реєстрації (просп. Берестейський, 34).</span>
-            <span class="en">Locations of scientific session halls, surgical simulation workshop center, and registration lobby (34 Beresteiskyi Ave).</span>
-          </p>
-        </div>
-
-        <!-- Floor Cards Grid -->
-        <div class="building-floors-grid">
-          <!-- Floor 1 Card -->
-          <div class="floor-card">
-            <div class="floor-badge">
-              <span class="ua">1 Поверх</span>
-              <span class="en">1st Floor</span>
-            </div>
-            <div class="floor-rooms-list">
-              <div class="floor-room-item highlight-blue">
-                <span class="room-pin">1</span>
-                <div class="room-details">
-                  <strong><span class="ua">Велика анатомічна аудиторія</span><span class="en">Great Anatomical Hall</span></strong>
-                  <p><span class="ua">Пленарне відкриття · Секція 1: Бойова травма</span><span class="en">Plenary Opening · Section 1: Combat Trauma</span></p>
-                </div>
-              </div>
-              <div class="floor-room-item">
-                <span class="room-pin neutral">Хол</span>
-                <div class="room-details">
-                  <strong><span class="ua">Центральний вестибюль</span><span class="en">Central Lobby</span></strong>
-                  <p><span class="ua">Реєстрація учасників · Стійка оргкомітету · Гардероб</span><span class="en">Registration · Info Desk · Cloakroom</span></p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Floor 2 Card -->
-          <div class="floor-card">
-            <div class="floor-badge">
-              <span class="ua">2 Поверх</span>
-              <span class="en">2nd Floor</span>
-            </div>
-            <div class="floor-rooms-list">
-              <div class="floor-room-item highlight-blue">
-                <span class="room-pin">2</span>
-                <div class="room-details">
-                  <strong><span class="ua">Мала лекційна аудиторія №1</span><span class="en">Small Lecture Hall 1</span></strong>
-                  <p><span class="ua">Секція 2: Черевна порожнина</span><span class="en">Section 2: Abdominal Surgery</span></p>
-                </div>
-              </div>
-              <div class="floor-room-item highlight-blue">
-                <span class="room-pin">3</span>
-                <div class="room-details">
-                  <strong><span class="ua">Аудиторія №2 (Колонна зала)</span><span class="en">Lecture Hall 2</span></strong>
-                  <p><span class="ua">Секція 3: Онкохірургія та трансплантологія</span><span class="en">Section 3: Oncosurgery & Transplantation</span></p>
-                </div>
-              </div>
-              <div class="floor-room-item">
-                <span class="room-pin neutral">Фойє</span>
-                <div class="room-details">
-                  <strong><span class="ua">Колонна зала фойє</span><span class="en">Colonnade Gallery</span></strong>
-                  <p><span class="ua">Стендові доповіді (постери) · Кава-брейк · Нетворкінг</span><span class="en">Poster presentations · Coffee break · Networking</span></p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Floor 3 Card -->
-          <div class="floor-card floor-card-gold">
-            <div class="floor-badge gold">
-              <span class="ua">3 Поверх</span>
-              <span class="en">3rd Floor</span>
-            </div>
-            <div class="floor-rooms-list">
-              <div class="floor-room-item highlight-gold">
-                <span class="room-pin gold">★</span>
-                <div class="room-details">
-                  <strong><span class="ua">Симуляційний тренінговий центр НМУ</span><span class="en">NMU Simulation Training Center</span></strong>
-                  <p><span class="ua">День 2: Практичні хірургічні воркшопи (судинний шов, лапароскопія, мікрохірургія, FAST УЗД, NPWT)</span><span class="en">Day 2: Practical Surgical Workshops (vascular suture, laparoscopy, microsurgery, FAST US, NPWT)</span></p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Architectural Blueprint SVG Diagram -->
-        <div class="blueprint-diagram-box">
-          <div class="blueprint-legend">
-            <span class="legend-item"><span class="legend-dot blue"></span> <span class="ua">Секційні зали (День 1)</span><span class="en">Session Halls (Day 1)</span></span>
-            <span class="legend-item"><span class="legend-dot gold"></span> <span class="ua">Симуляційний центр воркшопів (День 2)</span><span class="en">Simulation Center Workshops (Day 2)</span></span>
-            <span class="legend-item"><span class="legend-dot gray"></span> <span class="ua">Хол та рекреація</span><span class="en">Lobby & Networking</span></span>
-          </div>
-
-          <div class="blueprint-svg-container">
-            <svg class="blueprint-svg" viewBox="0 0 940 230" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="planGrid" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(29, 66, 138, 0.05)" stroke-width="1"/>
-                </pattern>
-              </defs>
-              <rect width="940" height="230" fill="#F8FAFC" rx="6"/>
-              <rect width="940" height="230" fill="url(#planGrid)" rx="6"/>
-              <rect x="1" y="1" width="938" height="228" fill="none" stroke="#E2E8F0" stroke-width="1.5" rx="5"/>
-
-              <!-- 1st Floor Diagram -->
-              <g transform="translate(25, 20)">
-                <rect width="270" height="190" rx="6" fill="#FFFFFF" stroke="#1D428A" stroke-width="1.8"/>
-                <rect x="12" y="12" width="246" height="26" rx="4" fill="rgba(29, 66, 138, 0.08)"/>
-                <text x="135" y="29" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" fill="#1D428A">1 ПОВЕРХ: ПЛЕНАРНІ ЗАСІДАННЯ</text>
-
-                <!-- Room 1 -->
-                <rect x="16" y="48" width="238" height="74" rx="4" fill="rgba(29, 66, 138, 0.06)" stroke="#1D428A" stroke-dasharray="3 3"/>
-                <circle cx="38" cy="85" r="13" fill="#1D428A"/>
-                <text x="38" y="90" text-anchor="middle" font-family="'Inter', sans-serif" font-size="11" font-weight="800" fill="#FFFFFF">1</text>
-                <text x="62" y="78" font-family="'Manrope', sans-serif" font-size="11" font-weight="700" fill="#0E1B33">Велика аудиторія</text>
-                <text x="62" y="94" font-family="'Inter', sans-serif" font-size="9" font-weight="600" fill="#1D428A">Секція 1: Бойова травма</text>
-                <text x="62" y="108" font-family="'Inter', sans-serif" font-size="8.5" fill="#64748B">Пленарне урочисте відкриття</text>
-
-                <!-- Central Hall -->
-                <rect x="16" y="130" width="238" height="48" rx="4" fill="#F1F5F9" stroke="#CBD5E1"/>
-                <text x="135" y="152" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="10" font-weight="700" fill="#334155">Центральний вестибюль</text>
-                <text x="135" y="167" text-anchor="middle" font-family="'Inter', sans-serif" font-size="8.5" fill="#64748B">Реєстрація · Оргкомітет · Гардероб</text>
-              </g>
-
-              <!-- 2nd Floor Diagram -->
-              <g transform="translate(335, 20)">
-                <rect width="270" height="190" rx="6" fill="#FFFFFF" stroke="#1D428A" stroke-width="1.8"/>
-                <rect x="12" y="12" width="246" height="26" rx="4" fill="rgba(29, 66, 138, 0.08)"/>
-                <text x="135" y="29" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" fill="#1D428A">2 ПОВЕРХ: СЕКЦІЙНІ АУДИТОРІЇ</text>
-
-                <!-- Room 2 -->
-                <rect x="16" y="48" width="238" height="42" rx="4" fill="rgba(29, 66, 138, 0.06)" stroke="#1D428A" stroke-dasharray="3 3"/>
-                <circle cx="34" cy="69" r="10" fill="#1D428A"/>
-                <text x="34" y="73" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10" font-weight="800" fill="#FFFFFF">2</text>
-                <text x="52" y="66" font-family="'Manrope', sans-serif" font-size="10" font-weight="700" fill="#0E1B33">Мала аудиторія №1</text>
-                <text x="52" y="80" font-family="'Inter', sans-serif" font-size="8.5" font-weight="600" fill="#1D428A">Секція 2: Черевна порожнина</text>
-
-                <!-- Room 3 -->
-                <rect x="16" y="96" width="238" height="42" rx="4" fill="rgba(29, 66, 138, 0.06)" stroke="#1D428A" stroke-dasharray="3 3"/>
-                <circle cx="34" cy="117" r="10" fill="#1D428A"/>
-                <text x="34" y="121" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10" font-weight="800" fill="#FFFFFF">3</text>
-                <text x="52" y="114" font-family="'Manrope', sans-serif" font-size="10" font-weight="700" fill="#0E1B33">Аудиторія №2</text>
-                <text x="52" y="128" font-family="'Inter', sans-serif" font-size="8.5" font-weight="600" fill="#1D428A">Секція 3: Онкохірургія</text>
-
-                <!-- Colonnade Gallery -->
-                <rect x="16" y="144" width="238" height="34" rx="4" fill="#F1F5F9" stroke="#CBD5E1"/>
-                <text x="135" y="165" text-anchor="middle" font-family="'Inter', sans-serif" font-size="9" font-weight="600" fill="#334155">Колонна зала · Постерна сесія & Кава</text>
-              </g>
-
-              <!-- 3rd Floor Diagram -->
-              <g transform="translate(645, 20)">
-                <rect width="270" height="190" rx="6" fill="#0E1B33" stroke="#C59B27" stroke-width="1.8"/>
-                <rect x="12" y="12" width="246" height="26" rx="4" fill="rgba(197, 155, 39, 0.16)"/>
-                <text x="135" y="29" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" fill="#DFBA54">3 ПОВЕРХ: СИМУЛЯЦІЙНИЙ ЦЕНТР</text>
-
-                <!-- Workshop Simulation Lab -->
-                <rect x="16" y="48" width="238" height="130" rx="4" fill="rgba(255, 255, 255, 0.05)" stroke="#C59B27" stroke-dasharray="3 3"/>
-                <circle cx="38" cy="74" r="13" fill="#C59B27"/>
-                <text x="38" y="79" text-anchor="middle" font-family="'Inter', sans-serif" font-size="13" font-weight="800" fill="#0E1B33">★</text>
-                <text x="62" y="69" font-family="'Manrope', sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">Хірургічні воркшопи</text>
-                <text x="62" y="84" font-family="'Inter', sans-serif" font-size="9" font-weight="600" fill="#DFBA54">День 2: Практичний тренінг</text>
-
-                <!-- Simulation features -->
-                <text x="28" y="112" font-family="'Inter', sans-serif" font-size="8.5" fill="rgba(248, 250, 252, 0.85)">• Лапароскопічні тренажери</text>
-                <text x="28" y="128" font-family="'Inter', sans-serif" font-size="8.5" fill="rgba(248, 250, 252, 0.85)">• Судинний та мікросудинний шов</text>
-                <text x="28" y="144" font-family="'Inter', sans-serif" font-size="8.5" fill="rgba(248, 250, 252, 0.85)">• Станція E-FAST УЗД при травмі</text>
-                <text x="28" y="160" font-family="'Inter', sans-serif" font-size="8.5" fill="rgba(248, 250, 252, 0.85)">• NPWT вакуумні дренажні системи</text>
-              </g>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <!-- ============ 2. ВШИТИЙ PDF ЧИТАЧ ============ -->
-      <div class="program-pdf-viewer reveal">
-        <div class="pdf-viewer-toolbar">
-          <div class="pdf-toolbar-info">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            <div>
-              <strong><span class="ua">Офіційна наукова програма USSF 2026 (PDF)</span><span class="en">Official USSF 2026 Scientific Program (PDF)</span></strong>
-              <span class="pdf-badge"><span class="ua">Затверджено оргкомітетом</span><span class="en">Approved by Committee</span></span>
-            </div>
-          </div>
-          <div class="pdf-toolbar-actions">
-            <a href="USSF2026_Program.pdf" target="_blank" rel="noopener noreferrer" class="btn-outline-dark pdf-action-btn">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              <span class="ua">На весь екран</span><span class="en">Fullscreen</span>
-            </a>
-            <a href="USSF2026_Program.pdf" download="USSF2026_Program.pdf" class="btn-primary pdf-action-btn">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span class="ua">Завантажити PDF</span><span class="en">Download PDF</span>
-            </a>
-          </div>
-        </div>
-
-        <div class="pdf-iframe-container">
-          <iframe src="USSF2026_Program.pdf#view=FitH&toolbar=1"
-                  title="Офіційна наукова програма USSF 2026"
-                  loading="lazy">
-          </iframe>
-        </div>
-
-        <!-- Mobile direct action fallback -->
-        <div class="pdf-mobile-fallback">
-          <p><span class="ua">Переглядайте повний розклад або завантажуйте PDF-файл програми на пристрій:</span><span class="en">View the full schedule or download the PDF program to your device:</span></p>
-          <div class="pdf-mobile-btns">
-            <a href="USSF2026_Program.pdf" target="_blank" rel="noopener noreferrer" class="btn-outline-dark">
-              <span class="ua">Відкрити PDF</span><span class="en">Open PDF</span>
-            </a>
-            <a href="USSF2026_Program.pdf" download="USSF2026_Program.pdf" class="btn-primary">
-              <span class="ua">Завантажити PDF</span><span class="en">Download PDF</span>
-            </a>
-          </div>
-        </div>
-      </div>
+      <!-- ============ 1. ВШИТИЙ PDF ЧИТАЧ НАУКОВОЇ ПРОГРАМИ ============ -->
+      
 
       <!-- ============ 3. ДВІ ГОЛОВНІ КНОПКИ ДНІВ (ПІСЛЯ PDF ЧИТАЧА) ============ -->
       <div class="program-days-nav reveal">
@@ -568,7 +342,7 @@
       <!-- PANEL 1: COMBAT TRAUMA -->
       <div class="program-panel active" id="panel-section1">
         <div class="section-overview-banner">
-          <h3><span class="ua">Секція 1: «Сучасні питання лікування бойової травми. Мультидисциплінарний підхід»</span><span class="en">Section 1: "Contemporary Management of Combat Trauma. Multidisciplinary Approach"</span></h3>
+          <h3><span class="ua">Напрямки секції 1: «Сучасні питання лікування бойової травми. Мультидисциплінарний підхід»</span><span class="en">Section 1: "Contemporary Management of Combat Trauma. Multidisciplinary Approach"</span></h3>
           <p><span class="ua">День 1 · Ключові аспекти військової хірургії, етапного лікування та відновних технологій.</span><span class="en">Day 1 · Key aspects of military surgery, staged management, and reconstructive technologies.</span></p>
         </div>
 
@@ -614,7 +388,7 @@
       <!-- PANEL 2: ABDOMINAL SURGERY -->
       <div class="program-panel" id="panel-section2">
         <div class="section-overview-banner">
-          <h3><span class="ua">Секція 2: «Невідкладна та планова хірургія черевної порожнини. Мініінвазивні технології»</span><span class="en">Section 2: "Emergency and Elective Abdominal Surgery. Minimally Invasive Technologies"</span></h3>
+          <h3><span class="ua">Напрямки секції 2: «Невідкладна та планова хірургія черевної порожнини. Мініінвазивні технології»</span><span class="en">Section 2: "Emergency and Elective Abdominal Surgery. Minimally Invasive Technologies"</span></h3>
           <p><span class="ua">День 1 · Сучасні лапароскопічні, ендоскопічні та відкриті втручання в абдомінальній хірургії.</span><span class="en">Day 1 · Advanced laparoscopic, endoscopic, and open abdominal procedures.</span></p>
         </div>
 
@@ -660,7 +434,7 @@
       <!-- PANEL 3: ONCOSURGERY & TRANSPLANTATION -->
       <div class="program-panel" id="panel-section3">
         <div class="section-overview-banner">
-          <h3><span class="ua">Секція 3: «Абдомінальна й торакальна онкохірургія. Окремі питання трансплантології»</span><span class="en">Section 3: "Abdominal & Thoracic Surgical Oncology. Selected Issues of Transplantation"</span></h3>
+          <h3><span class="ua">Напрямки секції 3: «Абдомінальна й торакальна онкохірургія. Окремі питання трансплантології»</span><span class="en">Section 3: "Abdominal & Thoracic Surgical Oncology. Selected Issues of Transplantation"</span></h3>
           <p><span class="ua">День 1 · Радикальні резекції, мініінвазивні онковтручання та органозберігаючі технології.</span><span class="en">Day 1 · Radical resections, minimally invasive oncosurgery, and organ transplantation.</span></p>
         </div>
 
@@ -756,6 +530,123 @@
         </div>
       </div>
 
+      <!-- ============ 5. ОНОВЛЕНИЙ ПЛАН БУДІВЛІ ТА СХЕМА ЕВАКУАЦІЇ ============ -->
+      <div class="building-plan-block reveal" id="venuePlanBlock" style="margin-top: 3.5rem;">
+        <div class="building-plan-header">
+          <div class="plan-badge">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span class="ua">Схема евакуації та навігація</span>
+            <span class="en">Navigation & Evacuation Plan</span>
+          </div>
+          <h3 class="plan-title">
+            <span class="ua">План локацій та схема евакуації корпусів форуму</span>
+            <span class="en">Venue Navigation & Evacuation Blueprint</span>
+          </h3>
+          <p class="plan-desc">
+            <span class="ua">Архітектурна схема розташування пленарних та секційних аудиторій, хірургічного симуляційного центру воркшопів, зон реєстрації та евакуаційних виходів (Морфологічний корпус НМУ імені О.О. Богомольця, просп. Берестейський, 34).</span>
+            <span class="en">Architectural floor layout of scientific session halls, surgical simulation workshop center, registration lobby, and emergency evacuation exits (NMU Morphological Building, 34 Beresteiskyi Ave).</span>
+          </p>
+
+          <!-- Floor Switcher Tabs -->
+          <div class="plan-tabs-nav">
+            <button type="button" class="plan-tab-btn active" id="tabFloorAll" onclick="switchFloorPlan('all')">
+              <span class="ua">🏢 Усі 3 поверхи</span>
+              <span class="en">🏢 All 3 Floors</span>
+            </button>
+            <button type="button" class="plan-tab-btn" id="tabFloor1" onclick="switchFloorPlan('floor1')">
+              <span class="ua">1 Поверх: Велика аудиторія & Хол</span>
+              <span class="en">1st Floor: Grand Hall & Lobby</span>
+            </button>
+            <button type="button" class="plan-tab-btn" id="tabFloor2" onclick="switchFloorPlan('floor2')">
+              <span class="ua">2 Поверх: Секції 2, 3 & Постери</span>
+              <span class="en">2nd Floor: Sections 2, 3 & Posters</span>
+            </button>
+            <button type="button" class="plan-tab-btn" id="tabFloor3" onclick="switchFloorPlan('floor3')">
+              <span class="ua">3 Поверх: Симуляційний центр</span>
+              <span class="en">3rd Floor: Simulation Center</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Floor Cards Grid -->
+        <div class="building-floors-grid">
+          <!-- Floor 1 Card -->
+          <div class="floor-card reveal-scale delay-1" id="cardFloor1">
+            <div class="floor-badge">
+              <span class="ua">1 Поверх</span>
+              <span class="en">1st Floor</span>
+            </div>
+            <div class="floor-rooms-list">
+              <div class="floor-room-item highlight-blue">
+                <span class="room-pin">1</span>
+                <div class="room-details">
+                  <strong><span class="ua">Велика анатомічна аудиторія (Зал №1)</span><span class="en">Great Anatomical Hall (Auditorium 1)</span></strong>
+                  <p><span class="ua">Пленарне відкриття · Секція 1: Бойова травма (350+ місць) · Прямі виходи назовні</span><span class="en">Plenary Opening · Section 1: Combat Trauma (350+ seats) · Direct exits</span></p>
+                </div>
+              </div>
+              <div class="floor-room-item">
+                <span class="room-pin neutral">Хол</span>
+                <div class="room-details">
+                  <strong><span class="ua">Центральний вестибюль</span><span class="en">Central Lobby</span></strong>
+                  <p><span class="ua">Головний вхід (турнікети) · Стійка оргкомітету · Реєстрація · Гардероб · Медпункт</span><span class="en">Main entrance · Registration desk · Cloakroom · First aid post</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Floor 2 Card -->
+          <div class="floor-card reveal-scale delay-2" id="cardFloor2">
+            <div class="floor-badge">
+              <span class="ua">2 Поверх</span>
+              <span class="en">2nd Floor</span>
+            </div>
+            <div class="floor-rooms-list">
+              <div class="floor-room-item highlight-blue">
+                <span class="room-pin">2</span>
+                <div class="room-details">
+                  <strong><span class="ua">Мала лекційна аудиторія №1</span><span class="en">Small Lecture Hall 1</span></strong>
+                  <p><span class="ua">Секція 2: Невідкладна та планова хірургія черевної порожнини (120 місць)</span><span class="en">Section 2: Abdominal Surgery (120 seats)</span></p>
+                </div>
+              </div>
+              <div class="floor-room-item highlight-blue">
+                <span class="room-pin">3</span>
+                <div class="room-details">
+                  <strong><span class="ua">Аудиторія №2 (Конференц-зал)</span><span class="en">Auditorium 2 (Conference Hall)</span></strong>
+                  <p><span class="ua">Секція 3: Онкохірургія та трансплантологія (120 місць)</span><span class="en">Section 3: Oncosurgery & Transplantation (120 seats)</span></p>
+                </div>
+              </div>
+              <div class="floor-room-item">
+                <span class="room-pin neutral">Фойє</span>
+                <div class="room-details">
+                  <strong><span class="ua">Колонна зала фойє</span><span class="en">Colonnade Gallery</span></strong>
+                  <p><span class="ua">Стендові доповіді (постери) · Кава-брейк · Нетворкінг · Евакуаційні сходи</span><span class="en">Poster session · Coffee breaks · Networking · Evacuation stairs</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Floor 3 Card -->
+          <div class="floor-card floor-card-gold reveal-scale delay-3" id="cardFloor3">
+            <div class="floor-badge gold">
+              <span class="ua">3 Поверх</span>
+              <span class="en">3rd Floor</span>
+            </div>
+            <div class="floor-rooms-list">
+              <div class="floor-room-item highlight-gold">
+                <span class="room-pin gold">★</span>
+                <div class="room-details">
+                  <strong><span class="ua">Симуляційний тренінговий центр НМУ</span><span class="en">NMU Simulation Training Center</span></strong>
+                  <p><span class="ua">День 2: Хірургічні воркшопи (лапароскопія, судинний шов, FAST УЗД, NPWT) · Евакуаційні сходи</span><span class="en">Day 2: Practical Surgical Workshops (laparoscopy, vascular suture, FAST US, NPWT)</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Architectural Evacuation Blueprint SVG Diagram -->
+
+      </div>
+
     </div>
   </section>
 
@@ -777,7 +668,7 @@
         <div class="reg-step-card reveal delay-1">
           <div class="step-num">01</div>
           <h4><span class="ua">Вимоги до матеріалів</span><span class="en">Scientific Criteria</span></h4>
-          <p><span class="ua">До виступу та публікації допускаються всі види авторських наукових робіт: експериментальні дослідження, клінічні кейси та серії спостережень, обсерваційні дослідження, систематичні огляди та мета-аналізи.</span><span class="en">All types of original scientific contributions are eligible: experimental trials, clinical cases and case series, observational cohort studies, systematic reviews, and meta-analyses.</span></p>
+          <p><span class="ua">До виступу та публікації допускаються всі види авторських наукових робіт, які оформлені у форматі тез: експериментальні дослідження, клінічні кейси та серії спостережень, обсерваційні дослідження, систематичні огляди та мета-аналізи.</span><span class="en">All types of original scientific contributions are eligible: experimental trials, clinical cases and case series, observational cohort studies, systematic reviews, and meta-analyses.</span></p>
         </div>
 
         <!-- Step 2 -->
@@ -854,7 +745,7 @@
           </div>
         </div>
 
-        <div class="venue-map-wrapper reveal">
+        <div class="venue-map-wrapper reveal-right">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2540.569420799424!2d30.45094267691672!3d50.44911768745917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40d4cc266f88ecf5%3A0x7d6a5960098df67f!2sBeresteiskyi%20Ave%2C%2034%2C%20Kyiv%2C%20Ukraine%2C%2003057!5e0!3m2!1sen!2sua!4v1710000000000!5m2!1sen!2sua"
             allowfullscreen=""
@@ -871,14 +762,17 @@
   <footer id="contacts">
     <div class="section-inner">
       <div class="footer-grid">
-        <div class="footer-brand">
+        <div class="footer-brand reveal delay-1">
           <h3>USSF 2026</h3>
-          <p>
 
+          <p>
+            <div class="hero-logo-box">
+              <img src="images/nastia.jpeg" alt="USSF Logo" class="hero-sub-logo">
+            </div>
           </p>
         </div>
 
-        <div class="footer-col">
+        <div class="footer-col reveal delay-2">
           <h4><span class="ua">Навігація</span><span class="en">Navigation</span></h4>
           <ul>
             <li><a href="#about"><span class="ua">Про форум</span><span class="en">About</span></a></li>
@@ -890,7 +784,7 @@
           </ul>
         </div>
 
-        <div class="footer-col">
+        <div class="footer-col reveal delay-3">
           <h4><span class="ua">Контакти для довідок</span><span class="en">Secretariat Contacts</span></h4>
           <div class="footer-contact-item">
             <strong>Email:</strong>
@@ -898,15 +792,15 @@
           </div>
           <div class="footer-contact-item">
             <strong><span class="ua">Телефон секретаріату:</span><span class="en">Secretariat Phone:</span></strong>
-            <a href="tel:+380 97 408 77 86">+38 (097) 408 77 86</a>
+            <a href="tel:+380 99 999 99 99">+38 (099) 999 99 99</a>
           </div>
           <div class="footer-contact-item">
             <strong><span class="ua">Telegram-канал новин:</span><span class="en">Telegram News Channel:</span></strong>
-            <a href="https://t.me/KuzOlexii" target="_blank" rel="noopener noreferrer">@KuzOlexii</a>
+            <a href="https://t.me/ussf" target="_blank" rel="noopener noreferrer">@ussf</a>
           </div>
         </div>
 
-        <div class="footer-col">
+        <div class="footer-col reveal delay-4">
           <h4><span class="ua">Університет</span><span class="en">University</span></h4>
           <ul>
             <li><a href="https://nmuofficial.com" target="_blank" rel="noopener noreferrer"><span class="ua">Офіційний сайт НМУ</span><span class="en">NMU Official Website</span></a></li>
@@ -949,7 +843,7 @@
             </div>
             <div class="form-group">
               <label for="institution"><span class="ua">Навчальний заклад / Установа *</span><span class="en">Medical University / Institution *</span></label>
-              <input type="text" id="institution" required placeholder="НМУ імені О.О. Богомольця" data-placeholder-ua="НМУ імені О.О. Богомольця" data-placeholder-en="Bogomolets National Medical University">
+              <input type="text" id="institution" required placeholder="НМУ імені О. О. Богомольця" data-placeholder-ua="НМУ імені О. О. Богомольця" data-placeholder-en="Bogomolets National Medical University">
             </div>
           </div>
 
@@ -978,17 +872,48 @@
             <label for="targetSection"><span class="ua">Секція форуму *</span><span class="en">Target Section *</span></label>
             <select id="targetSection">
               <option value="1" data-ua="Секція 1: Сучасні питання лікування бойової травми" data-en="Section 1: Contemporary Combat Trauma">Секція 1: Сучасні питання лікування бойової травми</option>
-              <option value="2" data-ua="Секція 2: Невідкладна та планова хірургія черевної порожнини" data-en="Section 2: Abdominal & Minimally Invasive Surgery">Секція 2: Невідкладна та планова хірургія черевної порожнини</option>
+              <option value="2" data-ua="Секція 2: Невідкладна хірургія" data-en="Section 2: Emergency surgery">Секція 2: Невідкладна хірургія</option>
               <option value="3" data-ua="Секція 3: Абдомінальна й торакальна онкохірургія та трансплантологія" data-en="Section 3: Oncosurgery & Organ Transplantation">Секція 3: Абдомінальна й торакальна онкохірургія та трансплантологія</option>
             </select>
           </div>
 
           <div class="form-group" id="abstractTitleGroup">
-            <label for="abstractTitle"><span class="ua">Тема наукової роботи / тез</span><span class="en">Abstract / Presentation Title</span></label>
-            <input type="text" id="abstractTitle" placeholder="Введіть назву вашої наукової роботи" data-placeholder-ua="Введіть назву вашої наукової роботи" data-placeholder-en="Enter the title of your paper">
+            <label for="abstractTitle"><span class="ua">Тема наукової роботи / тез *</span><span class="en">Abstract / Presentation Title *</span></label>
+            <input type="text" id="abstractTitle" placeholder="Тема вашої наукової роботи" data-placeholder-ua="Тема вашої наукової роботи" data-placeholder-en="Title of your research paper">
           </div>
 
           <div class="abstract-structured-container" id="abstractFileGroup">
+            <!-- ============ АКЦЕНТОВАНЕ ПОВІДОМЛЕННЯ ПРО АВТОМАТИЧНУ ГЕНЕРАЦІЮ ============ -->
+            <div class="abstract-auto-notice">
+              <div class="auto-notice-header">
+                <div class="auto-notice-icon-box">
+                  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </div>
+                <div>
+                  <div class="auto-notice-badge">
+                    <span class="pulse-beacon-dot"></span>
+                    <span class="ua">АВТОМАТИЧНА ГЕНЕРАЦІЯ ОФІЦІЙНОГО ДОКУМЕНТА (PDF)</span>
+                    <span class="en">AUTOMATIC OFFICIAL DOCUMENT GENERATION (PDF)</span>
+                  </div>
+                  <h4 class="auto-notice-title">
+                    <span class="ua">Усі тези автоматично компілюються в офіційний документ НМУ</span>
+                    <span class="en">All abstracts are automatically compiled into official NMU document</span>
+                  </h4>
+                </div>
+              </div>
+              <p class="auto-notice-desc">
+                <span class="ua">Введені вами дані збираються в готовий файл для публікації у збірнику матеріалів форуму за суворими критеріями ВАК/НМУ. Будь ласка, перевіряйте правильність написання ПІБ, звань керівника та назви кафедри:</span>
+                <span class="en">Your entered data is instantly compiled into a ready-to-publish document strictly adhering to university editorial criteria. Please double-check the spelling of names, supervisor titles, and department affiliations:</span>
+              </p>
+              <div class="auto-notice-specs">
+                <span class="spec-pill"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span class="ua">Шрифт: <strong>Times New Roman 14 pt</strong></span><span class="en">Font: <strong>Times New Roman 14 pt</strong></span></span>
+                <span class="spec-pill"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span class="ua">Інтервал: <strong>1.5</strong></span><span class="en">Spacing: <strong>1.5</strong></span></span>
+                <span class="spec-pill"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span class="ua">Поля: <strong>30 / 15 / 20 / 20 мм</strong></span><span class="en">Margins: <strong>30 / 15 / 20 / 20 mm</strong></span></span>
+                <span class="spec-pill"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span class="ua">Абзац: <strong>1.25 см</strong></span><span class="en">Indent: <strong>1.25 cm</strong></span></span>
+                <span class="spec-pill spec-live"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> <span class="ua">Миттєвий перегляд документа після відправки</span><span class="en">Instant live document preview on submit</span></span>
+              </div>
+            </div>
+
             <div class="form-section-heading">
               <span class="ua">Дані кафедри та наукового керівництва</span>
               <span class="en">Department and Academic Leadership Details</span>
@@ -997,21 +922,19 @@
             <!-- Науковий керівник -->
             <div class="form-group">
               <label for="scientificSupervisor"><span class="ua">Науковий керівник (посада, звання, ПІБ) *</span><span class="en">Scientific Supervisor (title, name) *</span></label>
-              <input type="text" id="scientificSupervisor" placeholder="Науковий керівник: асистентка кафедри Александренко Н. О." data-placeholder-ua="Науковий керівник: асистентка кафедри Александренко Н. О." data-placeholder-en="Scientific Supervisor: Asst. Prof. Aleksandrenko N. O.">
+              <input type="text" id="scientificSupervisor" placeholder="асист. Іванченко І. І," data-placeholder-ua="асист. Іванченко І. І." data-placeholder-en="Asst. Prof. Ivanchenko I. I">
             </div>
 
-            <div class="form-row">
-              <!-- Кафедра -->
-              <div class="form-group">
-                <label for="department"><span class="ua">Кафедра *</span><span class="en">Department *</span></label>
-                <input type="text" id="department" placeholder="Кафедра: Кафедра патофізіології" data-placeholder-ua="Кафедра: Кафедра патофізіології" data-placeholder-en="Department: Department of Pathophysiology">
-              </div>
+            <!-- Кафедра -->
+            <div class="form-group">
+              <label for="department"><span class="ua">Кафедра *</span><span class="en">Department *</span></label>
+              <input type="text" id="department" placeholder="Кафедра хірургії №1" data-placeholder-ua="Кафедра хірургії №1" data-placeholder-en="Department of Surgery No. 1">
+            </div>
 
-              <!-- Завідувач кафедри -->
-              <div class="form-group">
-                <label for="headOfDepartment"><span class="ua">Завідувач кафедри *</span><span class="en">Head of Department *</span></label>
-                <input type="text" id="headOfDepartment" placeholder="Завідувач кафедри: д.мед.н., професор Зябліцев С. В." data-placeholder-ua="Завідувач кафедри: д.мед.н., професор Зябліцев С. В." data-placeholder-en="Head of Department: Prof. Zyablitsev S. V.">
-              </div>
+            <!-- Завідувач кафедри -->
+            <div class="form-group">
+              <label for="headOfDepartment"><span class="ua">Завідувач кафедри (посада, звання, ПІБ) *</span><span class="en">Head of Department *</span></label>
+              <input type="text" id="headOfDepartment" placeholder="д.мед.н., проф. Іванченко І. І," data-placeholder-ua="д.мед.н., проф. Іванченко І. І," data-placeholder-en="Prof. Ivanchenko I. I.">
             </div>
 
             <div class="form-group">
@@ -1020,61 +943,76 @@
             </div>
 
             <div class="form-section-heading" style="margin-top: 1.6rem;">
-              <span class="ua">Структура наукових тез (за новим шаблоном)</span>
-              <span class="en">Abstract Structure (Conference Template)</span>
-            </div>
-            <div class="abstract-criteria-info">
-              <span class="ua">ℹ️ Формується за офіційним шаблоном: <strong>Times New Roman 14 pt</strong>, інтервал <strong>1.5</strong>, відступи та поля за зразком.</span>
-              <span class="en">ℹ️ Formatted by official template: <strong>Times New Roman 14 pt</strong>, line spacing <strong>1.5</strong>, margins by standard.</span>
+              <span class="ua">Структура наукових тез (за академічним шаблоном НМУ)</span>
+              <span class="en">Abstract Structure (Official NMU Template)</span>
             </div>
 
             <!-- 1. Вступ: -->
             <div class="form-group">
               <label for="abstractIntro"><span class="ua">Вступ *</span><span class="en">Introduction *</span></label>
-              <textarea id="abstractIntro" rows="3" placeholder="Вступ:" data-placeholder-ua="Вступ:" data-placeholder-en="Introduction:"></textarea>
+              <textarea id="abstractIntro" rows="3" placeholder="Вступ: стан досліджуваної проблеми та посилання на джерела [1]..." data-placeholder-ua="Вступ: стан досліджуваної проблеми та посилання на джерела [1]..." data-placeholder-en="Introduction: research background and citations [1]..."></textarea>
             </div>
 
             <!-- 2. Мета: -->
             <div class="form-group">
               <label for="abstractAim"><span class="ua">Мета *</span><span class="en">Aim *</span></label>
-              <textarea id="abstractAim" rows="2" placeholder="Мета:" data-placeholder-ua="Мета:" data-placeholder-en="Aim:"></textarea>
+              <textarea id="abstractAim" rows="2" placeholder="Мета: мета дослідження та завдання..." data-placeholder-ua="Мета: мета дослідження та завдання..." data-placeholder-en="Aim: aim of the study and objectives..."></textarea>
             </div>
 
             <!-- 3. Матеріали і методи: -->
             <div class="form-group">
               <label for="abstractMaterials"><span class="ua">Матеріали і методи *</span><span class="en">Materials and Methods *</span></label>
-              <textarea id="abstractMaterials" rows="3" placeholder="Матеріали і методи:" data-placeholder-ua="Матеріали і методи:" data-placeholder-en="Materials and methods:"></textarea>
+              <textarea id="abstractMaterials" rows="3" placeholder="Матеріали і методи: об'єкти, клінічний матеріал, методики..." data-placeholder-ua="Матеріали і методи: об'єкти, клінічний матеріал, методики..." data-placeholder-en="Materials and methods: subjects, clinical material, techniques..."></textarea>
             </div>
 
             <!-- 4. Результати: -->
             <div class="form-group">
               <label for="abstractResults"><span class="ua">Результати *</span><span class="en">Results *</span></label>
-              <textarea id="abstractResults" rows="4" placeholder="Результати:" data-placeholder-ua="Результати:" data-placeholder-en="Results:"></textarea>
+              <textarea id="abstractResults" rows="4" placeholder="Результати: отримані наукові дані, статистичний аналіз..." data-placeholder-ua="Результати: отримані наукові дані, статистичний аналіз..." data-placeholder-en="Results: scientific findings and data analysis..."></textarea>
             </div>
 
             <!-- 5. Висновок: -->
             <div class="form-group">
               <label for="abstractConclusion"><span class="ua">Висновок *</span><span class="en">Conclusion *</span></label>
-              <textarea id="abstractConclusion" rows="3" placeholder="Висновок:" data-placeholder-ua="Висновок:" data-placeholder-en="Conclusion:"></textarea>
+              <textarea id="abstractConclusion" rows="3" placeholder="Висновок: узагальнення та практичні рекомендації..." data-placeholder-ua="Висновок: узагальнення та практичні рекомендації..." data-placeholder-en="Conclusion: summary and practical recommendations..."></textarea>
             </div>
 
             <!-- 6. Ключові слова: -->
             <div class="form-group">
-              <label for="abstractKeywords"><span class="ua">Ключові слова</span><span class="en">Keywords</span></label>
-              <input type="text" id="abstractKeywords" placeholder="Ключові слова:" data-placeholder-ua="Ключові слова:" data-placeholder-en="Keywords:">
+              <label for="abstractKeywords"><span class="ua">Ключові слова (3–6 слів)</span><span class="en">Keywords (3–6 terms)</span></label>
+              <input type="text" id="abstractKeywords" placeholder="бойова травма, судинний шов, NPWT" data-placeholder-ua="бойова травма, судинний шов, NPWT" data-placeholder-en="combat trauma, vascular suture, NPWT">
             </div>
 
-            <!-- 7. Список літератури: -->
+            <!-- 7. Список літератури та правила APA / цитування -->
             <div class="form-group">
-              <label for="abstractReferences"><span class="ua">Список літератури</span><span class="en">List of References</span></label>
-              <textarea id="abstractReferences" rows="4" placeholder="Список літератури:" data-placeholder-ua="Список літератури:" data-placeholder-en="List of references:"></textarea>
+              <label for="abstractReferences"><span class="ua">Список літератури / Джерела *</span><span class="en">List of References *</span></label>
+
+              <!-- Повідомлення про стиль APA та цитування у форматі [1] -->
+              <div class="apa-guidelines-box">
+                <div class="apa-notice-line">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#C59B27" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  <span>
+                    <span class="ua">Дотримуйтесь стилю оформлення <a href="https://uk.wikipedia.org/wiki/%D0%A1%D1%82%D0%B8%D0%BB%D1%8C_APA" target="_blank" rel="noopener noreferrer" class="apa-highlight-link">APA</a></span>
+                    <span class="en">Follow the <a href="https://en.wikipedia.org/wiki/APA_style" target="_blank" rel="noopener noreferrer" class="apa-highlight-link">APA</a> citation style</span>
+                  </span>
+                </div>
+                <div class="apa-citation-rule">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#1D428A" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
+                  <span>
+                    <span class="ua">Цитування наводять за змістом тексту у форматі <strong>«[1]»</strong> відповідно до порядкового номеру джерела.</span>
+                    <span class="en">In-text citations must be cited in the text in the format <strong>"[1]"</strong> according to the ordinal number of the source.</span>
+                  </span>
+                </div>
+              </div>
+
+              <textarea id="abstractReferences" rows="4" placeholder="1. Автор, А. А. (2024). Назва статті. Журнал, 10(2), 123–130. [APA]&#10;2. Ohtsuka, T., et al. (2024). International Kyoto guidelines. Pancreatology, 24(2), 255–270." data-placeholder-ua="1. Автор, А. А. (2024). Назва статті. Журнал, 10(2), 123–130. [APA]&#10;2. Ohtsuka, T., et al. (2024). International Kyoto guidelines. Pancreatology, 24(2), 255–270." data-placeholder-en="1. Author, A. A. (2024). Title of article. Journal, 10(2), 123–130. [APA]&#10;2. Ohtsuka, T., et al. (2024). International Kyoto guidelines. Pancreatology, 24(2), 255–270."></textarea>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="email"><span class="ua">Email адреса *</span><span class="en">Email Address *</span></label>
-              <input type="email" id="email" required placeholder="ivanenko@gmail.com">
+              <input type="email" id="email" required placeholder="ivanchenko@gmail.com">
             </div>
             <div class="form-group">
               <label for="phone"><span class="ua">Контактний телефон *</span><span class="en">Phone Number *</span></label>
@@ -1143,6 +1081,11 @@
       </div>
     </div>
   </div>
+
+  <!-- Floating Back to Top Button -->
+  <button id="backToTopBtn" aria-label="Прокрутити вгору">
+    <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
 
   <!-- Custom Scripts -->
   <script src="js/app.js"></script>

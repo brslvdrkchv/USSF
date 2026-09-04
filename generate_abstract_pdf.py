@@ -243,57 +243,203 @@ def create_abstract_pdf(data: dict, output_path: str = None) -> str:
     return os.path.abspath(output_path)
 
 
-def send_abstract_email(pdf_path: str, data: dict, recipient: str = "derk.boryslav@gmail.com"):
-    """Send compiled abstract PDF to committee email via SMTP."""
-    smtp_host = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
-    smtp_port = int(os.environ.get('SMTP_PORT', 587))
-    smtp_user = os.environ.get('SMTP_USER')
-    smtp_pass = os.environ.get('SMTP_PASS')
+def load_email_config():
+    """Load email configuration from email_config.json or environment variables."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    config_file = os.path.join(base_dir, 'email_config.json')
+    config = {
+        'smtp_host': os.environ.get('SMTP_HOST', 'smtp.gmail.com'),
+        'smtp_port': int(os.environ.get('SMTP_PORT', 587)),
+        'smtp_user': os.environ.get('SMTP_USER', ''),
+        'smtp_pass': os.environ.get('SMTP_PASS', ''),
+        'committee_email': os.environ.get('COMMITTEE_EMAIL', 'derk.boryslav@gmail.com'),
+        'send_copy_to_author': True,
+        'sync_secret_token': os.environ.get('SYNC_SECRET_TOKEN', 'ussf_secure_sync_2026_med_nmu'),
+        'program_pdf_path': os.environ.get('PROGRAM_PDF_PATH', 'USSF2026_Program.pdf')
+    }
+    if os.path.exists(config_file):
+        try:
+            with open(config_file, 'r', encoding='utf-8') as f:
+                loaded = json.load(f)
+                config.update({k: v for k, v in loaded.items() if v not in (None, '') or k in ('smtp_user', 'smtp_pass')})
+        except Exception as e:
+            print(f"[WARN] Failed to read email_config.json: {e}")
+    return config
+
+
+def send_abstract_email(pdf_path: str, data: dict, recipient: str = None) -> dict:
+    """
+    Send two emails upon registration:
+    1. Automated No-Reply email to Participant with thank-you note, attached Program PDF and abstract PDF.
+    2. Notification email to Committee (derk.boryslav@gmail.com) with full registration data and abstract PDF.
+    """
+    cfg = load_email_config()
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+
+    smtp_host = cfg.get('smtp_host', 'smtp.gmail.com')
+    smtp_port = int(cfg.get('smtp_port', 587))
+    smtp_user = cfg.get('smtp_user', '').strip()
+    smtp_pass = cfg.get('smtp_pass', '').strip()
+
+    committee_email = recipient or cfg.get('committee_email', 'derk.boryslav@gmail.com')
+    author_email = data.get('email', '').strip()
 
     if not smtp_user or not smtp_pass:
-        print(f"[INFO] SMTP credentials not configured (SMTP_USER / SMTP_PASS).")
-        print(f"[INFO] PDF saved locally at: {pdf_path}")
-        print(f"[INFO] To send automatically to {recipient}, configure SMTP_USER and SMTP_PASS.")
-        return False
+        return {
+            "sent": False,
+            "error": "SMTP_NOT_CONFIGURED",
+            "message": "Поштові реквізити не налаштовано у файлі email_config.json (потрібно вказати smtp_user та smtp_pass).",
+            "recipients": [committee_email] + ([author_email] if author_email else [])
+        }
 
-    msg = MIMEMultipart()
-    msg['From'] = smtp_user
-    msg['To'] = recipient
-    msg['Subject'] = f"[USSF 2026 Тези] {data.get('fullName', '')} - {data.get('abstractTitle', '')}"
+    full_name = data.get('fullName', 'Учасник USSF')
+    title = data.get('abstractTitle', 'Наукова робота')
+    pdf_filename = os.path.basename(pdf_path)
 
-    body_text = f"""Шановний оргкомітет USSF 2026!
+    # Read the abstract PDF content
+    try:
+        with open(pdf_path, 'rb') as f:
+            abstract_pdf_bytes = f.read()
+    except Exception as e:
+        return {"sent": False, "error": f"ABSTRACT_PDF_READ_ERROR: {e}"}
 
-Отримано нові наукові тези для публікації та участі у форумі.
+    # Locate and read Program PDF
+    program_rel = cfg.get('program_pdf_path', 'USSF2026_Program.pdf')
+    program_path = os.path.join(base_dir, program_rel) if not os.path.isabs(program_rel) else program_rel
+    program_bytes = None
+    if os.path.exists(program_path):
+        try:
+            with open(program_path, 'rb') as pf:
+                program_bytes = pf.read()
+        except Exception as e:
+            print(f"[WARN] Could not read program PDF: {e}")
 
-АВТОР: {data.get('fullName')}
-НАВЧАЛЬНИЙ ЗАКЛАД: {data.get('institution')}
-КАФЕДРА: {data.get('department')}
-ЗАВІДУВАЧ КАФЕДРИ: {data.get('headOfDepartment')}
-НАУКОВИЙ КЕРІВНИК: {data.get('scientificSupervisor')}
-МІСТО / КРАЇНА: {data.get('cityCountry')}
+    sent_recipients = []
+    errors = []
 
-СЕКЦІЯ: {data.get('sectionText')}
-EMAIL: {data.get('email')}
-ТЕЛЕФОН: {data.get('phone')}
+    try:
+        # Establish SMTP connection
+        if smtp_port == 465:
+            server = smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=20)
+        else:
+            server = smtplib.SMTP(smtp_host, smtp_port, timeout=20)
+            server.starttls()
 
-ТЕМА: {data.get('abstractTitle')}
-
-Згенерований офіційний PDF-файл тез згідно з новим зразком-шаблоном додано у вкладенні.
-"""
-    msg.attach(MIMEText(body_text, 'plain', 'utf-8'))
-
-    with open(pdf_path, 'rb') as f:
-        attach = MIMEApplication(f.read(), _subtype='pdf')
-        attach.add_header('Content-Disposition', 'attachment', filename=os.path.basename(pdf_path))
-        msg.attach(attach)
-
-    with smtplib.SMTP(smtp_host, smtp_port) as server:
-        server.starttls()
         server.login(smtp_user, smtp_pass)
-        server.send_message(msg)
 
-    print(f"[SUCCESS] Abstract successfully emailed to {recipient}!")
-    return True
+        # ----------------------------------------------------
+        # 1. PARTICIPANT CONFIRMATION EMAIL (No-Reply)
+        # ----------------------------------------------------
+        if author_email:
+            p_msg = MIMEMultipart()
+            p_msg['From'] = f"USSF 2026 No-Reply <{smtp_user}>"
+            p_msg['To'] = author_email
+            p_msg['Reply-To'] = f"no-reply@ussf2026.org"
+            p_msg['Subject'] = f"Дякуємо за участь та реєстрацію на форумі USSF 2026!"
+
+            p_body = f"""Шановний(-а) {full_name}!
+
+Щиро дякуємо за участь та реєстрацію на I Всеукраїнському студентському хірургічному форумі (USSF 2026), який відбудеться 16–17 травня 2026 року в Національному медичному університеті імені О. О. Богомольця (м. Київ).
+
+Вашу заявку та тези наукової доповіді на тему:
+«{title}»
+успішно прийнято та передано науковому комітету форуму.
+
+📎 У додатку до цього листа надсилаємо:
+1. Офіційну програму форуму (USSF2026_Program.pdf) — розклад доповідей, практичних майстер-класів та хірургічних секцій.
+2. Скомпільований PDF-файл Ваших тез ({pdf_filename}) — оформлений за стандартом наукових збірників NMU (Times New Roman 14 pt, 1.5 інтервал).
+
+Зверніть увагу: це повідомлення сформовано автоматично (no-reply). З усіх питань звертайтеся до оргкомітету за адресою: derk.boryslav@gmail.com.
+
+З повагою,
+Оргкомітет USSF 2026
+Національний медичний університет імені О. О. Богомольця
+"""
+            p_msg.attach(MIMEText(p_body, 'plain', 'utf-8'))
+
+            # Attach program PDF
+            if program_bytes:
+                p_attach = MIMEApplication(program_bytes, _subtype='pdf')
+                p_attach.add_header('Content-Disposition', 'attachment', filename='USSF2026_Program.pdf')
+                p_msg.attach(p_attach)
+
+            # Attach participant abstract PDF
+            a_attach = MIMEApplication(abstract_pdf_bytes, _subtype='pdf')
+            a_attach.add_header('Content-Disposition', 'attachment', filename=pdf_filename)
+            p_msg.attach(a_attach)
+
+            try:
+                server.sendmail(smtp_user, [author_email], p_msg.as_string())
+                sent_recipients.append(author_email)
+                print(f"[SUCCESS] Participant confirmation email sent to {author_email}")
+            except Exception as pe:
+                print(f"[ERROR] Sending to participant {author_email} failed: {pe}")
+                errors.append(f"Author: {pe}")
+
+        # ----------------------------------------------------
+        # 2. COMMITTEE NOTIFICATION EMAIL
+        # ----------------------------------------------------
+        c_msg = MIMEMultipart()
+        c_msg['From'] = f"USSF 2026 Реєстрація <{smtp_user}>"
+        c_msg['To'] = committee_email
+        c_msg['Subject'] = f"[USSF 2026 Заявка + Тези] {full_name} — {title}"
+
+        c_body = f"""Шановні колеги!
+
+Отримано нову заявку та тези наукової доповіді на I Всеукраїнський студентський хірургічний форум (USSF 2026).
+
+---------------------------------------------------------
+ВІДОМОСТІ ПРО УЧАСНИКА ТА РОБОТУ:
+---------------------------------------------------------
+ПІБ автора: {full_name}
+Університет / заклад: {data.get('institution', 'НМУ імені О.О. Богомольця')}
+Кафедра: {data.get('department', 'Не вказано')}
+Завідувач кафедри: {data.get('headOfDepartment', 'Не вказано')}
+Науковий керівник: {data.get('scientificSupervisor', 'Не вказано')}
+Місто, Країна: {data.get('cityCountry', 'м. Київ, Україна')}
+Секція: {data.get('sectionText', '')}
+Email автора: {author_email}
+Телефон автора: {data.get('phone', '')}
+
+Тема наукової роботи: {title}
+---------------------------------------------------------
+
+Готовий до друку PDF-файл тез (Times New Roman 14 pt, 1.5 інтервал) прикріплено у вкладенні:
+📎 {pdf_filename}
+
+--
+Система онлайн-реєстрації USSF 2026
+"""
+        c_msg.attach(MIMEText(c_body, 'plain', 'utf-8'))
+
+        # Attach abstract PDF
+        ca_attach = MIMEApplication(abstract_pdf_bytes, _subtype='pdf')
+        ca_attach.add_header('Content-Disposition', 'attachment', filename=pdf_filename)
+        c_msg.attach(ca_attach)
+
+        try:
+            server.sendmail(smtp_user, [committee_email], c_msg.as_string())
+            sent_recipients.append(committee_email)
+            print(f"[SUCCESS] Committee notification sent to {committee_email}")
+        except Exception as ce:
+            print(f"[ERROR] Sending to committee failed: {ce}")
+            errors.append(f"Committee: {ce}")
+
+        server.quit()
+
+        return {
+            "sent": len(sent_recipients) > 0,
+            "recipients": sent_recipients,
+            "errors": errors if errors else None
+        }
+
+    except Exception as e:
+        print(f"[ERROR] SMTP connection failed: {e}")
+        return {
+            "sent": False,
+            "error": str(e),
+            "recipients": sent_recipients
+        }
 
 
 if __name__ == '__main__':

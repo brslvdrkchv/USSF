@@ -1,0 +1,11 @@
+{
+  "smtp_host": "smtp.gmail.com",
+  "smtp_port": 587,
+  "smtp_user": "",
+  "smtp_pass": "",
+  "committee_email": "derk.boryslav@gmail.com",
+  "send_copy_to_author": true,
+  "sync_secret_token": "ussf_secure_sync_2026_med_nmu",
+  "program_pdf_path": "USSF2026_Program.pdf",
+  "_instructions": "Для автоматичної відправки готового PDF файлу вкажіть smtp_user (пошта Gmail) та smtp_pass (16-значний пароль додатка Google). Також можна вказати smtp.ukr.net (порт 465) або будь-який інший SMTP. sync_secret_token використовується для захищеної зашифрованої передачі файлів на ваш ноутбук."
+}

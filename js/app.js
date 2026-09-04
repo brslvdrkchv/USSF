@@ -73,22 +73,111 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // ==========================================
+  // 3. SCROLL READING PROGRESS BAR & BACK TO TOP
+  // ==========================================
+  const progressBar = document.getElementById('scrollProgressBar');
+  const backToTopBtn = document.getElementById('backToTopBtn');
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight > 0 && progressBar) {
+      const pct = Math.min((scrollTop / docHeight) * 100, 100);
+      progressBar.style.width = `${pct}%`;
+    }
+
+    if (backToTopBtn) {
+      if (scrollTop > 350) {
+        backToTopBtn.classList.add('visible');
+      } else {
+        backToTopBtn.classList.remove('visible');
+      }
+    }
+  }, { passive: true });
+
+  if (backToTopBtn) {
+    backToTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+
+  // ==========================================
   // 4. SCROLL REVEAL ANIMATIONS (IntersectionObserver)
   // ==========================================
-  const reveals = document.querySelectorAll('.reveal, .reveal-left');
+  const reveals = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('visible');
       }
     });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 
   reveals.forEach(el => revealObserver.observe(el));
 
 
   // ==========================================
-  // 5. ACTIVE NAVIGATION LINKS ON SCROLL
+  // 5. HERO PARALLAX & ZOOM ON SCROLL (Exact liveronco.com style)
+  // ==========================================
+  const heroImage = document.querySelector('.hero-image-wrapper');
+  const heroContent = document.querySelector('.hero-content');
+
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const heroHeight = window.innerHeight;
+
+    if (scrolled <= heroHeight + 100) {
+      if (window.innerWidth > 991) {
+        // Calculate progress (0 to 1)
+        const progress = Math.min(1, scrolled / heroHeight);
+
+        // Parallax + Zoom + Fade for the framed hero visual
+        const translateY = scrolled * 0.25; // Parallax speed
+        const scale = 1 + (progress * 0.4);         // 40% zoom in
+        const opacity = 1 - (progress * 1.3);       // Fade out as it zooms
+
+        if (heroImage) {
+          heroImage.style.transform = `translateY(${translateY}px) rotate(2deg) scale(${scale})`;
+          heroImage.style.opacity = Math.max(0, opacity);
+          heroImage.style.visibility = opacity <= 0 ? 'hidden' : 'visible';
+        }
+
+        // Text content transitions
+        if (heroContent) {
+          heroContent.style.transform = `translateY(${scrolled * 0.4}px)`;
+          const textOpacity = 1 - (progress * 1.8); // Text fades faster
+          heroContent.style.opacity = Math.max(0, textOpacity);
+          heroContent.style.visibility = textOpacity <= 0 ? 'hidden' : 'visible';
+        }
+      }
+    }
+  }, { passive: true });
+
+
+  // ==========================================
+  // 7. SUBTLE 3D TILT ON CARDS (Desktop)
+  // ==========================================
+  const interactiveCards = document.querySelectorAll('.format-card, .organizer-card, .leader-card, .topic-card, .reg-step-card');
+  if (window.matchMedia('(hover: hover) and (min-width: 992px)').matches) {
+    interactiveCards.forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        const rotX = (-y / rect.height) * 6;
+        const rotY = (x / rect.width) * 6;
+        card.style.transform = `perspective(800px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateY(-6px)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+      });
+    });
+  }
+
+
+  // ==========================================
+  // 8. ACTIVE NAVIGATION LINKS ON SCROLL
   // ==========================================
   const sections = document.querySelectorAll('section[id]');
   const navLinks = document.querySelectorAll('.nav-links a');
@@ -168,6 +257,71 @@ function switchTab(tabId) {
   } else {
     selectDay(1);
     selectDay1Track(tabId);
+  }
+}
+
+// ==========================================
+// 6.1. VENUE & EVACUATION FLOOR SWITCHER
+// ==========================================
+function switchFloorPlan(floorKey) {
+  const buttons = document.querySelectorAll('.plan-tab-btn');
+  buttons.forEach(btn => btn.classList.remove('active'));
+
+  const activeBtn = document.getElementById(`tabFloor${floorKey === 'all' ? 'All' : (floorKey === 'floor1' ? '1' : (floorKey === 'floor2' ? '2' : '3'))}`);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  const svgFloor1 = document.getElementById('svgFloor1');
+  const svgFloor2 = document.getElementById('svgFloor2');
+  const svgFloor3 = document.getElementById('svgFloor3');
+
+  const card1 = document.getElementById('cardFloor1');
+  const card2 = document.getElementById('cardFloor2');
+  const card3 = document.getElementById('cardFloor3');
+
+  const allSvgFloors = [svgFloor1, svgFloor2, svgFloor3];
+  const allCards = [card1, card2, card3];
+
+  if (floorKey === 'all') {
+    allSvgFloors.forEach(g => {
+      if (g) {
+        g.classList.remove('dimmed');
+        g.classList.add('highlighted');
+      }
+    });
+    allCards.forEach(c => {
+      if (c) c.style.opacity = '1';
+    });
+  } else {
+    allSvgFloors.forEach(g => {
+      if (g) {
+        g.classList.add('dimmed');
+        g.classList.remove('highlighted');
+      }
+    });
+
+    allCards.forEach(c => {
+      if (c) c.style.opacity = '0.4';
+    });
+
+    if (floorKey === 'floor1') {
+      if (svgFloor1) {
+        svgFloor1.classList.remove('dimmed');
+        svgFloor1.classList.add('highlighted');
+      }
+      if (card1) card1.style.opacity = '1';
+    } else if (floorKey === 'floor2') {
+      if (svgFloor2) {
+        svgFloor2.classList.remove('dimmed');
+        svgFloor2.classList.add('highlighted');
+      }
+      if (card2) card2.style.opacity = '1';
+    } else if (floorKey === 'floor3') {
+      if (svgFloor3) {
+        svgFloor3.classList.remove('dimmed');
+        svgFloor3.classList.add('highlighted');
+      }
+      if (card3) card3.style.opacity = '1';
+    }
   }
 }
 
@@ -390,9 +544,14 @@ function handleFormSubmit(e) {
     successEmailLink.href = `mailto:derk.boryslav@gmail.com?subject=${subject}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
   }
 
-  // Post to local automation server to automatically write the PDF to device disk with timestamp
+  // Post to automation server to automatically write the PDF and send email
   try {
-    fetch('http://localhost:5050/api/submit-abstract', {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+    const apiUrl = isLocal
+      ? 'http://localhost:5050/api/submit-abstract'
+      : (window.location.origin.includes('onrender.com') ? '/api/submit-abstract' : 'https://ussf-n7ui.onrender.com/api/submit-abstract');
+
+    fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(currentSubmission)
@@ -401,7 +560,13 @@ function handleFormSubmit(e) {
     .then(data => {
       if (data.status === 'success' && data.pdf_path) {
         if (savedFilePathDisplay) {
-          savedFilePathDisplay.innerHTML = `<strong>${data.pdf_path}</strong>`;
+          let emailStatus = '';
+          if (data.email_result && data.email_result.sent) {
+            emailStatus = `<br><span style="color:#16A34A;font-weight:600;">✉️ Готовий PDF-файл надіслано на: ${data.email_result.recipients.join(', ')}</span>`;
+          } else if (data.email_result && data.email_result.error === 'SMTP_NOT_CONFIGURED') {
+            emailStatus = `<br><span style="color:#64748B;font-size:0.82rem;">✉️ PDF збережено. Щоб він надсилався на пошти автоматично, вкажіть логін і пароль у файлі email_config.json</span>`;
+          }
+          savedFilePathDisplay.innerHTML = `<strong>${data.pdf_path}</strong>${emailStatus}`;
         }
       }
     })
