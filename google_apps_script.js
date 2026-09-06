@@ -69,6 +69,22 @@ function ensureHeaders(sheet) {
 }
 
 /**
+ * Екранування тексту для безпечного запису в Google Таблицю.
+ * Якщо текст починається з '+', '=' або '-', Google Таблиці
+ * помилково вважають це математичною формулою та видають помилку #ERROR! або #NAME?.
+ * Додавання одинарного апострофа на початку ('...) змушує Таблиці відображати значення
+ * як чистий текст (при цьому сам апостроф у комірці не видно).
+ */
+function sanitizeForSheets(val) {
+  if (val === null || val === undefined) return "";
+  var str = String(val).trim();
+  if (str && !str.startsWith("'") && (str.charAt(0) === "+" || str.charAt(0) === "=" || str.charAt(0) === "-")) {
+    return "'" + str;
+  }
+  return str;
+}
+
+/**
  * Обробка POST запитів від веб-сайту
  */
 function doPost(e) {
@@ -100,28 +116,28 @@ function doPost(e) {
     var registrationDate = data.formattedDate || defaultTimestamp;
 
     var newRow = [
-      submissionId,
-      registrationDate,
-      data.fullName || "",
-      data.email || "",
-      data.phone || "",
-      data.telegram || "",
-      data.institution || "",
-      data.academicStatusText || data.academicStatus || "",
-      data.partFormatText || data.partFormat || "",
-      data.sectionText || (data.targetSection ? "Секція " + data.targetSection : ""),
-      data.abstractTitle || "",
-      data.scientificSupervisor || "",
-      data.department || "",
-      data.headOfDepartment || "",
-      data.cityCountry || "",
-      data.abstractIntro || "",
-      data.abstractAim || "",
-      data.abstractMaterials || "",
-      data.abstractResults || "",
-      data.abstractConclusion || "",
-      data.abstractKeywords || "",
-      data.abstractReferences || ""
+      sanitizeForSheets(submissionId),
+      sanitizeForSheets(registrationDate),
+      sanitizeForSheets(data.fullName),
+      sanitizeForSheets(data.email),
+      sanitizeForSheets(data.phone),
+      sanitizeForSheets(data.telegram),
+      sanitizeForSheets(data.institution),
+      sanitizeForSheets(data.academicStatusText || data.academicStatus),
+      sanitizeForSheets(data.partFormatText || data.partFormat),
+      sanitizeForSheets(data.sectionText || (data.targetSection ? "Секція " + data.targetSection : "")),
+      sanitizeForSheets(data.abstractTitle),
+      sanitizeForSheets(data.scientificSupervisor),
+      sanitizeForSheets(data.department),
+      sanitizeForSheets(data.headOfDepartment),
+      sanitizeForSheets(data.cityCountry),
+      sanitizeForSheets(data.abstractIntro),
+      sanitizeForSheets(data.abstractAim),
+      sanitizeForSheets(data.abstractMaterials),
+      sanitizeForSheets(data.abstractResults || data.abstractBody),
+      sanitizeForSheets(data.abstractConclusion),
+      sanitizeForSheets(data.abstractKeywords),
+      sanitizeForSheets(data.abstractReferences)
     ];
 
     sheet.appendRow(newRow);
@@ -129,7 +145,11 @@ function doPost(e) {
     // Центруємо стовпці з ID, датою, телефоном та Telegram для кращої читабельності
     var lastRowIdx = sheet.getLastRow();
     sheet.getRange(lastRowIdx, 1, 1, 2).setHorizontalAlignment("center");
-    sheet.getRange(lastRowIdx, 5, 1, 2).setHorizontalAlignment("center");
+    
+    // Встановлюємо формат "Простий текст" (@) для стовпців Телефон (5) та Telegram (6)
+    var phoneTelegramRange = sheet.getRange(lastRowIdx, 5, 1, 2);
+    phoneTelegramRange.setNumberFormat("@");
+    phoneTelegramRange.setHorizontalAlignment("center");
 
     return ContentService.createTextOutput(JSON.stringify({
       status: "success",
@@ -158,6 +178,38 @@ function doGet(e) {
     timestamp: new Date().toISOString(),
     message: "Вебхук USSF Google Sheets активний і готовий приймати реєстрації!"
   })).setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * 🛠️ Функція для швидкого виправлення вже наявних помилок #ERROR! у таблиці.
+ * 
+ * Як скористатися:
+ * 1. У верхньому меню редактора Apps Script у випадаючому списку виберіть "fixExistingPhoneErrors".
+ * 2. Натисніть кнопку "Виконати" (Run).
+ * 3. Поверніться до таблиці — усі #ERROR! у стовпчику "Контактний телефон" миттєво відновляться до нормальних номерів!
+ */
+function fixExistingPhoneErrors() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) {
+    Logger.log("Таблиця порожня або містить лише шапку.");
+    return;
+  }
+  
+  var phoneColumn = 5; // Стовпець E: Контактний телефон
+  var range = sheet.getRange(2, phoneColumn, lastRow - 1, 1);
+  var formulas = range.getFormulas();
+  var countFixed = 0;
+  
+  for (var i = 0; i < formulas.length; i++) {
+    var formula = formulas[i][0];
+    if (formula) {
+      // Якщо в комірці через знак '+' утворилася помилкова формула
+      range.getCell(i + 1, 1).setNumberFormat("@").setValue("'" + formula);
+      countFixed++;
+    }
+  }
+  Logger.log("Успішно виправлено комірок: " + countFixed);
 }
 
 /**

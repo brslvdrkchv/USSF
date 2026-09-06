@@ -21,6 +21,7 @@ import json
 import hashlib
 import http.server
 import socketserver
+import re
 from datetime import datetime
 import urllib.parse
 import smtplib
@@ -28,7 +29,8 @@ try:
     import requests
 except ImportError:
     requests = None
-from generate_abstract_pdf import create_abstract_pdf, send_abstract_email, load_email_config
+from generate_abstract_docx import create_abstract_docx, send_abstract_email_docx, load_email_config, format_author_initials
+from generate_abstract_pdf import create_abstract_pdf, send_abstract_email
 
 PORT = int(os.environ.get('PORT', 5050))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -58,34 +60,42 @@ def send_to_google_sheet(data, webhook_url=None):
             'message': 'URL Google Таблиці не налаштовано.'
         }
     
-    # Build payload with clean text strings
+    # Build payload with clean text strings (escape leading +, =, - with ' so Google Sheets won't evaluate as formula)
     now = datetime.now()
     default_id = f"USSF-{now.strftime('%Y%m%d')}-{now.strftime('%H%M%S')}"
     default_date = now.strftime('%d.%m.%Y %H:%M:%S')
 
+    def clean_sheet_val(val):
+        if val is None:
+            return ''
+        s = str(val).strip()
+        if s and not s.startswith("'") and (s.startswith('+') or s.startswith('=') or s.startswith('-')):
+            return "'" + s
+        return s
+
     payload = {
-        'submissionId': data.get('submissionId') or default_id,
-        'formattedDate': data.get('formattedDate') or default_date,
-        'fullName': data.get('fullName', ''),
-        'email': data.get('email', ''),
-        'phone': data.get('phone', ''),
-        'telegram': data.get('telegram', ''),
-        'institution': data.get('institution', ''),
-        'academicStatusText': data.get('academicStatusText') or data.get('academicStatus', ''),
-        'partFormatText': data.get('partFormatText') or data.get('partFormat', ''),
-        'sectionText': data.get('sectionText') or (f"Секція {data.get('targetSection')}" if data.get('targetSection') else ''),
-        'abstractTitle': data.get('abstractTitle', ''),
-        'scientificSupervisor': data.get('scientificSupervisor', ''),
-        'department': data.get('department', ''),
-        'headOfDepartment': data.get('headOfDepartment', ''),
-        'cityCountry': data.get('cityCountry', ''),
-        'abstractIntro': data.get('abstractIntro', ''),
-        'abstractAim': data.get('abstractAim', ''),
-        'abstractMaterials': data.get('abstractMaterials', ''),
-        'abstractResults': data.get('abstractResults') or data.get('abstractBody', ''),
-        'abstractConclusion': data.get('abstractConclusion', ''),
-        'abstractKeywords': data.get('abstractKeywords', ''),
-        'abstractReferences': data.get('abstractReferences', '')
+        'submissionId': clean_sheet_val(data.get('submissionId') or default_id),
+        'formattedDate': clean_sheet_val(data.get('formattedDate') or default_date),
+        'fullName': clean_sheet_val(data.get('fullName', '')),
+        'email': clean_sheet_val(data.get('email', '')),
+        'phone': clean_sheet_val(data.get('phone', '')),
+        'telegram': clean_sheet_val(data.get('telegram', '')),
+        'institution': clean_sheet_val(data.get('institution', '')),
+        'academicStatusText': clean_sheet_val(data.get('academicStatusText') or data.get('academicStatus', '')),
+        'partFormatText': clean_sheet_val(data.get('partFormatText') or data.get('partFormat', '')),
+        'sectionText': clean_sheet_val(data.get('sectionText') or (f"Секція {data.get('targetSection')}" if data.get('targetSection') else '')),
+        'abstractTitle': clean_sheet_val(data.get('abstractTitle', '')),
+        'scientificSupervisor': clean_sheet_val(data.get('scientificSupervisor', '')),
+        'department': clean_sheet_val(data.get('department', '')),
+        'headOfDepartment': clean_sheet_val(data.get('headOfDepartment', '')),
+        'cityCountry': clean_sheet_val(data.get('cityCountry', '')),
+        'abstractIntro': clean_sheet_val(data.get('abstractIntro', '')),
+        'abstractAim': clean_sheet_val(data.get('abstractAim', '')),
+        'abstractMaterials': clean_sheet_val(data.get('abstractMaterials', '')),
+        'abstractResults': clean_sheet_val(data.get('abstractResults') or data.get('abstractBody', '')),
+        'abstractConclusion': clean_sheet_val(data.get('abstractConclusion', '')),
+        'abstractKeywords': clean_sheet_val(data.get('abstractKeywords', '')),
+        'abstractReferences': clean_sheet_val(data.get('abstractReferences', ''))
     }
 
     try:
@@ -158,6 +168,7 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-Sync-Token, Authorization')
+        self.send_header('Cache-Control', 'no-cache, must-revalidate')
         super().end_headers()
 
     def do_OPTIONS(self):
@@ -201,7 +212,7 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
                 file_list = []
                 if os.path.exists(SUBMISSIONS_DIR):
                     for fname in sorted(os.listdir(SUBMISSIONS_DIR)):
-                        if fname.endswith('.pdf') or fname.endswith('.json'):
+                        if fname.endswith('.docx') or fname.endswith('.pdf') or fname.endswith('.json'):
                             fpath = os.path.join(SUBMISSIONS_DIR, fname)
                             if os.path.isfile(fpath):
                                 stat = os.stat(fpath)
@@ -215,12 +226,13 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
                                 except Exception:
                                     digest = ""
 
+                                ftype = 'docx' if fname.endswith('.docx') else ('pdf' if fname.endswith('.pdf') else 'json')
                                 file_list.append({
                                     "filename": fname,
                                     "size": stat.st_size,
                                     "mtime": stat.st_mtime,
                                     "sha256": digest,
-                                    "type": "pdf" if fname.endswith('.pdf') else "json",
+                                    "type": ftype,
                                     "download_url": f"/api/sync?action=download&file={urllib.parse.quote(fname)}&token={SYNC_TOKEN}"
                                 })
 
@@ -258,7 +270,13 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
                     self.wfile.write(json.dumps({"status": "error", "message": "Файл не знайдено."}).encode('utf-8'))
                     return
 
-                mime = 'application/pdf' if safe_filename.endswith('.pdf') else 'application/json'
+                if safe_filename.endswith('.docx'):
+                    mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                elif safe_filename.endswith('.pdf'):
+                    mime = 'application/pdf'
+                else:
+                    mime = 'application/json'
+
                 fsize = os.path.getsize(target_path)
                 self.send_response(200)
                 self.send_header('Content-Type', mime)
@@ -269,6 +287,35 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
                     while chunk := f.read(65536):
                         self.wfile.write(chunk)
                 return
+
+        # 1b. DIRECT PUBLIC DOWNLOAD DOCX ENDPOINT (/api/download-docx)
+        if path == '/api/download-docx':
+            req_file = query_params.get('file', [''])[0]
+            try:
+                req_file = req_file.encode('latin-1').decode('utf-8')
+            except Exception:
+                pass
+            req_file = urllib.parse.unquote(req_file)
+            safe_filename = os.path.basename(req_file)
+            target_path = os.path.join(SUBMISSIONS_DIR, safe_filename)
+
+            if not os.path.isfile(target_path) or not safe_filename.endswith('.docx'):
+                self.send_response(404)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": "Файл тез не знайдено або доступ обмежено."}).encode('utf-8'))
+                return
+
+            fsize = os.path.getsize(target_path)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+            self.send_header('Content-Length', str(fsize))
+            self.send_header('Content-Disposition', f'attachment; filename="{urllib.parse.quote(safe_filename)}"')
+            self.end_headers()
+            with open(target_path, 'rb') as f:
+                while chunk := f.read(65536):
+                    self.wfile.write(chunk)
+            return
 
         # 2. PRIVACY SHIELD: RESTRICT DIRECT ACCESS TO /заявки_тези/
         if path.startswith('/заявки_тези') or '/заявки_тези/' in path:
@@ -313,12 +360,13 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
             try:
                 data = json.loads(post_body.decode('utf-8'))
                 
-                # Timestamp & directory
                 timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-                safe_name = "".join(c for c in data.get('fullName', 'Учасник') if c.isalnum() or c in (' ', '_', '-')).strip().replace(' ', '_') or 'Учасник'
+                full_name = data.get('fullName', '').strip() or data.get('full_name', '').strip() or f"{data.get('last_name', '')} {data.get('first_name', '')} {data.get('middle_name', '')}".strip() or 'Учасник'
+                author_initials = format_author_initials(full_name)
+                safe_name = re.sub(r'[^\w]+', '_', author_initials.replace('.', '').strip()).strip('_') or 'Учасник'
                 
-                pdf_filename = f"Тези_{safe_name}_{timestamp}.pdf"
-                pdf_path = os.path.join(SUBMISSIONS_DIR, pdf_filename)
+                docx_filename = f"Тези_{safe_name}_{timestamp}.docx"
+                docx_path = os.path.join(SUBMISSIONS_DIR, docx_filename)
                 
                 json_filename = f"Заявка_{safe_name}_{timestamp}.json"
                 json_path = os.path.join(SUBMISSIONS_DIR, json_filename)
@@ -327,14 +375,12 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
                 with open(json_path, 'w', encoding='utf-8') as jf:
                     json.dump(data, jf, ensure_ascii=False, indent=2)
                 
-                # 2. Generate PDF strictly according to official NMU template
-                generated_pdf = create_abstract_pdf(data, pdf_path)
-                print(f"[SERVER] Generated abstract PDF: {generated_pdf}")
+                # 2. Generate DOCX strictly according to official NMU template
+                generated_docx = create_abstract_docx(data, docx_path)
+                print(f"[SERVER] Generated abstract DOCX: {generated_docx}")
                 
-                # 3. Dual email dispatch:
-                #    a) Automated No-reply email to participant with Program PDF attached
-                #    b) Submission alert with abstract PDF to committee (derk.boryslav@gmail.com)
-                email_result = send_abstract_email(generated_pdf, data, RECIPIENT)
+                # 3. Dual email dispatch with DOCX attachment
+                email_result = send_abstract_email_docx(generated_docx, data, RECIPIENT)
                 print(f"[SERVER] Email dispatch result: {email_result}")
                 
                 # 4. Instant Google Sheet synchronization (Row append)
@@ -343,7 +389,8 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
                 
                 response_data = {
                     "status": "success",
-                    "pdf_filename": pdf_filename,
+                    "docx_filename": docx_filename,
+                    "docx_url": f"/api/download-docx?file={urllib.parse.quote(docx_filename)}",
                     "timestamp": timestamp,
                     "email_result": email_result,
                     "google_sheets_result": sheets_result,
@@ -385,32 +432,33 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
                     }, ensure_ascii=False).encode('utf-8'))
                     return
 
-                pdf_filename = data.get('pdf_filename', '')
-                pdf_path = os.path.join(SUBMISSIONS_DIR, os.path.basename(pdf_filename)) if pdf_filename else None
+                docx_filename = data.get('docx_filename', '') or data.get('pdf_filename', '')
+                docx_path = os.path.join(SUBMISSIONS_DIR, os.path.basename(docx_filename)) if docx_filename else None
 
-                if not pdf_path or not os.path.isfile(pdf_path):
-                    safe_name = "".join(c for c in data.get('fullName', 'Учасник') if c.isalnum() or c in (' ', '_', '-')).strip().replace(' ', '_') or 'Учасник'
-                    candidates = [f for f in os.listdir(SUBMISSIONS_DIR) if f.startswith(f"Тези_{safe_name}") and f.endswith('.pdf')] if os.path.exists(SUBMISSIONS_DIR) else []
+                if not docx_path or not os.path.isfile(docx_path):
+                    author_initials = format_author_initials(data.get('fullName', 'Учасник'))
+                    safe_name = re.sub(r'[^\w]+', '_', author_initials.replace('.', '').strip()).strip('_') or 'Учасник'
+                    candidates = [f for f in os.listdir(SUBMISSIONS_DIR) if f.startswith(f"Тези_{safe_name}") and f.endswith('.docx')] if os.path.exists(SUBMISSIONS_DIR) else []
                     if candidates:
                         candidates.sort(reverse=True)
-                        pdf_path = os.path.join(SUBMISSIONS_DIR, candidates[0])
+                        docx_path = os.path.join(SUBMISSIONS_DIR, candidates[0])
                     else:
                         timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-                        pdf_filename = f"Тези_{safe_name}_{timestamp}.pdf"
-                        pdf_path = os.path.join(SUBMISSIONS_DIR, pdf_filename)
+                        docx_filename = f"Тези_{safe_name}_{timestamp}.docx"
+                        docx_path = os.path.join(SUBMISSIONS_DIR, docx_filename)
                         try:
-                            create_abstract_pdf(data, pdf_path)
+                            create_abstract_docx(data, docx_path)
                         except Exception as pe:
-                            print(f"[SERVER WARN] Could not compile PDF on disk: {pe}")
-                            pdf_path = None
+                            print(f"[SERVER WARN] Could not compile DOCX on disk: {pe}")
+                            docx_path = None
 
-                if pdf_path and os.path.isfile(pdf_path):
-                    email_result = send_abstract_email(pdf_path, data, RECIPIENT)
+                if docx_path and os.path.isfile(docx_path):
+                    email_result = send_abstract_email_docx(docx_path, data, RECIPIENT)
                 else:
                     email_result = {
                         "sent": False,
-                        "error": "PDF_NOT_FOUND",
-                        "message": "Не знайдено скомпільований PDF файл тез для вкладення."
+                        "error": "DOCX_NOT_FOUND",
+                        "message": "Не знайдено скомпільований DOCX файл тез для вкладення."
                     }
 
                 self.send_response(200)
@@ -419,7 +467,7 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({
                     "status": "success" if email_result.get("sent") else "error",
                     "email_result": email_result,
-                    "pdf_filename": os.path.basename(pdf_path) if pdf_path else ""
+                    "docx_filename": os.path.basename(docx_path) if docx_path else ""
                 }, ensure_ascii=False).encode('utf-8'))
                 return
             except Exception as e:

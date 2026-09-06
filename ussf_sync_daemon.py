@@ -165,9 +165,9 @@ def sync_cycle(remote_url, token, local_dir):
                 print(f"[УСПІХ] Збережено: {local_path} [SHA256 ПЕРЕВІРЕНО]")
 
                 # Notify user immediately on their desktop
-                if fname.endswith('.pdf'):
+                if fname.endswith('.docx') or fname.endswith('.pdf'):
                     send_desktop_notification(
-                        "USSF 2026: Нові тези надійшли!",
+                        "USSF 2026: Нові тези надійшли (DOCX)!",
                         f"Документ збережено:\n{fname}"
                     )
             except Exception as dl_err:

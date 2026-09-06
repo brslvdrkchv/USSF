@@ -127,42 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
   reveals.forEach(el => revealObserver.observe(el));
 
 
-  // ==========================================
-  // 5. HERO PARALLAX & ZOOM ON SCROLL (Exact liveronco.com style)
-  // ==========================================
-  const heroImage = document.querySelector('.hero-image-wrapper');
-  const heroContent = document.querySelector('.hero-content');
-
-  window.addEventListener('scroll', () => {
-    const scrolled = window.scrollY;
-    const heroHeight = window.innerHeight;
-
-    if (scrolled <= heroHeight + 100) {
-      if (window.innerWidth > 991) {
-        // Calculate progress (0 to 1)
-        const progress = Math.min(1, scrolled / heroHeight);
-
-        // Parallax + Zoom + Fade for the framed hero visual
-        const translateY = scrolled * 0.25; // Parallax speed
-        const scale = 1 + (progress * 0.4);         // 40% zoom in
-        const opacity = 1 - (progress * 1.3);       // Fade out as it zooms
-
-        if (heroImage) {
-          heroImage.style.transform = `translateY(${translateY}px) rotate(2deg) scale(${scale})`;
-          heroImage.style.opacity = Math.max(0, opacity);
-          heroImage.style.visibility = opacity <= 0 ? 'hidden' : 'visible';
-        }
-
-        // Text content transitions
-        if (heroContent) {
-          heroContent.style.transform = `translateY(${scrolled * 0.4}px)`;
-          const textOpacity = 1 - (progress * 1.8); // Text fades faster
-          heroContent.style.opacity = Math.max(0, textOpacity);
-          heroContent.style.visibility = textOpacity <= 0 ? 'hidden' : 'visible';
-        }
-      }
-    }
-  }, { passive: true });
+  // Hero section remains completely static during scroll (no movement or parallax)
 
 
   // ==========================================
@@ -376,6 +341,7 @@ function openRegistrationModal() {
     document.body.style.overflow = 'hidden';
     const mobileStickyBar = document.getElementById('mobileStickyBar');
     if (mobileStickyBar) mobileStickyBar.classList.remove('visible');
+    initReferencesBuilder();
     updateAbstractCharCounter();
   }
 }
@@ -394,7 +360,10 @@ function closeRegistrationModal(resetForm = false) {
     setTimeout(() => {
       if (formContent) formContent.style.display = 'block';
       if (formSuccessMessage) formSuccessMessage.style.display = 'none';
-      if (resetForm && forumRegForm) forumRegForm.reset();
+      if (resetForm && forumRegForm) {
+        forumRegForm.reset();
+        initReferencesBuilder(true);
+      }
       updateAbstractCharCounter();
     }, 350);
   }
@@ -592,6 +561,334 @@ function initAbstractCharCounter() {
   updateAbstractCharCounter();
 }
 
+// ==========================================
+// ==========================================
+// 8.3. AUTO-CAPITALIZE & INDENT IN STRUCTURE FIELDS
+// ==========================================
+function capitalizeFirstLetters(text) {
+  if (!text) return text;
+  // Capitalize first non-whitespace letter at start of text and after every newline
+  return text.replace(/(^|\n)(\s*)([a-zа-яіїєґ])/gu, (m, p1, p2, p3) => p1 + p2 + p3.toUpperCase());
+}
+
+function stripSectionPrefixByField(text, fieldId) {
+  if (!text) return '';
+  const prefixMap = {
+    'abstractIntro': ['вступ', 'актуальність'],
+    'abstractAim': ['мета роботи', 'мета'],
+    'abstractMaterials': ['матеріали і методи', 'матеріали та методи', 'методи дослідження', 'матеріали'],
+    'abstractResults': ['результати'],
+    'abstractConclusion': ['висновки', 'висновок'],
+    'abstractKeywords': ['ключові слова']
+  };
+
+  const prefixes = prefixMap[fieldId] || [];
+  let res = text.trim();
+  for (const p of prefixes) {
+    const regPunct = new RegExp('^' + p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*[:\\-–—]\\s*', 'i');
+    if (regPunct.test(res)) {
+      res = res.replace(regPunct, '');
+      break;
+    }
+    const regExactLine = new RegExp('^' + p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*(?:\\r?\\n|$)\\s*', 'i');
+    if (regExactLine.test(res)) {
+      res = res.replace(regExactLine, '');
+      break;
+    }
+  }
+  return res.replace(/^[\t\s]+/, '').trim();
+}
+
+function applyCapitalizationPreservingCursor(el) {
+  if (!el || !el.value) return;
+  const original = el.value;
+  let transformed = capitalizeFirstLetters(original);
+
+  // For structure textareas, line 0 must NOT have leading tab or whitespace
+  if (['abstractIntro', 'abstractAim', 'abstractMaterials', 'abstractResults', 'abstractConclusion'].includes(el.id)) {
+    if (transformed.startsWith('\t') || transformed.startsWith(' ')) {
+      transformed = transformed.replace(/^[\t\s]+/, '');
+    }
+  }
+
+  if (original !== transformed) {
+    const selStart = el.selectionStart;
+    const selEnd = el.selectionEnd;
+    el.value = transformed;
+    if (typeof el.setSelectionRange === 'function' && selStart !== null && selEnd !== null) {
+      const diff = transformed.length - original.length;
+      el.setSelectionRange(Math.max(0, selStart + diff), Math.max(0, selEnd + diff));
+    }
+  }
+}
+
+function formatStructurePastedSnippet(text, fieldId, isAtStartOfField) {
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  const formatted = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    if (i === 0 && isAtStartOfField) {
+      // First line of field: clean section prefix, no leading tab, capitalize
+      line = line.replace(/^[\t\s]+/, '');
+      line = stripSectionPrefixByField(line, fieldId);
+      if (line) {
+        line = line.charAt(0).toUpperCase() + line.slice(1);
+      }
+      formatted.push(line);
+    } else {
+      // Subsequent lines: ensure indented with \t so paragraphs are preserved visually
+      const clean = line.replace(/^[\t\s]+/, '').trim();
+      if (clean) {
+        const cap = clean.charAt(0).toUpperCase() + clean.slice(1);
+        formatted.push('\t' + cap);
+      } else if (lines.length > 1) {
+        formatted.push('');
+      }
+    }
+  }
+
+  return formatted.join('\n');
+}
+
+function initStructureAutoCapitalizeAndTab() {
+  const structureTextareaIds = [
+    'abstractIntro',
+    'abstractAim',
+    'abstractMaterials',
+    'abstractResults',
+    'abstractConclusion'
+  ];
+
+  const singleInputIds = [
+    'abstractTitle',
+    'abstractKeywords'
+  ];
+
+  // Single-line inputs (Title, Keywords)
+  singleInputIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => applyCapitalizationPreservingCursor(el));
+    el.addEventListener('blur', () => applyCapitalizationPreservingCursor(el));
+    el.addEventListener('paste', () => setTimeout(() => applyCapitalizationPreservingCursor(el), 20));
+  });
+
+  // Structure textareas
+  structureTextareaIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    el.addEventListener('input', () => {
+      applyCapitalizationPreservingCursor(el);
+      updateAbstractCharCounter();
+    });
+
+    el.addEventListener('blur', () => {
+      applyCapitalizationPreservingCursor(el);
+      updateAbstractCharCounter();
+    });
+
+    // Enter key creates a new indented paragraph with \t
+    // Tab key indents or prevents tab on line 0
+    el.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const start = this.selectionStart;
+        const end = this.selectionEnd;
+        const insertText = '\n\t';
+
+        if (typeof this.setRangeText === 'function') {
+          this.setRangeText(insertText, start, end, 'end');
+        } else {
+          this.value = this.value.substring(0, start) + insertText + this.value.substring(end);
+          this.selectionStart = this.selectionEnd = start + insertText.length;
+        }
+        this.dispatchEvent(new Event('input', { bubbles: true }));
+      } else if (e.key === 'Tab' && !e.shiftKey) {
+        e.preventDefault();
+        const start = this.selectionStart;
+        const end = this.selectionEnd;
+
+        // Line 0 must NOT have tab at the very start
+        if (start === 0) return;
+        const before = this.value.substring(0, start);
+        if (!before.includes('\n') && start <= 1) return;
+
+        if (typeof this.setRangeText === 'function') {
+          this.setRangeText('\t', start, end, 'end');
+        } else {
+          this.value = this.value.substring(0, start) + '\t' + this.value.substring(end);
+          this.selectionStart = this.selectionEnd = start + 1;
+        }
+        this.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    });
+
+    // Smart paste preserving paragraph indents (\t) in the textarea
+    el.addEventListener('paste', function(e) {
+      e.preventDefault();
+      const clipboard = (e.clipboardData || window.clipboardData);
+      const text = clipboard ? clipboard.getData('text') : '';
+      if (!text) return;
+
+      const start = this.selectionStart;
+      const end = this.selectionEnd;
+      const val = this.value;
+      const isAtStart = (start === 0);
+
+      const formatted = formatStructurePastedSnippet(text, el.id, isAtStart);
+
+      if (typeof this.setRangeText === 'function') {
+        this.setRangeText(formatted, start, end, 'end');
+      } else {
+        this.value = val.substring(0, start) + formatted + val.substring(end);
+        this.selectionStart = this.selectionEnd = start + formatted.length;
+      }
+      this.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  });
+}
+
+// ==========================================
+// 8.4. REFERENCES LIST (CLEAN TEXTAREA WITH AUTO-NUMBERING)
+// ==========================================
+function initReferencesBuilder(forceReset = false) {
+  const refArea = document.getElementById('abstractReferences');
+  if (!refArea) return;
+
+  refArea.style.display = '';
+
+  if (forceReset) {
+    refArea.value = '';
+    return;
+  }
+
+  // Avoid duplicate event listener attachments
+  if (refArea.dataset.initialized === 'true') return;
+  refArea.dataset.initialized = 'true';
+
+  // Smart Enter key handling: auto-numbers next line (\n2. , \n3. ...)
+  refArea.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      const start = this.selectionStart;
+      const val = this.value;
+      const currentLine = val.substring(0, start).split('\n').pop();
+      const match = currentLine.match(/^(\d+)[\.\)]\s*(.*)$/);
+
+      if (match) {
+        e.preventDefault();
+        const currentNum = parseInt(match[1], 10);
+        const itemText = match[2].trim();
+
+        if (!itemText) {
+          // User pressed Enter on empty numbered line (e.g. "3. ") -> remove number to finish
+          const lineStartIndex = val.substring(0, start).lastIndexOf('\n') + 1;
+          this.value = val.substring(0, lineStartIndex) + val.substring(start);
+          this.selectionStart = this.selectionEnd = lineStartIndex;
+        } else {
+          // Insert next number
+          const nextItem = `\n${currentNum + 1}. `;
+          if (typeof this.setRangeText === 'function') {
+            this.setRangeText(nextItem, start, this.selectionEnd, 'end');
+          } else {
+            this.value = val.substring(0, start) + nextItem + val.substring(this.selectionEnd);
+            this.selectionStart = this.selectionEnd = start + nextItem.length;
+          }
+        }
+        this.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
+  });
+
+  // Auto-prefix "1. " if user starts typing from scratch without a number
+  refArea.addEventListener('input', function() {
+    const val = this.value;
+    if (val && !val.match(/^(\d+[\.\)]|\[\d+\])/) && !val.startsWith('\n')) {
+      const start = this.selectionStart;
+      const end = this.selectionEnd;
+      this.value = `1. ${val}`;
+      if (typeof this.setSelectionRange === 'function') {
+        this.setSelectionRange(start + 3, end + 3);
+      }
+    }
+    applyCapitalizationPreservingCursor(this);
+  });
+
+  // Smart paste: formats and re-numbers all pasted lines sequentially
+  refArea.addEventListener('paste', function(e) {
+    e.preventDefault();
+    const clipboard = (e.clipboardData || window.clipboardData);
+    const text = clipboard ? clipboard.getData('text') : '';
+    if (!text) return;
+
+    const rawLines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+    const cleanLines = [];
+
+    for (const line of rawLines) {
+      let clean = line.replace(/^(\[\d+\]|\d+[\.\)\s\t]+)/, '').replace(/^[\t\s]+/, '').trim();
+      if (clean) {
+        clean = clean.charAt(0).toUpperCase() + clean.slice(1);
+        cleanLines.push(clean);
+      }
+    }
+
+    if (!cleanLines.length) return;
+
+    const start = this.selectionStart;
+    const end = this.selectionEnd;
+    const val = this.value;
+
+    const linesBefore = val.substring(0, start).split('\n').filter(l => l.trim());
+    let currentIdx = linesBefore.length;
+    if (start === 0 && end === val.length) {
+      currentIdx = 0;
+    }
+
+    const formattedLines = cleanLines.map((line, i) => `${currentIdx + i + 1}. ${line}`);
+    const replacement = formattedLines.join('\n');
+
+    if (typeof this.setRangeText === 'function') {
+      this.setRangeText(replacement, start, end, 'end');
+    } else {
+      this.value = val.substring(0, start) + replacement + val.substring(end);
+      this.selectionStart = this.selectionEnd = start + replacement.length;
+    }
+    this.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
+  refArea.addEventListener('blur', function() {
+    renumberReferencesTextarea(this);
+  });
+}
+
+function renumberReferencesTextarea(el) {
+  if (!el || !el.value) return;
+  const lines = el.value.split('\n');
+  let num = 1;
+  const newLines = [];
+  for (const line of lines) {
+    let clean = line.replace(/^(\[\d+\]|\d+[\.\)\s\t]+)/, '').replace(/^[\t\s]+/, '').trim();
+    if (clean) {
+      clean = clean.charAt(0).toUpperCase() + clean.slice(1);
+      newLines.push(`${num}. ${clean}`);
+      num++;
+    }
+  }
+  if (newLines.length > 0 && newLines.join('\n') !== el.value.trim()) {
+    el.value = newLines.join('\n');
+  }
+}
+
+// Stubs for backward compatibility
+function syncReferencesToHidden() {}
+function addReferenceItem() {}
+function removeReferenceItem() {}
+window.addReferenceItem = addReferenceItem;
+window.removeReferenceItem = removeReferenceItem;
+window.initReferencesBuilder = initReferencesBuilder;
+window.renumberReferencesTextarea = renumberReferencesTextarea;
+
 // Toggle abstract fields based on selected format
 function toggleAbstractField(format) {
   const sectionGroup = document.getElementById('sectionSelectGroup');
@@ -616,6 +913,8 @@ let currentSubmission = null;
 function handleFormSubmit(e) {
   e.preventDefault();
 
+  syncReferencesToHidden();
+
   const fullName = document.getElementById('fullName').value.trim();
   const institution = document.getElementById('institution').value.trim();
   const department = document.getElementById('department') ? document.getElementById('department').value.trim() : '';
@@ -631,13 +930,14 @@ function handleFormSubmit(e) {
   const sectionEl = document.getElementById('targetSection');
   const sectionText = sectionEl ? sectionEl.options[sectionEl.selectedIndex].text : '';
 
-  const abstractTitle = document.getElementById('abstractTitle') ? document.getElementById('abstractTitle').value.trim() : '';
-  const abstractIntro = document.getElementById('abstractIntro') ? document.getElementById('abstractIntro').value.trim() : '';
-  const abstractAim = document.getElementById('abstractAim') ? document.getElementById('abstractAim').value.trim() : '';
-  const abstractMaterials = document.getElementById('abstractMaterials') ? document.getElementById('abstractMaterials').value.trim() : '';
-  const abstractResults = document.getElementById('abstractResults') ? document.getElementById('abstractResults').value.trim() : '';
-  const abstractConclusion = document.getElementById('abstractConclusion') ? document.getElementById('abstractConclusion').value.trim() : '';
-  const abstractKeywords = document.getElementById('abstractKeywords') ? document.getElementById('abstractKeywords').value.trim() : '';
+  const cap = str => capitalizeFirstLetters(str.trim());
+  const abstractTitle = document.getElementById('abstractTitle') ? cap(document.getElementById('abstractTitle').value) : '';
+  const abstractIntro = document.getElementById('abstractIntro') ? cap(document.getElementById('abstractIntro').value) : '';
+  const abstractAim = document.getElementById('abstractAim') ? cap(document.getElementById('abstractAim').value) : '';
+  const abstractMaterials = document.getElementById('abstractMaterials') ? cap(document.getElementById('abstractMaterials').value) : '';
+  const abstractResults = document.getElementById('abstractResults') ? cap(document.getElementById('abstractResults').value) : '';
+  const abstractConclusion = document.getElementById('abstractConclusion') ? cap(document.getElementById('abstractConclusion').value) : '';
+  const abstractKeywords = document.getElementById('abstractKeywords') ? cap(document.getElementById('abstractKeywords').value) : '';
   const abstractReferences = document.getElementById('abstractReferences') ? document.getElementById('abstractReferences').value.trim() : '';
 
   const email = document.getElementById('email').value.trim();
@@ -748,11 +1048,15 @@ function handleFormSubmit(e) {
   try {
     const clientSheetsUrl = localStorage.getItem('ussf_google_sheet_url') || window.GOOGLE_SHEET_WEBHOOK_URL;
     if (clientSheetsUrl && clientSheetsUrl.startsWith('http')) {
+      const sheetSubmission = Object.assign({}, currentSubmission);
+      if (sheetSubmission.phone && !sheetSubmission.phone.startsWith("'") && (sheetSubmission.phone.startsWith('+') || sheetSubmission.phone.startsWith('='))) {
+        sheetSubmission.phone = "'" + sheetSubmission.phone;
+      }
       fetch(clientSheetsUrl, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentSubmission)
+        body: JSON.stringify(sheetSubmission)
       }).catch(e => console.log('Client sheet sync note:', e));
     }
   } catch (err) {}
@@ -780,7 +1084,7 @@ function handleFormSubmit(e) {
             emailStatus = `<br><span style="color:#16A34A;font-weight:600;">✉️ Програму форуму надіслано на вашу пошту, а матеріали та тези — оргкомітету.</span>`;
             renderEmailStatusSent(data.email_result);
           } else {
-            emailStatus = `<br><span style="color:#475569;font-size:0.82rem;">🔒 Файли тез (.pdf) та анкета (.json) надійно зафіксовані в базі оргкомітету.</span>`;
+            emailStatus = `<br><span style="color:#475569;font-size:0.82rem;">🔒 Файли тез (.docx) та анкета (.json) надійно зафіксовані в базі оргкомітету.</span>`;
           }
 
           let sheetsStatus = '';
@@ -805,7 +1109,28 @@ function handleFormSubmit(e) {
   if (formSuccessMessage) formSuccessMessage.style.display = 'block';
 }
 
-// Build standardized academic HTML document matching NMU template
+// Helper: Convert Full Name to Surname + Initials (Ukrainian academic standard)
+function formatAuthorInitials(fullName) {
+  if (!fullName) return "Автор";
+  const parts = fullName.trim().split(/\s+/);
+  const rawLast = parts[0];
+  const lastName = rawLast ? (rawLast.charAt(0).toUpperCase() + rawLast.slice(1)) : "Автор";
+  const initials = [];
+  for (let i = 1; i < parts.length; i++) {
+    const cleanP = parts[i].replace(/[.,]/g, '').trim();
+    if (!cleanP) continue;
+    if (cleanP.length <= 2 && cleanP === cleanP.toUpperCase()) {
+      for (const ch of cleanP) {
+        initials.push(ch.toUpperCase() + '.');
+      }
+    } else {
+      initials.push(cleanP[0].toUpperCase() + '.');
+    }
+  }
+  return initials.length ? `${lastName} ${initials.join(' ')}` : lastName;
+}
+
+// Build standardized academic HTML document matching NMU template (Times New Roman 12, single spacing, 25.4mm margins)
 function buildAbstractHTML(s) {
   const affilLines = [];
   if (s.scientificSupervisor) {
@@ -827,48 +1152,76 @@ function buildAbstractHTML(s) {
     affilLines.push(s.cityCountry);
   }
 
-  const refItems = (s.abstractReferences || '').split('\n').filter(r => r.trim());
-  const refHtml = refItems.length > 0
-    ? `<p class="ref-heading">Список літератури:</p>` + refItems.map(item => `<p class="ref-para">${item}</p>`).join('')
-    : '';
-
   const cleanPrefix = (text, prefixes) => {
     if (!text) return '';
     let res = text.trim();
     for (const p of prefixes) {
-      const reg = new RegExp('^' + p.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&') + '\\s*[:\\-–—]?\\s*', 'i');
-      res = res.replace(reg, '');
+      const regPunct = new RegExp('^' + p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*[:\\-–—]\\s*', 'i');
+      if (regPunct.test(res)) {
+        res = res.replace(regPunct, '');
+        break;
+      }
+      const regExactLine = new RegExp('^' + p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*(?:\\r?\\n|$)\\s*', 'i');
+      if (regExactLine.test(res)) {
+        res = res.replace(regExactLine, '');
+        break;
+      }
     }
-    return res.trim();
+    res = res.replace(/^[\t\s]+/, '').trim();
+    if (res) {
+      res = res.charAt(0).toUpperCase() + res.slice(1);
+    }
+    return res;
   };
 
-  const cleanIntro = cleanPrefix(s.abstractIntro, ['вступ']);
-  const cleanAim = cleanPrefix(s.abstractAim, ['мета']);
-  const cleanMaterials = cleanPrefix(s.abstractMaterials, ['матеріали і методи', 'матеріали та методи', 'матеріали']);
+  const cleanIntro = cleanPrefix(s.abstractIntro, ['вступ', 'актуальність']);
+  const cleanAim = cleanPrefix(s.abstractAim, ['мета', 'мета роботи']);
+  const cleanMaterials = cleanPrefix(s.abstractMaterials, ['матеріали і методи', 'матеріали та методи', 'методи дослідження', 'матеріали']);
   const cleanResults = cleanPrefix(s.abstractResults || s.abstractBody, ['результати']);
   const cleanConclusion = cleanPrefix(s.abstractConclusion, ['висновок', 'висновки']);
   const cleanKeywords = cleanPrefix(s.abstractKeywords, ['ключові слова']);
+
+  const formatSectionHtml = (label, rawText) => {
+    if (!rawText) return '';
+    const paras = rawText.split('\n').map(p => p.replace(/^[\t\s]+/, '').trim()).filter(Boolean);
+    if (!paras.length) return '';
+    const firstPara = paras[0].charAt(0).toUpperCase() + paras[0].slice(1);
+    let out = `<p class="section-para"><strong class="section-label">${label}</strong> ${firstPara}</p>`;
+    for (let i = 1; i < paras.length; i++) {
+      const subPara = paras[i].charAt(0).toUpperCase() + paras[i].slice(1);
+      out += `<p class="section-para">${subPara}</p>`;
+    }
+    return out;
+  };
+
+  const refItems = (s.abstractReferences || '').split('\n')
+    .map(r => r.replace(/^(\[\d+\]|\d+[\.\)\s\t]+)/, '').replace(/^[\t\s]+/, '').trim())
+    .filter(Boolean);
+  const formattedRefs = refItems.map(item => item.charAt(0).toUpperCase() + item.slice(1));
+  const refHtml = formattedRefs.length > 0
+    ? `<p class="ref-heading">Джерела:</p><ol class="ref-list">${formattedRefs.map(item => `<li>${item}</li>`).join('')}</ol>`
+    : '';
+
+  const authorFormatted = formatAuthorInitials(s.fullName || 'Учасник');
+  const titleFormatted = (s.abstractTitle || 'НАЗВА НАУКОВОЇ РОБОТИ').toUpperCase();
 
   return `<!DOCTYPE html>
 <html lang="uk">
 <head>
   <meta charset="utf-8">
-  <title>Тези_USSF_${(s.fullName || 'Учасник').replace(/\\s+/g, '_')}</title>
+  <title>Тези_USSF_${authorFormatted.replace(/\\s+/g, '_')}</title>
   <style>
     @page {
       size: A4;
-      margin-left: 30mm;
-      margin-right: 15mm;
-      margin-top: 20mm;
-      margin-bottom: 20mm;
+      margin: 25.4mm;
     }
     body {
       font-family: 'Times New Roman', Times, serif;
-      font-size: 14pt;
-      line-height: 1.5;
+      font-size: 12pt;
+      line-height: 1.0;
       color: #000;
       margin: 0;
-      padding: 24px 20px 24px 32px;
+      padding: 25.4mm;
       background: #fff;
       text-rendering: optimizeLegibility;
       box-sizing: border-box;
@@ -876,47 +1229,54 @@ function buildAbstractHTML(s) {
     .paper-title {
       font-weight: bold;
       text-align: center;
-      margin: 0 0 1.2rem 0;
-      font-size: 14pt;
-      line-height: 1.4;
+      margin: 0 0 1rem 0;
+      font-size: 12pt;
+      line-height: 1.0;
     }
     .author-name {
       font-style: italic;
       text-align: center;
-      margin-bottom: 1.4rem;
-      font-size: 14pt;
-      line-height: 1.5;
+      margin-bottom: 1rem;
+      font-size: 12pt;
+      line-height: 1.0;
     }
     .affiliation-block {
       font-style: italic;
       text-align: left;
-      margin-bottom: 1.4rem;
-      line-height: 1.5;
-      font-size: 14pt;
+      margin-bottom: 1rem;
+      line-height: 1.0;
+      font-size: 12pt;
     }
     p.section-para {
       text-align: justify;
-      text-indent: 1.25cm;
-      margin: 0 0 0.75rem 0;
-      line-height: 1.5;
-      font-size: 14pt;
+      text-indent: 10mm;
+      margin: 0;
+      line-height: 1.0;
+      font-size: 12pt;
     }
     .section-label {
       font-weight: bold;
     }
     .ref-heading {
       font-weight: bold;
-      text-indent: 1.25cm;
-      margin: 1.2rem 0 0.4rem 0;
-      font-size: 14pt;
-      line-height: 1.5;
-    }
-    .ref-para {
+      text-indent: 10mm;
+      margin: 1rem 0 0.35rem 0;
+      font-size: 12pt;
+      line-height: 1.0;
       text-align: justify;
-      text-indent: 1.25cm;
-      margin: 0 0 0.5rem 0;
-      font-size: 14pt;
-      line-height: 1.5;
+    }
+    .ref-list {
+      margin: 0;
+      padding-left: 10mm;
+      font-size: 12pt;
+      line-height: 1.0;
+      text-align: justify;
+    }
+    .ref-list li {
+      margin: 0 0 0.25rem 0;
+      padding-left: 2mm;
+      font-size: 12pt;
+      line-height: 1.0;
     }
     @media print {
       body {
@@ -926,18 +1286,18 @@ function buildAbstractHTML(s) {
   </style>
 </head>
 <body>
-  <div class="paper-title">${s.abstractTitle || 'НАЗВА НАУКОВОЇ РОБОТИ'}</div>
+  <div class="paper-title">${titleFormatted}</div>
 
-  <div class="author-name">${s.fullName || 'Прізвище Ім\'я'}</div>
+  <div class="author-name">${authorFormatted}</div>
 
   ${affilLines.length > 0 ? `<div class="affiliation-block">${affilLines.join('<br>')}</div>` : ''}
 
-  ${cleanIntro ? `<p class="section-para"><span class="section-label">Вступ:</span> ${cleanIntro}</p>` : ''}
-  ${cleanAim ? `<p class="section-para"><span class="section-label">Мета:</span> ${cleanAim}</p>` : ''}
-  ${cleanMaterials ? `<p class="section-para"><span class="section-label">Матеріали і методи:</span> ${cleanMaterials}</p>` : ''}
-  ${cleanResults ? `<p class="section-para"><span class="section-label">Результати:</span> ${cleanResults}</p>` : ''}
-  ${cleanConclusion ? `<p class="section-para"><span class="section-label">Висновок:</span> ${cleanConclusion}</p>` : ''}
-  ${cleanKeywords ? `<p class="section-para"><span class="section-label">Ключові слова:</span> ${cleanKeywords}</p>` : ''}
+  ${formatSectionHtml('Вступ:', cleanIntro)}
+  ${formatSectionHtml('Мета:', cleanAim)}
+  ${formatSectionHtml('Матеріали і методи:', cleanMaterials)}
+  ${formatSectionHtml('Результати:', cleanResults)}
+  ${formatSectionHtml('Висновок:', cleanConclusion)}
+  ${formatSectionHtml('Ключові слова:', cleanKeywords)}
 
   ${refHtml}
 </body>
@@ -955,34 +1315,36 @@ function printCurrentPreview() {
   }
 }
 
-// Generate & download / print structured abstract document formatted strictly to academic template:
-// Font: Times New Roman, Size: 14pt, Line Spacing: 1.5, Margins: Left 30mm, Right 15mm, Top 20mm, Bottom 20mm, Indent: 1.25cm
+// Generate & download structured abstract document in DOCX (or Word-compatible .doc fallback)
 function downloadCurrentSubmissionDoc() {
   if (!currentSubmission) {
     alert('Дані для формування тез відсутні.');
     return;
   }
 
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) {
-    alert('Будь ласка, дозвольте відкриття спливаючих вікон для друку/збереження документа.');
+  // 1. Direct download of official server-compiled DOCX if available
+  if (window.lastServerResponse && window.lastServerResponse.docx_url) {
+    const link = document.createElement('a');
+    link.href = window.lastServerResponse.docx_url;
+    link.download = window.lastServerResponse.docx_filename || 'Тези_USSF_2026.docx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     return;
   }
 
-  let html = buildAbstractHTML(currentSubmission);
-  html = html.replace('</body>', `
-  <script>
-    window.onload = function() {
-      setTimeout(function() {
-        window.print();
-      }, 250);
-    };
-  <\/script>
-</body>`);
-
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
+  // 2. Client-side fallback: Export directly to Word-compatible document
+  const html = buildAbstractHTML(currentSubmission);
+  const authorClean = formatAuthorInitials(currentSubmission.fullName || 'Учасник').replace(/[^\p{L}\p{N}_]/gu, '_');
+  const blob = new Blob(['\ufeff' + html], { type: 'application/msword;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `Тези_${authorClean}_USSF2026.doc`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 // ==========================================
@@ -1474,15 +1836,19 @@ window.closeGoogleSheetsModal = closeGoogleSheetsModal;
 window.copyGoogleAppsScriptCode = copyGoogleAppsScriptCode;
 window.saveGoogleSheetsConfig = saveGoogleSheetsConfig;
 
-// Initialize phone, telegram masks and abstract character counter
+// Initialize phone, telegram masks, abstract character counter, auto-capitalization and references builder
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     setupPhoneInputMask(document.getElementById('phone'));
     setupTelegramInputMask(document.getElementById('telegram'));
     initAbstractCharCounter();
+    initStructureAutoCapitalizeAndTab();
+    initReferencesBuilder();
   });
 } else {
   setupPhoneInputMask(document.getElementById('phone'));
   setupTelegramInputMask(document.getElementById('telegram'));
   initAbstractCharCounter();
+  initStructureAutoCapitalizeAndTab();
+  initReferencesBuilder();
 }

@@ -13,6 +13,7 @@ if [ -f "$PIDFILE" ]; then
 fi
 
 fuser -k 5050/tcp 2>/dev/null || true
+sleep 0.5
 nohup python3 -u "$DIR/mailer_server.py" > "$LOGFILE" 2>&1 &
 PID=$!
 disown "$PID" 2>/dev/null || true

@@ -36,9 +36,10 @@
   <!-- ============ NAVIGATION ============ -->
   <nav id="mainNav">
     <a href="#hero" class="nav-brand">
+      <img src="images/Myroniuk/logo_ussf_dark.png" alt="USSF Logo" class="nav-brand-logo">
       <div class="nav-brand-text">
-        <span class="nav-brand-title">USSF 2026</span>
-        <span class="nav-brand-sub"><span class="ua">Хірургічний Форум</span><span class="en">Surgical Forum</span></span>
+        <span class="nav-brand-title ua">Всеукраїнський студентський<br>хірургічний форум</span>
+        <span class="nav-brand-title en">Ukrainian Students<br>Surgical Forum</span>
       </div>
     </a>
 
@@ -59,69 +60,70 @@
     </div>
   </nav>
 
-  <!-- ============ HERO SECTION ============ -->
+  <!-- ============ HERO SECTION (100% Page 7 Logobook) ============ -->
   <section id="hero">
-    <div class="hero-bg-placeholder"></div>
-    <div class="hero-painting"></div>
+    <div class="hero-bg-media"></div>
 
-    <div class="section-inner hero-inner">
-      <div class="hero-content">
-        <div class="hero-date-badge">
-          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          <span style='white-space: nowrap;' class="hero-date-text ua">xx.xx.2026 · Київ · Національний медичний університет імені О. О. Богомольця</span>
-          <span class="hero-date-text en">xx.xx.2026 · Kyiv · Bogomolets National Medical University</span>
-        </div>
-
+    <div class="hero-inner">
+      <div class="hero-title-wrap">
         <h1 class="hero-title">
-          <span class="ua">I Всеукраїнський студентський<br class="hero-title-break"> хірургічний форум</span>
-          <span class="en">1st All-Ukrainian Student<br class="hero-title-break"> Surgical Forum</span>
+          <span class="ua">Всеукраїнський студентський хірургічний форум</span>
+          <span class="en">Ukrainian Students Surgery Forum</span>
         </h1>
-
-        <!-- Logo leha.jpg immediately under the heading -->
-        <div class="hero-logo-box">
-          <img src="images/nastia.jpeg" alt="USSF Logo" class="hero-sub-logo">
-        </div>
-
-        <p class="hero-subtitle">
-          <span class="ua">Головна хірургічна подія року серед медичної молоді України</span>
-          <span class="en">The premier surgical event of the year for medical youth in Ukraine</span>
-        </p>
-
-        <div class="hero-ctas">
-          <button class="btn-primary" onclick="openRegistrationModal()">
-            <span class="ua">Подати тези та зареєструватися</span>
-            <span class="en">Submit Abstract & Register</span>
-          </button>
-          <a href="#program" class="btn-outline">
-            <span class="ua">Наукова програма</span>
-            <span class="en">Scientific Program</span>
-          </a>
-        </div>
+        <!-- 3D Artwork: anchored to title bottom, invariant across Ctrl +/- zoom -->
+        <img src="images/Myroniuk/hero_USSF.png" alt="USSF 3D Art" class="hero-3d-art">
       </div>
 
-      <!-- Framed Hero Element (liveronco style) with leha.jpg -->
-      <div class="hero-image-wrapper">
-        <div class="hero-image-container">
-          <img src="images/nastia.jpeg" alt="USSF Hero Image" class="hero-image">
-        </div>
+      <!-- Hero Centerpiece Area: Large White USSF Logo Layered Over Hero with Backlight Glow -->
+      <div class="hero-centerpiece-area">
+        <!-- Cyan Backlight Glow for the USSF Logo (as in logobook) -->
+        <div class="hero-logo-backlight" aria-hidden="true"></div>
+        <!-- Large White USSF Logo placed over hero -->
+        <img src="images/Myroniuk/logo_ussf_light.png" alt="USSF" class="hero-white-ussf-logo">
+      </div>
+
+      <div class="hero-ctas">
+        <button class="btn-pill" onclick="openRegistrationModal()">
+          <span class="ua">Реєстрація</span>
+          <span class="en">Registration</span>
+          <span class="btn-arrow-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </span>
+        </button>
+        <a href="#program" class="btn-pill">
+          <span class="ua">Наукова програма</span>
+          <span class="en">Scientific Program</span>
+          <span class="btn-arrow-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </span>
+        </a>
       </div>
     </div>
   </section>
 
   <!-- ============ ABOUT SECTION ============ -->
   <section id="about">
+    <img src="images/Myroniuk/needle.png" alt="" class="about-needle-bg" aria-hidden="true">
     <div class="section-inner">
       <div class="about-grid">
-        <!-- Sticky Welcome Leadership Column -->
+        <!-- Sticky Welcome Leadership Column with NMU White Emblem -->
         <div class="about-left reveal-left">
-          <img src="images/nastia.jpeg" alt="Наукове керівництво">
+          <div class="about-emblem-container">
+            <img src="images/Myroniuk/nmu_emblem_white.svg" alt="НМУ імені О.О. Богомольця" class="about-emblem-svg">
+          </div>
         </div>
 
         <!-- Welcome Speech & Overview -->
         <div class="about-text reveal">
           <div class="section-label">
-            <span class="ua">Про форум</span>
-            <span class="en">About the Forum</span>
+            <span class="ua">-- Про форум</span>
+            <span class="en">-- About the Forum</span>
           </div>
           <h2 class="section-title">
             <span class="ua">Шановні студенти та молоді вчені!</span>
@@ -145,7 +147,8 @@
 
   <!-- ============ ORGANIZERS & COMMITTEE SECTION ============ -->
   <section id="organizers">
-    <div class="section-inner">
+    <div class="organizers-bg-canvas"></div>
+    <div class="section-inner" style="position: relative; z-index: 2;">
       <div class="section-label light center">
         <span class="ua">Організатори</span>
         <span class="en">Organizers</span>
@@ -161,7 +164,7 @@
         <!-- SNT / Patronage -->
         <div class="organizer-card reveal delay-1">
           <div class="organizer-logo-box">
-            <img src='images/nastia.jpeg'>
+            <img src="images/Myroniuk/coin.png" alt="СНТ імені О.А. Киселя">
           </div>
           <h3><span class="ua">СНТ імені О.А. Киселя</span><span class="en">SSP named after O.A. Kysil</span></h3>
           <p><span class="ua">Найстаріше студентське наукове товариство Східної Європи, яке цього року відзначає 145-річчя</span><span class="en">The oldest student scientific society in Eastern Europe, which is celebrating its 145th anniversary this year</span></p>
@@ -179,7 +182,7 @@
         <!-- Surgery Department -->
         <div class="organizer-card reveal delay-3">
           <div class="organizer-logo-box">
-            <img src='images/nastia.jpeg'>
+            <img src="images/Myroniuk/logo_KH.jpeg" alt="Кафедра хірургії">
           </div>
           <h3><span class="ua">Кафедра хірургії з курсом гепатобіліарної та судинної хірургії</span><span class="en">Dept. of Surgery with HBP & Vascular Surgery</span></h3>
           <p><span class="ua">Опорна кафедра хірургічного профілю, центр інновацій та підготовки молодих хірургів</span><span class="en">Reference surgical department, hub of innovation and surgical training</span></p>
@@ -224,7 +227,7 @@
           </div>
 
           <!-- Committee Member 3: Prof. Kovalchuk -->
-          <div class="leader-card reveal delay-1">
+          <div class="leader-card reveal delay-3">
             <div class="leader-avatar">ЛК</div>
             <div class="leader-info">
               <span class="leader-role-badge"><span class="ua">Член оргкомітету</span><span class="en">Committee Member</span></span>
@@ -237,7 +240,7 @@
           </div>
 
           <!-- Committee Member 4: Assoc. Prof. Melnyk -->
-          <div class="leader-card reveal delay-2">
+          <div class="leader-card reveal delay-4">
             <div class="leader-avatar">ОМ</div>
             <div class="leader-info">
               <span class="leader-role-badge"><span class="ua">Відповідальний секретар</span><span class="en">Executive Secretary</span></span>
@@ -250,7 +253,7 @@
           </div>
 
           <!-- Committee Member 5: Prof. Tkachenko -->
-          <div class="leader-card reveal delay-1">
+          <div class="leader-card reveal delay-5">
             <div class="leader-avatar">АТ</div>
             <div class="leader-info">
               <span class="leader-role-badge"><span class="ua">Член оргкомітету</span><span class="en">Committee Member</span></span>
@@ -263,7 +266,7 @@
           </div>
 
           <!-- Committee Member 6: Assoc. Prof. Shevchenko -->
-          <div class="leader-card reveal delay-2">
+          <div class="leader-card reveal delay-6">
             <div class="leader-avatar">ВШ</div>
             <div class="leader-info">
               <span class="leader-role-badge"><span class="ua">Координатор воркшопів</span><span class="en">Workshop Coordinator</span></span>
@@ -276,7 +279,7 @@
           </div>
 
           <!-- Committee Member 7: Assoc. Prof. Kravchenko -->
-          <div class="leader-card reveal delay-1">
+          <div class="leader-card reveal delay-7">
             <div class="leader-avatar">НК</div>
             <div class="leader-info">
               <span class="leader-role-badge"><span class="ua">Науковий редактор</span><span class="en">Scientific Editor</span></span>
@@ -289,7 +292,7 @@
           </div>
 
           <!-- Committee Member 8: Assoc. Prof. Bondarenko -->
-          <div class="leader-card reveal delay-2">
+          <div class="leader-card reveal delay-8">
             <div class="leader-avatar">ІБ</div>
             <div class="leader-info">
               <span class="leader-role-badge"><span class="ua">Куратор СНТ</span><span class="en">SSS Curator</span></span>
@@ -302,7 +305,7 @@
           </div>
 
           <!-- Committee Member 9: Student Chair Bondar -->
-          <div class="leader-card reveal delay-1">
+          <div class="leader-card reveal delay-9">
             <div class="leader-avatar">ЮБ</div>
             <div class="leader-info">
               <span class="leader-role-badge"><span class="ua">Голова студентського оргкомітету</span><span class="en">Student Committee Head</span></span>
@@ -315,7 +318,7 @@
           </div>
 
           <!-- Committee Member 10: Logistics Coordinator Marchenko -->
-          <div class="leader-card reveal delay-2">
+          <div class="leader-card reveal delay-10">
             <div class="leader-avatar">АМ</div>
             <div class="leader-info">
               <span class="leader-role-badge"><span class="ua">Координатор логістики та IT</span><span class="en">Logistics & IT Coordinator</span></span>
@@ -889,13 +892,7 @@
     <div class="section-inner">
       <div class="footer-grid">
         <div class="footer-brand reveal delay-1">
-          <h3>USSF 2026</h3>
-
-          <p>
-            <div class="hero-logo-box">
-              <img src="images/nastia.jpeg" alt="USSF Logo" class="hero-sub-logo">
-            </div>
-          </p>
+          <img src="images/Myroniuk/logo_ussf_light.png" alt="USSF Logo" class="footer-brand-logo">
         </div>
 
         <div class="footer-col reveal delay-2">
@@ -1023,12 +1020,12 @@
                 <div>
                   <div class="auto-notice-badge">
                     <span class="pulse-beacon-dot"></span>
-                    <span class="ua">АВТОМАТИЧНА ГЕНЕРАЦІЯ ОФІЦІЙНОГО ДОКУМЕНТА (PDF)</span>
-                    <span class="en">AUTOMATIC OFFICIAL DOCUMENT GENERATION (PDF)</span>
+                    <span class="ua">АВТОМАТИЧНА ГЕНЕРАЦІЯ ОФІЦІЙНОГО ДОКУМЕНТА (DOCX / WORD)</span>
+                    <span class="en">AUTOMATIC OFFICIAL DOCUMENT GENERATION (DOCX / WORD)</span>
                   </div>
                   <h4 class="auto-notice-title">
-                    <span class="ua">Усі тези автоматично компілюються в офіційний документ НМУ</span>
-                    <span class="en">All abstracts are automatically compiled into official NMU document</span>
+                    <span class="ua">Усі тези автоматично компілюються в офіційний документ Word (.docx)</span>
+                    <span class="en">All abstracts are automatically compiled into official Word document (.docx)</span>
                   </h4>
                 </div>
               </div>
@@ -1037,10 +1034,10 @@
                 <span class="en">Your entered data is instantly compiled into a ready-to-publish document strictly adhering to university editorial criteria. Please double-check the spelling of names, supervisor titles, and department affiliations:</span>
               </p>
               <div class="auto-notice-specs">
-                <span class="spec-pill"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span class="ua">Шрифт: <strong>Times New Roman 14 pt</strong></span><span class="en">Font: <strong>Times New Roman 14 pt</strong></span></span>
-                <span class="spec-pill"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span class="ua">Інтервал: <strong>1.5</strong></span><span class="en">Spacing: <strong>1.5</strong></span></span>
-                <span class="spec-pill"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span class="ua">Поля: <strong>30 / 15 / 20 / 20 мм</strong></span><span class="en">Margins: <strong>30 / 15 / 20 / 20 mm</strong></span></span>
-                <span class="spec-pill"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span class="ua">Абзац: <strong>1.25 см</strong></span><span class="en">Indent: <strong>1.25 cm</strong></span></span>
+                <span class="spec-pill"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span class="ua">Шрифт: <strong>Times New Roman 12 pt</strong></span><span class="en">Font: <strong>Times New Roman 12 pt</strong></span></span>
+                <span class="spec-pill"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span class="ua">Інтервал: <strong>1.0 (Single)</strong></span><span class="en">Spacing: <strong>1.0 (Single)</strong></span></span>
+                <span class="spec-pill"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span class="ua">Поля: <strong>25.4 мм (1 дюйм з усіх боків)</strong></span><span class="en">Margins: <strong>25.4 mm all sides</strong></span></span>
+                <span class="spec-pill"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span class="ua">Абзац: <strong>10 мм</strong></span><span class="en">Indent: <strong>10 mm</strong></span></span>
                 <span class="spec-pill spec-limit"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span class="ua">Обсяг 5 розділів: <strong>до 3200 симв.</strong> (без пробілів)</span><span class="en">5-section length: <strong>up to 3200 chars</strong> (excl. spaces)</span></span>
                 <span class="spec-pill spec-live"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> <span class="ua">Миттєвий перегляд документа після відправки</span><span class="en">Instant live document preview on submit</span></span>
               </div>
@@ -1173,7 +1170,7 @@
                 </div>
               </div>
 
-              <textarea id="abstractReferences" rows="4" placeholder="1. Автор, А. А. (2024). Назва статті. Журнал, 10(2), 123–130. [APA]&#10;2. Ohtsuka, T., et al. (2024). International Kyoto guidelines. Pancreatology, 24(2), 255–270." data-placeholder-ua="1. Автор, А. А. (2024). Назва статті. Журнал, 10(2), 123–130. [APA]&#10;2. Ohtsuka, T., et al. (2024). International Kyoto guidelines. Pancreatology, 24(2), 255–270." data-placeholder-en="1. Author, A. A. (2024). Title of article. Journal, 10(2), 123–130. [APA]&#10;2. Ohtsuka, T., et al. (2024). International Kyoto guidelines. Pancreatology, 24(2), 255–270."></textarea>
+              <textarea id="abstractReferences" rows="5" class="references-textarea" placeholder="1. Smith, L., Wilkes, E., Rolfe, C., et al. (2024). Incisional Hernia Repair. J Abdom Wall Surg, 3, 12452.&#10;2. Tanaka, E. Y., Yoo, J. H., et al. (2023). Abdominal wall reconstruction. Hernia, 27(1), 45–52." data-placeholder-ua="1. Smith, L., Wilkes, E., Rolfe, C., et al. (2024). Incisional Hernia Repair. J Abdom Wall Surg, 3, 12452.&#10;2. Tanaka, E. Y., Yoo, J. H., et al. (2023). Abdominal wall reconstruction. Hernia, 27(1), 45–52." data-placeholder-en="1. Smith, L., Wilkes, E., Rolfe, C., et al. (2024). Incisional Hernia Repair. J Abdom Wall Surg, 3, 12452.&#10;2. Tanaka, E. Y., Yoo, J. H., et al. (2023). Abdominal wall reconstruction. Hernia, 27(1), 45–52."></textarea>
             </div>
           </div>
 
@@ -1215,8 +1212,8 @@
           <div class="device-box-content">
             <strong><span class="ua">Матеріали та анкету передано оргкомітету:</span><span class="en">Materials and application submitted to committee:</span></strong>
             <div class="saved-file-path" id="savedFilePathDisplay" style="font-family: inherit; font-size: 0.84rem; background: transparent; padding: 0; color: #475569; margin-top: 0.25rem;">
-              <span class="ua">Документи (.pdf) та анкета (.json) захищені й надходять виключно в архів оргкомітету форуму. На вашому пристрої жодні файли не зберігаються.</span>
-              <span class="en">Documents (.pdf) and form data (.json) are secured and delivered exclusively to the forum committee. No files are stored on your device.</span>
+              <span class="ua">Документи (.docx) та анкета (.json) захищені й надходять виключно в архів оргкомітету форуму. На вашому пристрої жодні файли не зберігаються.</span>
+              <span class="en">Documents (.docx) and form data (.json) are secured and delivered exclusively to the forum committee. No files are stored on your device.</span>
             </div>
           </div>
         </div>
@@ -1226,9 +1223,9 @@
           <div class="preview-card-header">
             <div class="preview-card-title">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              <span><strong><span class="ua">Прев'ю сформованого документа (Times New Roman 14, 1.5)</span><span class="en">Generated Document Preview (Times New Roman 14, 1.5)</span></strong></span>
+              <span><strong><span class="ua">Прев'ю сформованого документа (Times New Roman 12, 1.0)</span><span class="en">Generated Document Preview (Times New Roman 12, 1.0)</span></strong></span>
             </div>
-            <span class="preview-template-badge">Офіційний шаблон НМУ</span>
+            <span class="preview-template-badge">Офіційний шаблон НМУ (DOCX)</span>
           </div>
           <div class="preview-frame-wrap">
             <iframe id="abstractPreviewFrame" title="Прев'ю документа тез"></iframe>
@@ -1237,25 +1234,13 @@
 
         <div class="success-actions-row">
           <button type="button" class="btn-primary" onclick="downloadCurrentSubmissionDoc()">
-            <svg viewBox="0 0 24 24" style="width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; margin-right: 0.4rem; vertical-align: -2px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span class="ua">Завантажити PDF</span><span class="en">Download PDF</span>
+            <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; margin-right: 0.4rem; vertical-align: -2px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span class="ua">Завантажити DOCX</span><span class="en">Download DOCX</span>
           </button>
-          <button type="button" class="btn-outline-dark" onclick="printCurrentPreview()">
-            <svg viewBox="0 0 24 24" style="width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; margin-right: 0.4rem; vertical-align: -2px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            <span class="ua">Друк</span><span class="en">Print</span>
-          </button>
-          <button type="button" id="btnSendEmail" class="btn-outline-dark" onclick="handleSendEmailClick()">
-            <svg viewBox="0 0 24 24" style="width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; margin-right: 0.4rem; vertical-align: -2px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            <span id="btnSendEmailText"><span class="ua">Надіслати на пошту</span><span class="en">Send to Email</span></span>
+          <button type="button" class="btn-outline-dark" onclick="closeRegistrationModal(false)">
+            <span class="ua">Закрити вікно</span><span class="en">Close Window</span>
           </button>
         </div>
-
-        <!-- Dynamic Email Dispatch Panel & Options Container -->
-        <div id="emailDispatchArea" style="margin-top: 1.2rem; display: none;"></div>
-
-        <button class="btn-outline-dark" onclick="closeRegistrationModal(false)" style="margin-top: 1.4rem; width: 100%;">
-          <span class="ua">Закрити вікно</span><span class="en">Close Window</span>
-        </button>
       </div>
     </div>
   </div>
@@ -1266,7 +1251,7 @@
       <button class="modal-close-btn" onclick="closeSmtpModal()" aria-label="Закрити">&times;</button>
       <div class="modal-header">
         <h3 class="modal-title"><span class="ua">Налаштування пошти (SMTP)</span><span class="en">SMTP Email Settings</span></h3>
-        <p class="modal-subtitle"><span class="ua">Для прямої відправки PDF-файлів тез та програми учасникам</span><span class="en">For direct automated email dispatch with PDF</span></p>
+        <p class="modal-subtitle"><span class="ua">Для прямої відправки файлів тез (.docx) та програми учасникам</span><span class="en">For direct automated email dispatch of abstracts (.docx) and program</span></p>
       </div>
 
       <div class="smtp-help-box">
