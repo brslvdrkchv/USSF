@@ -8,5 +8,11 @@
   "sync_secret_token": "ussf_secure_sync_2026_med_nmu",
   "program_pdf_path": "USSF2026_Program.pdf",
   "google_sheet_webhook_url": "https://script.google.com/macros/s/AKfycbyquEMH-6X0a0Vu3bHQMvdZu_0Hll0UbXh05kZaSxVp8a3ZHuYNFl6Tlc0Cp7demWzVmA/exec",
-  "_instructions": "Для автоматичної відправки готового PDF файлу вкажіть smtp_user (пошта Gmail) та smtp_pass (16-значний пароль додатка Google). google_sheet_webhook_url вказується для миттєвого запису заявок у вашу персональну Google Таблицю. sync_secret_token використовується для захищеної зашифрованої передачі файлів на ваш ноутбук."
+  "turnstile_site_key": "1x00000000000000000000AA",
+  "turnstile_secret_key": "1x00000000000000000000000000000000AA",
+  "enable_turnstile": true,
+  "rate_limit_max_requests": 5,
+  "rate_limit_window_seconds": 600,
+  "min_submission_time_ms": 2500,
+  "_instructions": "Для автоматичної відправки готового PDF файлу вкажіть smtp_user (пошта Gmail) та smtp_pass (16-значний пароль додатка Google). google_sheet_webhook_url вказується для миттєвого запису заявок у вашу персональну Google Таблицю. turnstile_site_key та turnstile_secret_key — ключі Cloudflare Turnstile для захисту форми від спаму (за замовчуванням встановлені універсальні тестові ключі Cloudflare). rate_limit_max_requests обмежує кількість запитів з однієї IP за вказані секунди для захисту від DDoS."
 }

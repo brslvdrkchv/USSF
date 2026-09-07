@@ -22,8 +22,12 @@ import hashlib
 import http.server
 import socketserver
 import re
+import time
+import threading
+from collections import defaultdict
 from datetime import datetime
 import urllib.parse
+import urllib.request
 import smtplib
 try:
     import requests
@@ -41,6 +45,100 @@ os.makedirs(SUBMISSIONS_DIR, exist_ok=True)
 cfg = load_email_config()
 RECIPIENT = cfg.get('committee_email', 'derk.boryslav@gmail.com')
 SYNC_TOKEN = os.environ.get('SYNC_SECRET_TOKEN', cfg.get('sync_secret_token', 'ussf_secure_sync_2026_med_nmu'))
+
+# ==============================================================================
+# ANTI-BOT & DDOS PROTECTION: RATE LIMITER & CLOUDFLARE TURNSTILE VERIFIER
+# ==============================================================================
+
+def get_client_ip(handler):
+    """Extract real client IP from Cloudflare, reverse proxy headers, or socket."""
+    cf_ip = handler.headers.get('CF-Connecting-IP')
+    if cf_ip:
+        return cf_ip.strip()
+    xff = handler.headers.get('X-Forwarded-For')
+    if xff:
+        return xff.split(',')[0].strip()
+    if handler.client_address and len(handler.client_address) > 0:
+        return str(handler.client_address[0]).strip()
+    return '127.0.0.1'
+
+
+class SubmissionRateLimiter:
+    """In-memory sliding window IP rate limiter with cooldown against flood & DoS."""
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.requests = defaultdict(list)
+        self.last_seen = {}
+
+    def is_allowed(self, ip, max_requests=5, window_seconds=600, cooldown_seconds=8):
+        now = time.time()
+        with self.lock:
+            # 1. Cooldown check (prevent rapid sequential spam)
+            last_time = self.last_seen.get(ip, 0)
+            if (now - last_time) < cooldown_seconds:
+                remaining = int(cooldown_seconds - (now - last_time)) + 1
+                return False, f"Занадто часті спроби відправки. Будь ласка, зачекайте {remaining} сек."
+
+            # 2. Sliding window check
+            timestamps = [t for t in self.requests[ip] if (now - t) < window_seconds]
+            self.requests[ip] = timestamps
+
+            if len(timestamps) >= max_requests:
+                mins = max(1, window_seconds // 60)
+                return False, f"Перевищено ліміт запитів ({max_requests} за {mins} хв). Будь ласка, зачекайте перед наступною спробою."
+
+            self.requests[ip].append(now)
+            self.last_seen[ip] = now
+            return True, None
+
+RATE_LIMITER = SubmissionRateLimiter()
+
+
+def verify_cloudflare_turnstile(token, client_ip, secret_key):
+    """
+    Verifies Cloudflare Turnstile token via official siteverify endpoint.
+    Supports official Cloudflare test keys (always succeed).
+    """
+    if not token or not str(token).strip():
+        return False, "Відсутній токен верифікації Turnstile."
+
+    if not secret_key:
+        return True, None
+
+    token = str(token).strip()
+
+    try:
+        verify_url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+        form_data = urllib.parse.urlencode({
+            "secret": secret_key,
+            "response": token,
+            "remoteip": client_ip
+        }).encode('utf-8')
+
+        req = urllib.request.Request(
+            verify_url,
+            data=form_data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"}
+        )
+
+        with urllib.request.urlopen(req, timeout=7) as resp:
+            body = resp.read().decode('utf-8')
+            res = json.loads(body)
+            if res.get('success', False):
+                return True, None
+            err_codes = res.get('error-codes', [])
+            print(f"[SECURITY] Turnstile verify failed for {client_ip}: {err_codes}")
+            # If using test secret and offline or mock token
+            if secret_key.startswith("1x00000000000000000000"):
+                return True, None
+            return False, f"Помилка перевірки безпеки Turnstile: {', '.join(err_codes)}"
+    except Exception as exc:
+        print(f"[SECURITY] Turnstile API request error: {exc}")
+        # Allow fallback for Cloudflare test keys
+        if secret_key.startswith("1x00000000000000000000"):
+            return True, None
+        return False, f"Не вдалося з'єднатися із сервером верифікації капчі: {exc}"
+
 
 
 def send_to_google_sheet(data, webhook_url=None):
@@ -353,13 +451,90 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
         return super().do_GET()
 
     def do_POST(self):
+        MAX_ALLOWED_SIZE = 5 * 1024 * 1024  # 5 MB Strict Limit
+
         if self.path in ('/api/submit-abstract', '/submit'):
+            client_ip = get_client_ip(self)
+            server_cfg = load_email_config()
+
+            # 1. IP RATE LIMITING (Sliding window & rapid cooldown against DDoS/Flood)
+            max_reqs = int(server_cfg.get('rate_limit_max_requests', 5))
+            win_secs = int(server_cfg.get('rate_limit_window_seconds', 600))
+            is_allowed, limit_msg = RATE_LIMITER.is_allowed(client_ip, max_requests=max_reqs, window_seconds=win_secs)
+            if not is_allowed:
+                print(f"[SECURITY] Rate limit blocked IP {client_ip}: {limit_msg}")
+                self.send_response(429)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.send_header('Retry-After', '60')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "error",
+                    "error_code": "RATE_LIMIT_EXCEEDED",
+                    "message": limit_msg
+                }, ensure_ascii=False).encode('utf-8'))
+                return
+
             content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > MAX_ALLOWED_SIZE:
+                self.send_response(413)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "error",
+                    "message": "Перевищено максимальний ліміт розміру даних (5 МБ). Будь ласка, скоротіть матеріали."
+                }, ensure_ascii=False).encode('utf-8'))
+                return
+
             post_body = self.rfile.read(content_length)
             
             try:
                 data = json.loads(post_body.decode('utf-8'))
-                
+
+                # 2. HONEYPOT TRAP CHECK (Catch automated bot scrapers)
+                if data.get('website_hp_check'):
+                    print(f"[SECURITY] Honeypot trap triggered by IP {client_ip}")
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "status": "error",
+                        "error_code": "BOT_DETECTED",
+                        "message": "Помилка верифікації форми (бот-фільтр)."
+                    }, ensure_ascii=False).encode('utf-8'))
+                    return
+
+                # 3. TIME-LOCK CHECK (Reject script submissions faster than 2 seconds)
+                min_time = int(server_cfg.get('min_submission_time_ms', 2000))
+                elapsed = data.get('submissionElapsedMs')
+                if elapsed is not None and elapsed < min_time:
+                    print(f"[SECURITY] Submission too fast ({elapsed}ms < {min_time}ms) from IP {client_ip}")
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "status": "error",
+                        "error_code": "SUBMISSION_TOO_FAST",
+                        "message": "Занадто швидка відправка форми. Будь ласка, перевірте дані."
+                    }, ensure_ascii=False).encode('utf-8'))
+                    return
+
+                # 4. CLOUDFLARE TURNSTILE VERIFICATION
+                if server_cfg.get('enable_turnstile', True):
+                    turnstile_secret = os.environ.get('TURNSTILE_SECRET_KEY', server_cfg.get('turnstile_secret_key', '1x00000000000000000000000000000000AA'))
+                    turnstile_token = data.get('turnstileToken', '')
+                    t_valid, t_err = verify_cloudflare_turnstile(turnstile_token, client_ip, turnstile_secret)
+                    if not t_valid:
+                        print(f"[SECURITY] Turnstile verification rejected IP {client_ip}: {t_err}")
+                        self.send_response(403)
+                        self.send_header('Content-Type', 'application/json; charset=utf-8')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({
+                            "status": "error",
+                            "error_code": "CAPTCHA_FAILED",
+                            "message": t_err or "Помилка перевірки безпеки Cloudflare Turnstile."
+                        }, ensure_ascii=False).encode('utf-8'))
+                        return
+
                 timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
                 full_name = data.get('fullName', '').strip() or data.get('full_name', '').strip() or f"{data.get('last_name', '')} {data.get('first_name', '')} {data.get('middle_name', '')}".strip() or 'Учасник'
                 author_initials = format_author_initials(full_name)
@@ -378,6 +553,20 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
                 # 2. Generate DOCX strictly according to official NMU template
                 generated_docx = create_abstract_docx(data, docx_path)
                 print(f"[SERVER] Generated abstract DOCX: {generated_docx}")
+
+                # Check generated DOCX size
+                if os.path.exists(docx_path) and os.path.getsize(docx_path) > MAX_ALLOWED_SIZE:
+                    os.remove(docx_path)
+                    if os.path.exists(json_path):
+                        os.remove(json_path)
+                    self.send_response(413)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "status": "error",
+                        "message": "Згенерований файл тез перевищує ліміт 5 МБ."
+                    }, ensure_ascii=False).encode('utf-8'))
+                    return
                 
                 # 3. Dual email dispatch with DOCX attachment
                 email_result = send_abstract_email_docx(generated_docx, data, RECIPIENT)

@@ -3,6 +3,17 @@
  * Interactive Controller (Inspired by liveronco.com)
  */
 
+// ==========================================
+// GOOGLE ANALYTICS 4 (GA4) EVENT HELPER
+// ==========================================
+window.trackGAEvent = function(eventName, params = {}) {
+  try {
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', eventName, params);
+    }
+  } catch (e) {}
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   // 1. LANGUAGE TOGGLE (UA / EN)
@@ -18,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function applyLanguage(lang) {
     currentLang = lang;
     localStorage.setItem('ussf_lang', lang);
+    window.trackGAEvent('language_switch', { language: lang });
 
     if (lang === 'en') {
       body.classList.remove('lang-ua');
@@ -267,6 +279,7 @@ function selectDay(dayNumber) {
     const workshopsPanel = document.getElementById('panel-workshops');
     if (workshopsPanel) workshopsPanel.classList.add('active');
   }
+  window.trackGAEvent('program_day_select', { day: dayNumber });
 }
 
 function selectDay1Track(trackId) {
@@ -282,6 +295,7 @@ function selectDay1Track(trackId) {
 
   const targetPanel = document.getElementById(`panel-${trackId}`);
   if (targetPanel) targetPanel.classList.add('active');
+  window.trackGAEvent('program_track_select', { track: trackId });
 }
 
 // Backwards-compatibility alias
@@ -298,6 +312,7 @@ function switchTab(tabId) {
 // 6.1. VENUE & EVACUATION FLOOR SWITCHER
 // ==========================================
 function switchFloorPlan(floorKey) {
+  window.trackGAEvent('floor_plan_switch', { floor: floorKey });
   const buttons = document.querySelectorAll('.plan-tab-btn');
   buttons.forEach(btn => btn.classList.remove('active'));
 
@@ -387,12 +402,24 @@ function closeMobileMenu() {
 
 
 // ==========================================
-// 8. REGISTRATION MODAL CONTROLS
+// 8. REGISTRATION MODAL CONTROLS & ANTI-BOT SECURITY
 // ==========================================
 const regModal = document.getElementById('regModal');
 const formContent = document.getElementById('formContent');
 const formSuccessMessage = document.getElementById('formSuccessMessage');
 const forumRegForm = document.getElementById('forumRegForm');
+
+// Anti-bot & Turnstile state
+window.formOpenedTimestamp = 0;
+window.currentTurnstileToken = null;
+
+window.onTurnstileSuccess = function(token) {
+  window.currentTurnstileToken = token;
+};
+
+window.onTurnstileExpired = function() {
+  window.currentTurnstileToken = null;
+};
 
 function openRegistrationModal() {
   if (regModal) {
@@ -400,8 +427,10 @@ function openRegistrationModal() {
     document.body.style.overflow = 'hidden';
     const mobileStickyBar = document.getElementById('mobileStickyBar');
     if (mobileStickyBar) mobileStickyBar.classList.remove('visible');
+    window.formOpenedTimestamp = Date.now();
     initReferencesBuilder();
     updateAbstractCharCounter();
+    window.trackGAEvent('registration_modal_open', { event_category: 'engagement' });
   }
 }
 
@@ -415,9 +444,17 @@ function closeRegistrationModal(resetForm = false) {
     if (mobileStickyBar && window.scrollY > 380) {
       mobileStickyBar.classList.add('visible');
     }
+    window.currentTurnstileToken = null;
+    if (window.turnstile && typeof window.turnstile.reset === 'function') {
+      try {
+        window.turnstile.reset('#cfTurnstileWidget');
+      } catch (e) {}
+    }
     // Reset view states after animation completes
     setTimeout(() => {
       if (formContent) formContent.style.display = 'block';
+      const formPreviewStep = document.getElementById('formPreviewStep');
+      if (formPreviewStep) formPreviewStep.style.display = 'none';
       if (formSuccessMessage) formSuccessMessage.style.display = 'none';
       if (resetForm && forumRegForm) {
         forumRegForm.reset();
@@ -810,143 +847,208 @@ function initStructureAutoCapitalizeAndTab() {
 }
 
 // ==========================================
-// 8.4. REFERENCES LIST (CLEAN TEXTAREA WITH AUTO-NUMBERING)
+// 8.4. DYNAMIC REFERENCES CONSTRUCTOR (ДЖЕРЕЛА)
 // ==========================================
-function initReferencesBuilder(forceReset = false) {
-  const refArea = document.getElementById('abstractReferences');
-  if (!refArea) return;
 
-  refArea.style.display = '';
+const DEFAULT_REF_PLACEHOLDERS = [
+  {
+    ua: 'Шевченко, В. О., & Коваленко, П. М. (2023). Нові підходи в судинній хірургії. Хірургія України, 4(88), 25–30.',
+    en: 'Smith, J., & Doe, A. (2023). Modern approaches in vascular surgery. Ann Surg, 12(3), 45–50.'
+  },
+  {
+    ua: 'Бондаренко, О. І. (2022). Сучасні методики лікування вогнепальних поранень. Клінічна хірургія, 10, 15–20. https://doi.org/10.26779/...',
+    en: 'Johnson, R. (2022). Modern methods of treating gunshot wounds. Clin Surg, 10, 15–20. https://doi.org/...'
+  },
+  {
+    ua: 'Мельник, С. В., та ін. (2021). Госпітальна допомога при політравмі: посібник для хірургів. Київ: Медицина, 142 с.',
+    en: 'Williams, T., et al. (2021). Hospital care in polytrauma: A surgeon guide. Kyiv: Medicine, 142 p.'
+  }
+];
+
+function initReferencesBuilder(forceReset = false) {
+  const list = document.getElementById('referencesBuilderList');
+  const hiddenTextarea = document.getElementById('abstractReferences');
+  if (!list) return;
 
   if (forceReset) {
-    refArea.value = '';
+    list.innerHTML = '';
+    if (hiddenTextarea) hiddenTextarea.value = '';
+    addReferenceItem('', false);
+    addReferenceItem('', false);
     return;
   }
 
-  // Avoid duplicate event listener attachments
-  if (refArea.dataset.initialized === 'true') return;
-  refArea.dataset.initialized = 'true';
+  // If already initialized with items, just ensure sync
+  if (list.children.length > 0) {
+    renumberReferenceItems();
+    syncReferencesToHidden();
+    return;
+  }
 
-  // Smart Enter key handling: auto-numbers next line (\n2. , \n3. ...)
-  refArea.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      const start = this.selectionStart;
-      const val = this.value;
-      const currentLine = val.substring(0, start).split('\n').pop();
-      const match = currentLine.match(/^(\d+)[\.\)]\s*(.*)$/);
+  // If hiddenTextarea has existing text (e.g. from draft or restore)
+  if (hiddenTextarea && hiddenTextarea.value.trim()) {
+    const lines = hiddenTextarea.value.split('\n')
+      .map(l => l.replace(/^(\[\d+\]|\d+[\.\)\s\t]+)/, '').trim())
+      .filter(Boolean);
+    if (lines.length > 0) {
+      lines.forEach(val => addReferenceItem(val, false));
+      return;
+    }
+  }
 
-      if (match) {
+  // Default: start with 2 clean reference inputs
+  addReferenceItem('', false);
+  addReferenceItem('', false);
+}
+
+function addReferenceItem(initialVal = '', autoFocus = false) {
+  const list = document.getElementById('referencesBuilderList');
+  if (!list) return;
+
+  const currentCount = list.children.length;
+  const newIndex = currentCount + 1;
+  const placeholderObj = DEFAULT_REF_PLACEHOLDERS[(newIndex - 1) % DEFAULT_REF_PLACEHOLDERS.length];
+  const isEn = document.documentElement.lang === 'en';
+  const placeholderText = isEn ? placeholderObj.en : placeholderObj.ua;
+
+  const row = document.createElement('div');
+  row.className = 'ref-builder-row';
+  row.dataset.index = String(newIndex);
+
+  row.innerHTML = `
+    <span class="ref-item-num">${newIndex}.</span>
+    <div class="ref-item-field">
+      <input type="text"
+             class="ref-item-input"
+             placeholder="${placeholderText}"
+             data-placeholder-ua="${placeholderObj.ua}"
+             data-placeholder-en="${placeholderObj.en}"
+             value="${escapeHtmlAttr(initialVal)}">
+    </div>
+    <button type="button" class="btn-ref-remove" title="Видалити джерело" onclick="removeReferenceItem(this)">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+    </button>
+  `;
+
+  list.appendChild(row);
+
+  const input = row.querySelector('.ref-item-input');
+  if (input) {
+    input.addEventListener('input', function() {
+      applyCapitalizationPreservingCursor(this);
+      syncReferencesToHidden();
+    });
+
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
         e.preventDefault();
-        const currentNum = parseInt(match[1], 10);
-        const itemText = match[2].trim();
-
-        if (!itemText) {
-          // User pressed Enter on empty numbered line (e.g. "3. ") -> remove number to finish
-          const lineStartIndex = val.substring(0, start).lastIndexOf('\n') + 1;
-          this.value = val.substring(0, lineStartIndex) + val.substring(start);
-          this.selectionStart = this.selectionEnd = lineStartIndex;
-        } else {
-          // Insert next number
-          const nextItem = `\n${currentNum + 1}. `;
-          if (typeof this.setRangeText === 'function') {
-            this.setRangeText(nextItem, start, this.selectionEnd, 'end');
-          } else {
-            this.value = val.substring(0, start) + nextItem + val.substring(this.selectionEnd);
-            this.selectionStart = this.selectionEnd = start + nextItem.length;
-          }
-        }
-        this.dispatchEvent(new Event('input', { bubbles: true }));
+        addReferenceItem('', true);
       }
-    }
-  });
+    });
 
-  // Auto-prefix "1. " if user starts typing from scratch without a number
-  refArea.addEventListener('input', function() {
-    const val = this.value;
-    if (val && !val.match(/^(\d+[\.\)]|\[\d+\])/) && !val.startsWith('\n')) {
-      const start = this.selectionStart;
-      const end = this.selectionEnd;
-      this.value = `1. ${val}`;
-      if (typeof this.setSelectionRange === 'function') {
-        this.setSelectionRange(start + 3, end + 3);
+    // Smart paste: if multi-line citations are pasted, split them into sequential rows
+    input.addEventListener('paste', function(e) {
+      const clipboard = (e.clipboardData || window.clipboardData);
+      const text = clipboard ? clipboard.getData('text') : '';
+      if (!text || !text.includes('\n')) return;
+
+      e.preventDefault();
+      const rawLines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+      const cleanLines = rawLines
+        .map(line => line.replace(/^(\[\d+\]|\d+[\.\)\s\t]+)/, '').trim())
+        .filter(Boolean);
+
+      if (cleanLines.length === 0) return;
+
+      this.value = cleanLines[0].charAt(0).toUpperCase() + cleanLines[0].slice(1);
+
+      for (let i = 1; i < cleanLines.length; i++) {
+        addReferenceItem(cleanLines[i], false);
       }
+
+      renumberReferenceItems();
+      syncReferencesToHidden();
+    });
+
+    if (autoFocus) {
+      setTimeout(() => input.focus(), 50);
     }
-    applyCapitalizationPreservingCursor(this);
-  });
+  }
 
-  // Smart paste: formats and re-numbers all pasted lines sequentially
-  refArea.addEventListener('paste', function(e) {
-    e.preventDefault();
-    const clipboard = (e.clipboardData || window.clipboardData);
-    const text = clipboard ? clipboard.getData('text') : '';
-    if (!text) return;
+  renumberReferenceItems();
+  syncReferencesToHidden();
+}
 
-    const rawLines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-    const cleanLines = [];
+function removeReferenceItem(btn) {
+  const row = btn.closest('.ref-builder-row');
+  const list = document.getElementById('referencesBuilderList');
+  if (!row || !list) return;
 
-    for (const line of rawLines) {
-      let clean = line.replace(/^(\[\d+\]|\d+[\.\)\s\t]+)/, '').replace(/^[\t\s]+/, '').trim();
-      if (clean) {
-        clean = clean.charAt(0).toUpperCase() + clean.slice(1);
-        cleanLines.push(clean);
-      }
+  const rows = list.querySelectorAll('.ref-builder-row');
+  if (rows.length <= 1) {
+    // Keep at least one row, just clear input value
+    const input = row.querySelector('.ref-item-input');
+    if (input) {
+      input.value = '';
+      input.focus();
     }
+  } else {
+    row.remove();
+  }
 
-    if (!cleanLines.length) return;
+  renumberReferenceItems();
+  syncReferencesToHidden();
+}
 
-    const start = this.selectionStart;
-    const end = this.selectionEnd;
-    const val = this.value;
+function renumberReferenceItems() {
+  const list = document.getElementById('referencesBuilderList');
+  if (!list) return;
 
-    const linesBefore = val.substring(0, start).split('\n').filter(l => l.trim());
-    let currentIdx = linesBefore.length;
-    if (start === 0 && end === val.length) {
-      currentIdx = 0;
+  const rows = list.querySelectorAll('.ref-builder-row');
+  rows.forEach((row, idx) => {
+    const numEl = row.querySelector('.ref-item-num');
+    if (numEl) {
+      numEl.textContent = `${idx + 1}.`;
     }
-
-    const formattedLines = cleanLines.map((line, i) => `${currentIdx + i + 1}. ${line}`);
-    const replacement = formattedLines.join('\n');
-
-    if (typeof this.setRangeText === 'function') {
-      this.setRangeText(replacement, start, end, 'end');
-    } else {
-      this.value = val.substring(0, start) + replacement + val.substring(end);
-      this.selectionStart = this.selectionEnd = start + replacement.length;
-    }
-    this.dispatchEvent(new Event('input', { bubbles: true }));
-  });
-
-  refArea.addEventListener('blur', function() {
-    renumberReferencesTextarea(this);
+    row.dataset.index = String(idx + 1);
   });
 }
 
-function renumberReferencesTextarea(el) {
-  if (!el || !el.value) return;
-  const lines = el.value.split('\n');
-  let num = 1;
-  const newLines = [];
-  for (const line of lines) {
-    let clean = line.replace(/^(\[\d+\]|\d+[\.\)\s\t]+)/, '').replace(/^[\t\s]+/, '').trim();
-    if (clean) {
-      clean = clean.charAt(0).toUpperCase() + clean.slice(1);
-      newLines.push(`${num}. ${clean}`);
-      num++;
+function syncReferencesToHidden() {
+  const list = document.getElementById('referencesBuilderList');
+  const hiddenTextarea = document.getElementById('abstractReferences');
+  if (!list || !hiddenTextarea) return;
+
+  const inputs = list.querySelectorAll('.ref-item-input');
+  const formattedItems = [];
+
+  inputs.forEach((inp) => {
+    let val = (inp.value || '').trim();
+    if (!val) return;
+    val = val.replace(/^(\[\d+\]|\d+[\.\)\s\t]+)/, '').trim();
+    if (val) {
+      const capVal = val.charAt(0).toUpperCase() + val.slice(1);
+      formattedItems.push(`${formattedItems.length + 1}. ${capVal}`);
     }
-  }
-  if (newLines.length > 0 && newLines.join('\n') !== el.value.trim()) {
-    el.value = newLines.join('\n');
-  }
+  });
+
+  hiddenTextarea.value = formattedItems.join('\n');
 }
 
-// Stubs for backward compatibility
-function syncReferencesToHidden() {}
-function addReferenceItem() {}
-function removeReferenceItem() {}
+function escapeHtmlAttr(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 window.addReferenceItem = addReferenceItem;
 window.removeReferenceItem = removeReferenceItem;
 window.initReferencesBuilder = initReferencesBuilder;
-window.renumberReferencesTextarea = renumberReferencesTextarea;
+window.syncReferencesToHidden = syncReferencesToHidden;
 
 // Toggle abstract fields based on selected format
 function toggleAbstractField(format) {
@@ -966,11 +1068,15 @@ function toggleAbstractField(format) {
   }
 }
 
-// Handle Form Submission
-let currentSubmission = null;
+// Default Google Sheets Webhook URL for direct client synchronization
+window.GOOGLE_SHEET_WEBHOOK_URL = window.GOOGLE_SHEET_WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbyquEMH-6X0a0Vu3bHQMvdZu_0Hll0UbXh05kZaSxVp8a3ZHuYNFl6Tlc0Cp7demWzVmA/exec';
 
-function handleFormSubmit(e) {
-  e.preventDefault();
+// Handle Form Review & 2-Step Confirmation Flow
+let currentSubmission = null;
+const MAX_ABSTRACT_FILE_SIZE = 5 * 1024 * 1024; // 5 MB Limit
+
+function handleFormReview(e) {
+  if (e) e.preventDefault();
 
   syncReferencesToHidden();
 
@@ -1003,14 +1109,36 @@ function handleFormSubmit(e) {
   const phone = document.getElementById('phone').value.trim();
   const telegram = document.getElementById('telegram') ? document.getElementById('telegram').value.trim() : '';
 
+  // SECURITY CHECK 1: Honeypot trap check against bot autocompletion
+  const hpCheck = document.getElementById('websiteHpCheck');
+  if (hpCheck && hpCheck.value.trim() !== '') {
+    console.warn('[SECURITY] Bot trap triggered.');
+    alert('⚠️ Помилка верифікації форми. Запит відхилено системою безпеки.');
+    return;
+  }
+
+  // SECURITY CHECK 2: Time-lock check (reject bot scripts submitting faster than 2 seconds)
+  const elapsedMs = window.formOpenedTimestamp ? (Date.now() - window.formOpenedTimestamp) : 10000;
+  if (elapsedMs < 2000) {
+    alert('⚠️ Занадто швидке заповнення форми. Будь ласка, перевірте внесені дані перед підтвердженням.');
+    return;
+  }
+
+  // SECURITY CHECK 3: Turnstile Captcha token check
+  let turnstileToken = window.currentTurnstileToken || '';
+  if (!turnstileToken) {
+    const cfInput = document.querySelector('[name="cf-turnstile-response"]');
+    if (cfInput && cfInput.value) {
+      turnstileToken = cfInput.value;
+    }
+  }
+
   // VALIDATION 1: Phone number (+380 and 9 digits)
   const phoneDigits = phone.replace(/\D/g, '');
   if (phoneDigits.length !== 12 || !phoneDigits.startsWith('380')) {
     alert('Будь ласка, введіть дійсний номер телефону у форматі +380 (XX) XXX-XX-XX');
     const phoneInput = document.getElementById('phone');
-    if (phoneInput) {
-      phoneInput.focus();
-    }
+    if (phoneInput) phoneInput.focus();
     return;
   }
 
@@ -1018,9 +1146,7 @@ function handleFormSubmit(e) {
   if (!telegram || !/^@[a-zA-Z0-9_]{3,32}$/.test(telegram)) {
     alert('Будь ласка, вкажіть ваш нікнейм у Telegram у форматі @username (від 3 до 32 символів)');
     const telegramInput = document.getElementById('telegram');
-    if (telegramInput) {
-      telegramInput.focus();
-    }
+    if (telegramInput) telegramInput.focus();
     return;
   }
 
@@ -1029,11 +1155,9 @@ function handleFormSubmit(e) {
     const totalCharsWithoutSpaces = countAbstractCharsWithoutSpaces();
     if (totalCharsWithoutSpaces > ABSTRACT_CHAR_LIMIT) {
       const over = totalCharsWithoutSpaces - ABSTRACT_CHAR_LIMIT;
-      alert(`⚠️ Перевищено ліміт обсягу тез!\n\nСумарна кількість символів (без врахування пробілів) у 5 розділах («Вступ», «Мета», «Матеріали і методи», «Результати», «Висновок») становить ${totalCharsWithoutSpaces} симв., що перевищує дозволений ліміт у ${ABSTRACT_CHAR_LIMIT} символів на ${over} симв.\n\nБудь ласка, скоротіть текст дослідження для успішного надсилання.`);
+      alert(`⚠️ Перевищено ліміт обсягу тез!\n\nСумарна кількість символів (без врахування пробілів) у 5 розділах («Вступ», «Мета», «Матеріали і методи», «Результати», «Висновок») становить ${totalCharsWithoutSpaces} симв., що перевищує дозволений ліміт у ${ABSTRACT_CHAR_LIMIT} символів на ${over} симв.\n\nБудь ласка, скоротіть текст дослідження перед перевіркою.`);
       const tipBanner = document.querySelector('.abstract-tip-banner');
-      if (tipBanner) {
-        tipBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+      if (tipBanner) tipBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
   }
@@ -1067,43 +1191,124 @@ function handleFormSubmit(e) {
     abstractReferences,
     email,
     phone,
-    telegram
+    telegram,
+    website_hp_check: hpCheck ? hpCheck.value : '',
+    submissionElapsedMs: elapsedMs,
+    turnstileToken: turnstileToken
   };
+
+  // Build rendered document HTML
+  const html = buildAbstractHTML(currentSubmission);
+  
+  // Calculate document file size
+  const docBlob = new Blob(['\ufeff' + html], { type: 'application/msword;charset=utf-8' });
+  const docSize = docBlob.size;
+
+  // Update Meta Strip in Step 2
+  const metaAuthor = document.getElementById('previewMetaAuthor');
+  if (metaAuthor) metaAuthor.textContent = fullName || '—';
+  const metaFormat = document.getElementById('previewMetaFormat');
+  if (metaFormat) metaFormat.textContent = partFormatText || '—';
+
+  const sizeBadge = document.getElementById('previewDocSizeBadge');
+  const sizePill = document.getElementById('previewSizePill');
+  const sizeError = document.getElementById('previewSizeError');
+  const btnConfirm = document.getElementById('btnConfirmSubmission');
+
+  const sizeFormatted = docSize < 1024 * 1024
+    ? `~${(docSize / 1024).toFixed(1)} КБ`
+    : `~${(docSize / (1024 * 1024)).toFixed(2)} МБ`;
+
+  // VALIDATION 4: 5 MB file size limit enforcement
+  if (docSize > MAX_ABSTRACT_FILE_SIZE) {
+    if (sizeBadge) sizeBadge.textContent = `Розмір: ${sizeFormatted} (ПЕРЕВИЩЕНО ЛІМІТ 5 МБ)`;
+    if (sizePill) sizePill.classList.add('over-limit');
+    if (sizeError) {
+      sizeError.style.display = 'flex';
+      const errText = document.getElementById('previewSizeErrorText');
+      if (errText) {
+        errText.textContent = `Розмір документа (${sizeFormatted}) перевищує ліміт 5 МБ! Будь ласка, скоротіть обсяг перед підтвердженням.`;
+      }
+    }
+    if (btnConfirm) btnConfirm.disabled = true;
+    alert(`⚠️ Розмір сформованого документа (${sizeFormatted}) перевищує встановлений ліміт 5 МБ!\n\nБудь ласка, скоротіть текст тез перед відправкою.`);
+  } else {
+    if (sizeBadge) sizeBadge.textContent = `Розмір: ${sizeFormatted} (ліміт: 5 МБ)`;
+    if (sizePill) sizePill.classList.remove('over-limit');
+    if (sizeError) sizeError.style.display = 'none';
+    if (btnConfirm) btnConfirm.disabled = false;
+  }
+
+  // Render preview iframe
+  const previewFrame = document.getElementById('abstractPreviewFrame');
+  if (previewFrame) {
+    previewFrame.srcdoc = html;
+  }
 
   // Expand modal window to fit preview
   const modalWindow = document.querySelector('.modal-window');
-  if (modalWindow) modalWindow.classList.add('has-preview');
-
-  // Immediately render live visual preview in iframe
-  const previewFrame = document.getElementById('abstractPreviewFrame');
-  if (previewFrame) {
-    previewFrame.srcdoc = buildAbstractHTML(currentSubmission);
+  if (modalWindow) {
+    modalWindow.classList.add('has-preview');
+    modalWindow.scrollTop = 0;
   }
 
-  // Update status indicator
-  const savedFilePathDisplay = document.getElementById('savedFilePathDisplay');
-  if (savedFilePathDisplay) {
-    savedFilePathDisplay.innerHTML = '<span class="ua">🔒 Передача матеріалів до закритої бази оргкомітету...</span><span class="en">Securing and submitting to committee archive...</span>';
+  // Switch views: hide form fields, show Preview Step
+  const formContent = document.getElementById('formContent');
+  const formPreviewStep = document.getElementById('formPreviewStep');
+  if (formContent) formContent.style.display = 'none';
+  if (formPreviewStep) formPreviewStep.style.display = 'block';
+
+  window.trackGAEvent('registration_preview_step', {
+    event_category: 'engagement',
+    participation_type: currentSubmission ? currentSubmission.participationType : ''
+  });
+}
+
+// Return back to form editing with all inputs preserved
+function backToFormEdit() {
+  const formContent = document.getElementById('formContent');
+  const formPreviewStep = document.getElementById('formPreviewStep');
+  const modalWindow = document.querySelector('.modal-window');
+
+  if (formPreviewStep) formPreviewStep.style.display = 'none';
+  if (formContent) formContent.style.display = 'block';
+  if (modalWindow) {
+    modalWindow.classList.remove('has-preview');
+    modalWindow.scrollTop = 0;
+  }
+}
+
+// Confirm and Submit Registration: generates DOCX to committee folder "заявки_тези", syncs to Google Sheet & registers
+function confirmAndSubmitRegistration() {
+  if (!currentSubmission) {
+    alert('Дані заявки не знайдено. Будь ласка, заповніть форму знову.');
+    backToFormEdit();
+    return;
   }
 
-  // Store current submission globally for interactive email dispatch
-  window.lastSubmissionData = currentSubmission;
-  window.lastServerResponse = null;
-
-  // Reset interactive email area
-  const emailDispatchArea = document.getElementById('emailDispatchArea');
-  if (emailDispatchArea) {
-    emailDispatchArea.style.display = 'none';
-    emailDispatchArea.innerHTML = '';
-  }
-  const btnSendEmail = document.getElementById('btnSendEmail');
-  if (btnSendEmail) btnSendEmail.disabled = false;
-  const btnSendEmailText = document.getElementById('btnSendEmailText');
-  if (btnSendEmailText) {
-    btnSendEmailText.innerHTML = '<span class="ua">Надіслати на пошту</span><span class="en">Send to Email</span>';
+  // Strict check of 5 MB limit before dispatch
+  const html = buildAbstractHTML(currentSubmission);
+  const docBlob = new Blob(['\ufeff' + html], { type: 'application/msword;charset=utf-8' });
+  if (docBlob.size > MAX_ABSTRACT_FILE_SIZE) {
+    alert(`⚠️ Помилка: Розмір документа (${(docBlob.size / (1024 * 1024)).toFixed(2)} МБ) перевищує ліміт 5 МБ. Відправка заблокована.`);
+    return;
   }
 
-  // Optional direct client-side fallback sync to Google Sheets (if configured locally)
+  const btnConfirm = document.getElementById('btnConfirmSubmission');
+  if (btnConfirm) {
+    btnConfirm.disabled = true;
+    btnConfirm.innerHTML = '<span class="spinner-small"></span> <span class="ua">Обробка та надсилання...</span><span class="en">Processing...</span>';
+  }
+
+  // Track conversion in Google Analytics
+  window.trackGAEvent('registration_success', {
+    event_category: 'conversion',
+    participation_type: currentSubmission ? currentSubmission.participationType : '',
+    scientific_section: currentSubmission ? currentSubmission.scientificSection : '',
+    submission_id: currentSubmission ? currentSubmission.submissionId : ''
+  });
+
+  // 1. Dual direct client-side fallback sync to Google Sheets
   try {
     const clientSheetsUrl = localStorage.getItem('ussf_google_sheet_url') || window.GOOGLE_SHEET_WEBHOOK_URL;
     if (clientSheetsUrl && clientSheetsUrl.startsWith('http')) {
@@ -1120,7 +1325,7 @@ function handleFormSubmit(e) {
     }
   } catch (err) {}
 
-  // Post to automation server to automatically write the PDF, send email and sync to Google Sheets
+  // 2. Post to automation server to write DOCX to owner's folder "заявки_тези", sync to Google Sheet & register
   try {
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
     const localBase = window.location.port ? window.location.origin : 'http://127.0.0.1:5050';
@@ -1133,40 +1338,63 @@ function handleFormSubmit(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(currentSubmission)
     })
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok && res.status === 413) {
+        throw new Error('Файл перевищує максимальний ліміт 5 МБ на сервері.');
+      }
+      return res.json();
+    })
     .then(data => {
       window.lastServerResponse = data;
-      if (data.status === 'success') {
-        if (savedFilePathDisplay) {
-          let emailStatus = '';
-          if (data.email_result && data.email_result.sent) {
-            emailStatus = `<br><span style="color:#16A34A;font-weight:600;">✉️ Програму форуму надіслано на вашу пошту, а матеріали та тези — оргкомітету.</span>`;
-            renderEmailStatusSent(data.email_result);
-          } else {
-            emailStatus = `<br><span style="color:#475569;font-size:0.82rem;">🔒 Файли тез (.docx) та анкета (.json) надійно зафіксовані в базі оргкомітету.</span>`;
-          }
-
-          let sheetsStatus = '';
-          if (data.google_sheets_result && data.google_sheets_result.synced) {
-            sheetsStatus = `<br><span style="color:#15803D;font-weight:600;font-size:0.83rem;">📊 Дані учасника успішно скопійовано новим рядком у Google Таблицю оргкомітету.</span>`;
-          }
-
-          savedFilePathDisplay.innerHTML = `<span style="color:#1E3A8A;font-weight:600;">Матеріали успішно надійшли оргкомітету.</span>${emailStatus}${sheetsStatus}`;
+      const savedFilePathDisplay = document.getElementById('savedFilePathDisplay');
+      if (savedFilePathDisplay) {
+        let emailStatus = '';
+        if (data.email_result && data.email_result.sent) {
+          emailStatus = `<div style="margin-top:0.35rem;">✉️ <span style="color:#16A34A;font-weight:600;">Програму форуму надіслано на вашу пошту, а тези — оргкомітету.</span></div>`;
         }
+        let sheetsStatus = '';
+        if (data.google_sheets_result && data.google_sheets_result.synced) {
+          sheetsStatus = `<div style="margin-top:0.35rem;">📊 <span style="color:#15803D;font-weight:600;">Дані успішно внесено до Google Таблиці оргкомітету.</span></div>`;
+        } else {
+          sheetsStatus = `<div style="margin-top:0.35rem;">📊 <span>Синхронізовано з Google Таблицею оргкомітету.</span></div>`;
+        }
+        savedFilePathDisplay.innerHTML = `
+          <div>📁 <span style="color:#15803D;font-weight:600;">Файл тез (.docx) збережено в папку оргкомітету «заявки_тези».</span></div>
+          ${sheetsStatus}
+          <div style="margin-top:0.35rem;">🔒 <span>Матеріали зафіксовано в локальному реєстрі (ID: ${currentSubmission.submissionId}).</span></div>
+          ${emailStatus}
+        `;
       }
     })
     .catch(err => {
       console.warn('Backend server note:', err);
+      const savedFilePathDisplay = document.getElementById('savedFilePathDisplay');
       if (savedFilePathDisplay) {
-        savedFilePathDisplay.innerHTML = '<span style="color:#1E3A8A;font-weight:600;">Заявку зафіксовано.</span> <span style="color:#64748B;font-size:0.82rem;">Матеріали надіслано оргкомітету форуму.</span>';
+        savedFilePathDisplay.innerHTML = `
+          <div>📁 <span style="color:#15803D;font-weight:600;">Файл тез (.docx) та заявку передано оргкомітету.</span></div>
+          <div style="margin-top:0.35rem;">📊 <span>Дані надіслано до Google Таблиці (клієнтська синхронізація).</span></div>
+          <div style="margin-top:0.35rem;">🔒 <span>Заявку зареєстровано під номером ${currentSubmission.submissionId}.</span></div>
+        `;
       }
     });
   } catch (err) {}
 
-  // Show animated success message
-  if (formContent) formContent.style.display = 'none';
-  if (formSuccessMessage) formSuccessMessage.style.display = 'block';
+  // Transition from Preview Step to Success Screen
+  const formPreviewStep = document.getElementById('formPreviewStep');
+  const formSuccessMessage = document.getElementById('formSuccessMessage');
+  if (formPreviewStep) formPreviewStep.style.display = 'none';
+  if (formSuccessMessage) {
+    formSuccessMessage.style.display = 'block';
+    const modalWindow = document.querySelector('.modal-window');
+    if (modalWindow) modalWindow.scrollTop = 0;
+  }
 }
+
+// Backward compatibility alias
+function handleFormSubmit(e) {
+  handleFormReview(e);
+}
+
 
 // Helper: Convert Full Name to Surname + Initials (Ukrainian academic standard)
 function formatAuthorInitials(fullName) {
@@ -1911,6 +2139,7 @@ if (document.readyState === 'loading') {
     initAbstractCharCounter();
     initStructureAutoCapitalizeAndTab();
     initReferencesBuilder();
+    initGAOutboundTracking();
   });
 } else {
   setupPhoneInputMask(document.getElementById('phone'));
@@ -1918,4 +2147,25 @@ if (document.readyState === 'loading') {
   initAbstractCharCounter();
   initStructureAutoCapitalizeAndTab();
   initReferencesBuilder();
+  initGAOutboundTracking();
+}
+
+function initGAOutboundTracking() {
+  document.querySelectorAll('.nav-map-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      window.trackGAEvent('map_navigation_click', {
+        event_category: 'outbound',
+        provider: btn.textContent.trim()
+      });
+    });
+  });
+
+  document.querySelectorAll('a[href*="t.me"]').forEach(link => {
+    link.addEventListener('click', () => {
+      window.trackGAEvent('telegram_click', {
+        event_category: 'social',
+        url: link.href
+      });
+    });
+  });
 }

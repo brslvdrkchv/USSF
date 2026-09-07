@@ -1,0 +1,9 @@
+{
+  "fullName": "Rate Limit Tester",
+  "email": "rl@test.com",
+  "phone": "+380 (50) 111-22-33",
+  "website_hp_check": "",
+  "submissionElapsedMs": 6000,
+  "turnstileToken": "mock_valid_token",
+  "partFormat": "listener"
+}
