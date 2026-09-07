@@ -1,0 +1,20 @@
+{
+  "fullName": "Кузнецов Олександр Олександрович",
+  "format": "active",
+  "institution": "Національний медичний університет імені О. О. Богомольця",
+  "department": "Кафедра хірургії №1",
+  "headOfDepartment": "проф. Пойда О. І.",
+  "scientificSupervisor": "проф. Білянський Л. С.",
+  "cityCountry": "м. Київ, Україна",
+  "abstractTitle": "Оптимізація передопераційної підготовки",
+  "abstractIntro": "Актуальність проблеми обумовлена високою частотою рецидивів.\n\tДругий абзац вступу з новими даними.\n\tТретій абзац вступу про патогенез.",
+  "abstractAim": "Мета: Оцінити ефективність запропонованої методики.",
+  "abstractMaterials": "Матеріали та методи: Досліджено 60 хворих.",
+  "abstractResults": "Результати: В основній групі ускладнень не спостерігалось.",
+  "abstractConclusion": "Висновки: Запропонований підхід є ефективним.",
+  "abstractKeywords": "герніопластика, сітчастий імплантат, рецидив",
+  "abstractReferences": "1. Smith, L. et al. (2024). Incisional Hernia Repair. JAWS, 3, 12452.\n2. Tanaka, E. Y. et al. (2023). Abdominal wall reconstruction. Hernia, 27(1), 45-52.",
+  "email": "test_participant@example.com",
+  "phone": "+380 (50) 123-45-67",
+  "telegram": "@alex_kuznetsov"
+}

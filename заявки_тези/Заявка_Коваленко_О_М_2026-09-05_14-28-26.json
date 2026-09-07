@@ -1,0 +1,23 @@
+{
+  "submissionId": "USSF-2026-TEST-REF-BUILDER",
+  "fullName": "коваленко олена михайлівна",
+  "abstractTitle": "сучасні погляди на антибактеріальну терапію в невідкладній хірургії",
+  "academicStatusText": "інтерн",
+  "institution": "НМУ імені О.О. Богомольця",
+  "department": "кафедра хірургії №2",
+  "scientificSupervisor": "д.мед.н., проф. Мішалов В. Г.",
+  "headOfDepartment": "д.мед.н., проф. Безродний Б. Г.",
+  "cityCountry": "м. Київ, Україна",
+  "email": "kovalenko@example.com",
+  "phone": "+380509876543",
+  "telegram": "@kovalenko_olena",
+  "sectionText": "Хірургія",
+  "partFormatText": "Усна доповідь + публікація тез",
+  "abstractIntro": "\tактуальність дослідження зумовлена зростанням антибіотикорезистентності.\n\tдругий абзац вступу з деталями.",
+  "abstractAim": "\tмета дослідження полягає у визначенні чутливості мікрофлори.",
+  "abstractMaterials": "\tматеріали і методи базуються на дослідженні посівів 95 хворих.",
+  "abstractResults": "\tрезультати свідчать про високу чутливість до карбапенемів.",
+  "abstractConclusion": "\tвисновок обґрунтовує корекцію емпіричної антибіотикотерапії.",
+  "abstractKeywords": "хірургія, сепсис, антибіотикотерапія",
+  "abstractReferences": "1. ковальчук л.я. клінічна хірургія. - тернопіль: укрмедкнига, 2021. - 380 с.\n2. dupont h. antibiotic therapy in intra-abdominal infections. - lancet infect dis 2023; 23(4):112-120."
+}

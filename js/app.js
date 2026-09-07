@@ -46,6 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const ph = (lang === 'en') ? el.getAttribute('data-placeholder-en') : el.getAttribute('data-placeholder-ua');
       if (ph) el.placeholder = ph;
     });
+
+    // Recompute title and hero art geometry for current language
+    requestAnimationFrame(() => {
+      updateHeroGeometry();
+    });
   }
 
   function toggleLanguage() {
@@ -54,6 +59,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (langToggle) langToggle.addEventListener('click', toggleLanguage);
   if (langToggleMobile) langToggleMobile.addEventListener('click', toggleLanguage);
+
+
+  // ==========================================
+  // 1b. HERO TITLE & ART GEOMETRY CALIBRATION
+  // Spatial margins: Distance(nav to title top) === Distance(screen left to title left) === Distance(screen right to title right)
+  // Art positioning: top === title.top + 0.75 * title.height (covers bottom 25% of title)
+  // Art alignment: right: 0 (flush to right screen edge)
+  // ==========================================
+  function updateHeroGeometry() {
+    if (window.innerWidth < 992) {
+      const heroSection = document.getElementById('hero');
+      if (heroSection) {
+        heroSection.style.removeProperty('--nav-bottom');
+        heroSection.style.removeProperty('--hero-title-gap');
+        heroSection.style.removeProperty('--hero-title-pad-top');
+        heroSection.style.removeProperty('--hero-title-height');
+      }
+      return;
+    }
+
+    const title = document.querySelector('.hero-title');
+    const nav = document.getElementById('mainNav');
+    const heroSection = document.getElementById('hero');
+    if (!title || !nav || !heroSection) return;
+
+    // Get active title span to get exact typographic bounding width
+    const isEn = body.classList.contains('lang-en');
+    const activeSpan = title.querySelector(isEn ? 'span.en' : 'span.ua') || title;
+    const spanRect = activeSpan.getBoundingClientRect();
+    const navRect = nav.getBoundingClientRect();
+
+    const titleWidth = spanRect.width > 0 ? spanRect.width : title.getBoundingClientRect().width;
+    const sideMargin = Math.max(16, (window.innerWidth - titleWidth) / 2);
+    const navBottom = navRect.bottom > 0 ? navRect.bottom : 64.6;
+
+    heroSection.style.setProperty('--nav-bottom', `${navBottom}px`);
+    if (spanRect.height > 0) {
+      heroSection.style.setProperty('--hero-title-height', `${spanRect.height}px`);
+    }
+  }
+
+  updateHeroGeometry();
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(updateHeroGeometry);
+  }
+  window.addEventListener('resize', updateHeroGeometry, { passive: true });
+  window.addEventListener('load', updateHeroGeometry, { passive: true });
+
+  if (window.ResizeObserver) {
+    const heroTitle = document.querySelector('.hero-title');
+    if (heroTitle) new ResizeObserver(updateHeroGeometry).observe(heroTitle);
+    const mainNav = document.getElementById('mainNav');
+    if (mainNav) new ResizeObserver(updateHeroGeometry).observe(mainNav);
+  }
 
 
   // ==========================================
@@ -1831,6 +1890,14 @@ async function saveGoogleSheetsConfig(e) {
   }
 }
 
+function toggleImradChecklist() {
+  const card = document.querySelector('.imrad-checklist-card');
+  if (card) {
+    card.classList.toggle('collapsed');
+  }
+}
+
+window.toggleImradChecklist = toggleImradChecklist;
 window.openGoogleSheetsModal = openGoogleSheetsModal;
 window.closeGoogleSheetsModal = closeGoogleSheetsModal;
 window.copyGoogleAppsScriptCode = copyGoogleAppsScriptCode;

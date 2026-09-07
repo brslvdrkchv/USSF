@@ -70,7 +70,7 @@
           <span class="ua">Всеукраїнський студентський хірургічний форум</span>
           <span class="en">Ukrainian Students Surgery Forum</span>
         </h1>
-        <!-- 3D Artwork: anchored to title bottom, invariant across Ctrl +/- zoom -->
+        <!-- 3D Artwork: fixed proportion, right: 0, top at 0.75 * line-height below title top -->
         <img src="images/Myroniuk/hero_USSF.png" alt="USSF 3D Art" class="hero-3d-art">
       </div>
 
@@ -122,8 +122,8 @@
         <!-- Welcome Speech & Overview -->
         <div class="about-text reveal">
           <div class="section-label">
-            <span class="ua">-- Про форум</span>
-            <span class="en">-- About the Forum</span>
+            <span class="ua">Про форум</span>
+            <span class="en">About the Forum</span>
           </div>
           <h2 class="section-title">
             <span class="ua">Шановні студенти та молоді вчені!</span>
@@ -147,24 +147,18 @@
 
   <!-- ============ ORGANIZERS & COMMITTEE SECTION ============ -->
   <section id="organizers">
-    <div class="organizers-bg-canvas"></div>
     <div class="section-inner" style="position: relative; z-index: 2;">
-      <div class="section-label light center">
-        <span class="ua">Організатори</span>
-        <span class="en">Organizers</span>
-      </div>
-      <h2 class="section-title light reveal" style="text-align: center;">
+      <h2 class="section-title reveal" style="text-align: center;">
         <span class="ua">Організатори форуму</span>
         <span class="en">Forum Organizers</span>
       </h2>
-      <div class="divider center"></div>
-
+      
       <!-- Institutions Grid -->
       <div class="organizers-grid">
         <!-- SNT / Patronage -->
         <div class="organizer-card reveal delay-1">
           <div class="organizer-logo-box">
-            <img src="images/Myroniuk/coin.png" alt="СНТ імені О.А. Киселя">
+            <img src="images/kisel.png" alt="СНТ імені О.А. Киселя">
           </div>
           <h3><span class="ua">СНТ імені О.А. Киселя</span><span class="en">SSP named after O.A. Kysil</span></h3>
           <p><span class="ua">Найстаріше студентське наукове товариство Східної Європи, яке цього року відзначає 145-річчя</span><span class="en">The oldest student scientific society in Eastern Europe, which is celebrating its 145th anniversary this year</span></p>
@@ -173,7 +167,7 @@
         <!-- Bogomolets NMU -->
         <div class="organizer-card reveal delay-2">
           <div class="organizer-logo-box">
-            <img src="images/big-logo.svg" alt="НМУ імені О.О. Богомольця">
+            <img src="images/little-logo.jpeg" alt="НМУ імені О.О. Богомольця">
           </div>
           <h3><span class="ua">НМУ імені О.О. Богомольця</span><span class="en">Bogomolets National Medical University</span></h3>
           <p><span class="ua">Провідний заклад вищої медичної освіти України з понад 180-річною історією</span><span class="en">Ukraine's premier medical university with over 180 years of excellence</span></p>
@@ -188,11 +182,9 @@
           <p><span class="ua">Опорна кафедра хірургічного профілю, центр інновацій та підготовки молодих хірургів</span><span class="en">Reference surgical department, hub of innovation and surgical training</span></p>
         </div>
       </div>
-
       <!-- Committee Sub-block -->
       <div class="organizers-committee-block">
         <div class="organizers-subheading reveal">
-
           <h3>
             <span class="ua">Організаційний комітет</span>
             <span class="en">Organizing Committee</span>
@@ -200,142 +192,148 @@
         </div>
 
         <div class="committee-grid">
-          <!-- Head of Committee: Prof. Zemskov -->
+          <!-- 1. Head of Committee: Prof. Zemskov -->
           <div class="leader-card reveal delay-1">
-            <div class="leader-avatar">СЗ</div>
+            <div class="leader-avatar"><span class="ua">СЗ</span><span class="en">SZ</span></div>
             <div class="leader-info">
               <span class="leader-role-badge"><span class="ua">Голова оргкомітету</span><span class="en">Head of Committee</span></span>
               <h3><span class="ua">Земсков Сергій Володимирович</span><span class="en">Serhii Zemskov</span></h3>
               <p class="leader-bio">
-                <span class="ua">Директор Навчально-наукового інституту медицини НМУ імені О.О. Богомольця, професор кафедри загальної та невідкладної хірургії, доктор медичних наук, професор.</span>
-                <span class="en">Director of the Educational and Scientific Institute of Medicine of Bogomolets NMU, Professor of the Department of General and Emergency Surgery, MD, Dr. Med. Sci., Professor.</span>
+                <span class="ua">Директор Навчально-наукового інституту медицини, професор кафедри загальної та невідкладної хірургії, д.мед.н., професор, лікар-онколог, онкохірург.</span>
+                <span class="en">Director of the Educational and Scientific Institute of Medicine, Professor of the Department of General and Emergency Surgery, MD, Dr. Med. Sci., Professor, Surgical Oncologist.</span>
               </p>
             </div>
           </div>
 
-          <!-- Co-head: Prof. Susak -->
+          <!-- 2. Co-head: Prof. Susak -->
           <div class="leader-card reveal delay-2">
-            <div class="leader-avatar">ЯС</div>
+            <div class="leader-avatar"><span class="ua">ЯС</span><span class="en">YS</span></div>
             <div class="leader-info">
               <span class="leader-role-badge"><span class="ua">Співголова оргкомітету</span><span class="en">Co-Head of Committee</span></span>
               <h3><span class="ua">Сусак Ярослав Михайлович</span><span class="en">Yaroslav Susak</span></h3>
               <p class="leader-bio">
-                <span class="ua">Завідувач кафедри хірургії з курсом гепатобіліарної та судинної хірургії, доктор медичних наук, професор, заслужений лікар України, головний редактор журналу «Загальна хірургія».</span>
+                <span class="ua">Завідувач кафедри хірургії з курсом гепатобіліарної та судинної хірургії, д.мед.н., професор, заслужений лікар України, головний редактор журналу «Загальна хірургія».</span>
                 <span class="en">Head of the Department of Surgery with Course of Hepatobiliary & Vascular Surgery, MD, Dr. Med. Sci., Professor, Honored Doctor of Ukraine, Editor-in-Chief of "General Surgery" Journal.</span>
               </p>
             </div>
           </div>
 
-          <!-- Committee Member 3: Prof. Kovalchuk -->
+          <!-- 3. Deputy Head: Assoc. Prof. Tsymbaliuk -->
           <div class="leader-card reveal delay-3">
-            <div class="leader-avatar">ЛК</div>
+            <div class="leader-avatar"><span class="ua">РЦ</span><span class="en">RT</span></div>
             <div class="leader-info">
-              <span class="leader-role-badge"><span class="ua">Член оргкомітету</span><span class="en">Committee Member</span></span>
-              <h3><span class="ua">Ковальчук Леонід Якимович</span><span class="en">Leonid Kovalchuk</span></h3>
+              <span class="leader-role-badge"><span class="ua">Заступник голови</span><span class="en">Deputy Head</span></span>
+              <h3><span class="ua">Цимбалюк Руслан Степанович</span><span class="en">Ruslan Tsymbaliuk</span></h3>
               <p class="leader-bio">
-                <span class="ua">Професор кафедри хірургії №1 НМУ імені О.О. Богомольця, доктор медичних наук, експерт з ендовідеохірургії та малоінвазивних втручань.</span>
-                <span class="en">Professor of the Department of Surgery No. 1 at Bogomolets NMU, MD, Dr. Med. Sci., expert in endovideosurgery and minimally invasive procedures.</span>
+                <span class="ua">Заступник директора ННІ Медицини по роботі з 1-3 курсом, доцент кафедри загальної та невідкладної хірургії, к.мед.н., доцент, Заслужений лікар України.</span>
+                <span class="en">Deputy Director of the Educational and Scientific Institute of Medicine (Years 1–3), Associate Professor of the Department of General and Emergency Surgery, MD, PhD, Associate Professor, Honored Doctor of Ukraine.</span>
               </p>
             </div>
           </div>
 
-          <!-- Committee Member 4: Assoc. Prof. Melnyk -->
+          <!-- 4. Deputy Head: Assoc. Prof. Moroz -->
           <div class="leader-card reveal delay-4">
-            <div class="leader-avatar">ОМ</div>
+            <div class="leader-avatar"><span class="ua">ВМ</span><span class="en">VM</span></div>
+            <div class="leader-info">
+              <span class="leader-role-badge"><span class="ua">Заступник голови</span><span class="en">Deputy Head</span></span>
+              <h3><span class="ua">Мороз Владислав Владиславович</span><span class="en">Vladyslav Moroz</span></h3>
+              <p class="leader-bio">
+                <span class="ua">Доцент кафедри хірургії з курсом гепатобіліарної та судинної хірургії, к.мед.н., доцент, науковий керівник студентського наукового гуртка.</span>
+                <span class="en">Associate Professor of the Department of Surgery with Course of Hepatobiliary and Vascular Surgery, MD, PhD, Associate Professor, Scientific Advisor of the Student Scientific Club.</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- 5. Committee Member: Prof. Dronov -->
+          <div class="leader-card reveal delay-5">
+            <div class="leader-avatar"><span class="ua">ОД</span><span class="en">OD</span></div>
+            <div class="leader-info">
+              <span class="leader-role-badge"><span class="ua">Член оргкомітету</span><span class="en">Committee Member</span></span>
+              <h3><span class="ua">Дронов Олексій Васильович</span><span class="en">Oleksii Dronov</span></h3>
+              <p class="leader-bio">
+                <span class="ua">Завідувач кафедри загальної та невідкладної хірургії, д.мед.н., професор, Заслужений діяч науки і техніки України.</span>
+                <span class="en">Head of the Department of General and Emergency Surgery, MD, Dr. Med. Sci., Professor, Honored Worker of Science and Technology of Ukraine.</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- 6. Committee Member: Assoc. Prof. Burlaka -->
+          <div class="leader-card reveal delay-6">
+            <div class="leader-avatar"><span class="ua">АБ</span><span class="en">AB</span></div>
+            <div class="leader-info">
+              <span class="leader-role-badge"><span class="ua">Член оргкомітету</span><span class="en">Committee Member</span></span>
+              <h3><span class="ua">Бурлака Антон Анатолійович</span><span class="en">Anton Burlaka</span></h3>
+              <p class="leader-bio">
+                <span class="ua">Завідувач кафедри онкології, д.мед.н., доцент, лікар-онкохірург.</span>
+                <span class="en">Head of the Department of Oncology, MD, Dr. Med. Sci., Associate Professor, Surgical Oncologist.</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- 7. Committee Member: Prof. Kolosovych -->
+          <div class="leader-card reveal delay-7">
+            <div class="leader-avatar"><span class="ua">ІК</span><span class="en">IK</span></div>
+            <div class="leader-info">
+              <span class="leader-role-badge"><span class="ua">Член оргкомітету</span><span class="en">Committee Member</span></span>
+              <h3><span class="ua">Колосович Ігор Володимирович</span><span class="en">Ihor Kolosovych</span></h3>
+              <p class="leader-bio">
+                <span class="ua">Завідувач кафедри хірургії з курсом абдомінальної хірургії, д.мед.наук, професор, лауреат премії НАН України.</span>
+                <span class="en">Head of the Department of Surgery with Course of Abdominal Surgery, MD, Dr. Med. Sci., Professor, Laureate of the National Academy of Sciences of Ukraine Prize.</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- 8. Committee Member: Prof. Ioffe -->
+          <div class="leader-card reveal delay-8">
+            <div class="leader-avatar"><span class="ua">ОІ</span><span class="en">OI</span></div>
+            <div class="leader-info">
+              <span class="leader-role-badge"><span class="ua">Член оргкомітету</span><span class="en">Committee Member</span></span>
+              <h3><span class="ua">Іоффе Олександр Юлійович</span><span class="en">Oleksandr Ioffe</span></h3>
+              <p class="leader-bio">
+                <span class="ua">Завідувач кафедри хірургії інституту стоматології, д.мед.н., професор, Заслужений лікар України.</span>
+                <span class="en">Head of the Department of Surgery at the Institute of Dentistry, MD, Dr. Med. Sci., Professor, Honored Doctor of Ukraine.</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- 9. Executive Secretary: Oleksii Kuznetsov -->
+          <div class="leader-card reveal delay-9">
+            <div class="leader-avatar"><span class="ua">ОК</span><span class="en">OK</span></div>
             <div class="leader-info">
               <span class="leader-role-badge"><span class="ua">Відповідальний секретар</span><span class="en">Executive Secretary</span></span>
-              <h3><span class="ua">Мельник Оксана Василівна</span><span class="en">Oksana Melnyk</span></h3>
+              <h3><span class="ua">Кузнецов Олексій</span><span class="en">Oleksii Kuznetsov</span></h3>
               <p class="leader-bio">
-                <span class="ua">Доцент кафедри загальної та невідкладної хірургії, кандидат медичних наук, координатор міжнародних академічних зв'язків та студентських публікацій.</span>
-                <span class="en">Associate Professor of General and Emergency Surgery, MD, PhD, Coordinator of International Academic Relations and Student Publications.</span>
+                <span class="ua">Студент 4 курсу ННІ Медицини, староста гуртка кафедри хірургії з курсом гепатобіліарної та судинної хірургії.</span>
+                <span class="en">4th-year Medical Student, Head of the Student Scientific Club of the Department of Surgery with Course of Hepatobiliary and Vascular Surgery.</span>
               </p>
             </div>
           </div>
 
-          <!-- Committee Member 5: Prof. Tkachenko -->
-          <div class="leader-card reveal delay-5">
-            <div class="leader-avatar">АТ</div>
-            <div class="leader-info">
-              <span class="leader-role-badge"><span class="ua">Член оргкомітету</span><span class="en">Committee Member</span></span>
-              <h3><span class="ua">Ткаченко Андрій Миколайович</span><span class="en">Andrii Tkachenko</span></h3>
-              <p class="leader-bio">
-                <span class="ua">Професор кафедри травматології та ортопедії НМУ, доктор медичних наук, провідний фахівець з надання невідкладної допомоги при бойовій хірургічній травмі.</span>
-                <span class="en">Professor of the Department of Traumatology and Orthopedics, MD, Dr. Med. Sci., leading specialist in emergency care for combat surgical trauma.</span>
-              </p>
-            </div>
-          </div>
-
-          <!-- Committee Member 6: Assoc. Prof. Shevchenko -->
-          <div class="leader-card reveal delay-6">
-            <div class="leader-avatar">ВШ</div>
-            <div class="leader-info">
-              <span class="leader-role-badge"><span class="ua">Координатор воркшопів</span><span class="en">Workshop Coordinator</span></span>
-              <h3><span class="ua">Шевченко Віктор Іванович</span><span class="en">Viktor Shevchenko</span></h3>
-              <p class="leader-bio">
-                <span class="ua">Доцент кафедри анестезіології та інтенсивної терапії, кандидат медичних наук, куратор симуляційних хірургічних тренінгів та FAST-протоколів.</span>
-                <span class="en">Associate Professor of Anesthesiology and Intensive Care, MD, PhD, Curator of Surgical Simulation Trainings and FAST Protocols.</span>
-              </p>
-            </div>
-          </div>
-
-          <!-- Committee Member 7: Assoc. Prof. Kravchenko -->
-          <div class="leader-card reveal delay-7">
-            <div class="leader-avatar">НК</div>
-            <div class="leader-info">
-              <span class="leader-role-badge"><span class="ua">Науковий редактор</span><span class="en">Scientific Editor</span></span>
-              <h3><span class="ua">Кравченко Наталія Петрівна</span><span class="en">Nataliia Kravchenko</span></h3>
-              <p class="leader-bio">
-                <span class="ua">Доцент кафедри онкології, кандидат медичних наук, голова експертної ради рецензування тез секції онкохірургії та реконструктивної медицини.</span>
-                <span class="en">Associate Professor of Oncology, MD, PhD, Head of the Abstract Review Board for Oncosurgery and Reconstructive Medicine.</span>
-              </p>
-            </div>
-          </div>
-
-          <!-- Committee Member 8: Assoc. Prof. Bondarenko -->
-          <div class="leader-card reveal delay-8">
-            <div class="leader-avatar">ІБ</div>
-            <div class="leader-info">
-              <span class="leader-role-badge"><span class="ua">Куратор СНТ</span><span class="en">SSS Curator</span></span>
-              <h3><span class="ua">Бондаренко Ігор Романович</span><span class="en">Ihor Bondarenko</span></h3>
-              <p class="leader-bio">
-                <span class="ua">Доцент кафедри дитячої хірургії, кандидат медичних наук, науковий куратор Товариства молодих вчених і спеціалістів імені О.А. Киселя.</span>
-                <span class="en">Associate Professor of Pediatric Surgery, MD, PhD, Scientific Curator of the O.A. Kysil Society of Young Scientists and Specialists.</span>
-              </p>
-            </div>
-          </div>
-
-          <!-- Committee Member 9: Student Chair Bondar -->
-          <div class="leader-card reveal delay-9">
-            <div class="leader-avatar">ЮБ</div>
-            <div class="leader-info">
-              <span class="leader-role-badge"><span class="ua">Голова студентського оргкомітету</span><span class="en">Student Committee Head</span></span>
-              <h3><span class="ua">Бондар Юлія Олександрівна</span><span class="en">Yuliia Bondar</span></h3>
-              <p class="leader-bio">
-                <span class="ua">Студентка 5-го курсу медичного факультету №1, староста студентського наукового гуртка кафедри хірургії з курсом гепатобіліарної хірургії.</span>
-                <span class="en">5th-year medical student, Faculty No. 1, Head of the Student Scientific Surgery Club at the Department of Surgery with Hepatobiliary Course.</span>
-              </p>
-            </div>
-          </div>
-
-          <!-- Committee Member 10: Logistics Coordinator Marchenko -->
+          <!-- 10. Graphic Designer: Anastasiia Myroniuk -->
           <div class="leader-card reveal delay-10">
-            <div class="leader-avatar">АМ</div>
+            <div class="leader-avatar"><span class="ua">АМ</span><span class="en">AM</span></div>
             <div class="leader-info">
-              <span class="leader-role-badge"><span class="ua">Координатор логістики та IT</span><span class="en">Logistics & IT Coordinator</span></span>
-              <h3><span class="ua">Марченко Артем Григорович</span><span class="en">Artem Marchenko</span></h3>
+              <span class="leader-role-badge"><span class="ua">Графічний дизайнер</span><span class="en">Graphic Designer</span></span>
+              <h3><span class="ua">Миронюк Анастасія</span><span class="en">Anastasiia Myroniuk</span></h3>
               <p class="leader-bio">
-                <span class="ua">Лікар-інтерн першого року за спеціальністю «Хірургія», координатор волонтерської команди, цифрової платформи реєстрації та трансляцій.</span>
-                <span class="en">First-year surgical resident, coordinator of the volunteer team, digital registration platform, and live broadcasts.</span>
+                <span class="ua">Студентка 4 курсу ННІ Медицини, староста гуртка оперативної хірургії та топографічної анатомії.</span>
+                <span class="en">4th-year Medical Student, Head of the Student Scientific Club of Operative Surgery and Topographic Anatomy.</span>
               </p>
             </div>
           </div>
-        </div>
 
-        <div class="committee-note reveal">
-          <p>
-            <span class="ua">До складу комітету входять завідувачі хірургічних кафедр та керівники студентських наукових гуртків НМУ імені О.О. Богомольця.</span>
-            <span class="en">The committee also comprises the heads of surgical departments and student scientific society directors of Bogomolets NMU.</span>
-          </p>
+          <!-- 11. Fullstack Developer: Boryslav Derkachov -->
+          <div class="leader-card reveal delay-11">
+            <div class="leader-avatar"><span class="ua">БД</span><span class="en">BD</span></div>
+            <div class="leader-info">
+              <span class="leader-role-badge"><span class="ua">Fullstack-developer</span><span class="en">Fullstack Developer</span></span>
+              <h3><span class="ua">Деркачов Борислав</span><span class="en">Boryslav Derkachov</span></h3>
+              <p class="leader-bio">
+                <span class="ua">Студент 4 курсу ННІ Медицини.</span>
+                <span class="en">4th-year Medical Student, Fullstack Developer.</span>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -411,8 +409,6 @@
           <div class="divider"></div>
         </div>
       </div>
-
-      <!-- ============ 1. ВШИТИЙ PDF ЧИТАЧ НАУКОВОЇ ПРОГРАМИ ============ -->
 
 
       <!-- ============ 3. ДВІ ГОЛОВНІ КНОПКИ ДНІВ (ПІСЛЯ PDF ЧИТАЧА) ============ -->
@@ -615,14 +611,14 @@
               <span class="ua">Другий день форуму цілковито присвячений відпрацюванню практичних навичок у невеликих групах на сучасному тренажерному обладнанні хірургічних кафедр та симуляційного центру НМУ імені О.О. Богомольця під персональним керівництвом провідних викладачів та хірургів.</span>
               <span class="en">The second day is entirely devoted to hands-on skill workshops in small groups using state-of-the-art surgical simulators under the direct mentorship of leading professors and surgeons.</span>
             </p>
-            <div style="font-size: 0.88rem; color: var(--gold-light);">
+            <div style="font-size: 0.88rem; color: #fbbf24;">
               <span class="ua">⚠️ <strong>Увага:</strong> Кількість місць обмежена! Пріоритет у реєстрації на воркшопи надається учасникам з усними доповідями.</span>
               <span class="en">⚠️ <strong>Note:</strong> Limited seats available! Priority is granted to registered participants presenting oral papers.</span>
             </div>
           </div>
 
           <div>
-            <h4 style="font-family: var(--font-serif); font-size: 1.3rem; color: var(--cream); margin-bottom: 1rem;">
+            <h4 style="font-family: var(--font-serif); font-size: 1.3rem; color: #ffffff; margin-bottom: 1rem;">
               <span class="ua">Напрямки воркшопів:</span>
               <span class="en">Workshop Directions:</span>
             </h4>
@@ -659,8 +655,8 @@
   <section id="registration">
     <div class="section-inner">
       <div class="section-label center">
-        <span class="ua">Умови участі</span>
-        <span class="en">Submission & Registration</span>
+        <span class="ua">Реєстрація</span>
+        <span class="en">Registration</span>
       </div>
       <h2 class="section-title reveal" style="text-align: center;">
         <span class="ua">Подання матеріалів та реєстрація</span>
@@ -742,9 +738,9 @@
               <span class="ua">Як дістатися:</span><span class="en">Getting There:</span>
             </h4>
             <ul>
-              <li>🚇 <span><strong style="color:var(--navy-dark);"><span class="ua">Метро:</span><span class="en">Metro:</span></strong> <span class="ua">Станція «Політехнічний інститут» або «Шулявська» (червона лінія) — 5–7 хв. пішки.</span><span class="en">"Politekhnichnyi Instytut" or "Shuliavska" station (Red line) — 5–7 min walk.</span></span></li>
-              <li>🚌 <span><strong style="color:var(--navy-dark);"><span class="ua">Наземний транспорт:</span><span class="en">Public Transit:</span></strong> <span class="ua">Автобуси, тролейбуси та маршрутні таксі по Берестейському проспекту (зупинка «Парк КПІ» або «Зоопарк»).</span><span class="en">Buses and trolleybuses along Beresteiskyi Ave (stop "KPI Park" or "Zoo").</span></span></li>
-              <li>🅿️ <span><strong style="color:var(--navy-dark);"><span class="ua">Паркування:</span><span class="en">Parking:</span></strong> <span class="ua">Доступний паркувальний майданчик поруч із університетським кампусом.</span><span class="en">Parking spaces available adjacent to the university campus.</span></span></li>
+              <li>🚇 <span><strong style="color:var(--brand-main);"><span class="ua">Метро:</span><span class="en">Metro:</span></strong> <span class="ua">Станція «Політехнічний інститут» або «Шулявська» (червона лінія) — 5–7 хв. пішки.</span><span class="en">"Politekhnichnyi Instytut" or "Shuliavska" station (Red line) — 5–7 min walk.</span></span></li>
+              <li>🚌 <span><strong style="color:var(--brand-main);"><span class="ua">Наземний транспорт:</span><span class="en">Public Transit:</span></strong> <span class="ua">Автобуси, тролейбуси та маршрутні таксі по Берестейському проспекту (зупинка «Парк КПІ» або «Зоопарк»).</span><span class="en">Buses and trolleybuses along Beresteiskyi Ave (stop "KPI Park" or "Zoo").</span></span></li>
+              <li>🅿️ <span><strong style="color:var(--brand-main);"><span class="ua">Паркування:</span><span class="en">Parking:</span></strong> <span class="ua">Доступний паркувальний майданчик поруч із університетським кампусом.</span><span class="en">Parking spaces available adjacent to the university campus.</span></span></li>
             </ul>
           </div>
 
@@ -935,10 +931,6 @@
         <p>© 2026 USSF · <span class="ua">НМУ імені О.О. Богомольця. Всі права захищено.</span><span class="en">Bogomolets NMU. All rights reserved.</span></p>
         <p>
           <span class="ua">Створено для розвитку хірургічної молоді України</span><span class="en">Empowering the surgical youth of Ukraine</span>
-          <span style="display:inline-block; margin: 0 0.5rem; opacity: 0.5;">·</span>
-          <button type="button" onclick="openGoogleSheetsModal()" style="background:none; border:none; color:inherit; font-size:0.8rem; cursor:pointer; text-decoration:underline; opacity:0.85; padding:0; font-family:inherit;" title="Налаштування синхронізації з Google Sheets">
-            📊 <span class="ua">Google Таблиця</span><span class="en">Google Sheets</span>
-          </button>
         </p>
       </div>
     </div>
@@ -1008,6 +1000,10 @@
           <div class="form-group" id="abstractTitleGroup">
             <label for="abstractTitle"><span class="ua">Тема наукової роботи / тез *</span><span class="en">Abstract / Presentation Title *</span></label>
             <input type="text" id="abstractTitle" placeholder="Тема вашої наукової роботи" data-placeholder-ua="Тема вашої наукової роботи" data-placeholder-en="Title of your research paper">
+            <span class="field-hint">
+              <span class="ua">Лаконічна та змістовна (відображає суть втручання/патології), без абревіатур і крапки наприкінці</span>
+              <span class="en">Concise and informative (reflects the intervention/pathology), without acronyms or trailing period</span>
+            </span>
           </div>
 
           <div class="abstract-structured-container" id="abstractFileGroup">
@@ -1076,6 +1072,214 @@
               <span class="en">Abstract Structure (Official NMU Template)</span>
             </div>
 
+            <!-- ============ IMRAD CHECKLIST CARD ============ -->
+            <div class="imrad-checklist-card">
+              <div class="imrad-checklist-header" onclick="toggleImradChecklist()">
+                <div class="imrad-header-left">
+                  <div class="imrad-icon-badge">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <path d="M9 11l3 3L22 4"/>
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="imrad-badge-tag">
+                      <span class="ua">Критерії рецензування тез</span>
+                      <span class="en">Abstract Peer-Review Criteria</span>
+                    </div>
+                    <h4 class="imrad-title">
+                      <span class="ua">Checklist змісту тез за структурою IMRAD</span>
+                      <span class="en">IMRAD Abstract Content Checklist</span>
+                    </h4>
+                  </div>
+                </div>
+                <div class="imrad-header-right">
+                  <span class="imrad-toggle-hint">
+                    <span class="ua">Згорнути / Розгорнути</span>
+                    <span class="en">Collapse / Expand</span>
+                  </span>
+                  <svg class="imrad-chevron" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="imrad-alert-box">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span>
+                  <span class="ua"><strong>Перевірте свій текст перед заповненням форми:</strong> дотримання цих пунктів є головним критерієм проходження рецензування.</span>
+                  <span class="en"><strong>Check your text before submitting:</strong> compliance with these criteria is the primary basis for peer-review approval.</span>
+                </span>
+              </div>
+
+              <div class="imrad-checklist-body" id="imradChecklistBody">
+                <div class="imrad-sections-grid">
+                  <!-- 1. Назва роботи (Title) -->
+                  <div class="imrad-step-card">
+                    <div class="imrad-step-num">1</div>
+                    <div class="imrad-step-content">
+                      <div class="imrad-step-title">
+                        <span class="ua">1. Назва роботи (Title)</span>
+                        <span class="en">1. Paper Title</span>
+                      </div>
+                      <ul class="imrad-points">
+                        <li>
+                          <span class="ua">Лаконічна та змістовна (відображає суть втручання/патології).</span>
+                          <span class="en">Concise and informative (reflects the intervention/pathology).</span>
+                        </li>
+                        <li>
+                          <span class="ua">Не містить абревіатур, скорочень та крапки наприкінці.</span>
+                          <span class="en">Contains no acronyms, abbreviations, or trailing period.</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <!-- 2. Вступ та мета (Introduction & Objective) -->
+                  <div class="imrad-step-card">
+                    <div class="imrad-step-num">2</div>
+                    <div class="imrad-step-content">
+                      <div class="imrad-step-title">
+                        <span class="ua">2. Вступ та мета (Intro & Objective)</span>
+                        <span class="en">2. Introduction & Objective</span>
+                      </div>
+                      <ul class="imrad-points">
+                        <li>
+                          <span class="ua">Чітко окреслено клінічну актуальність проблеми (1–2 речення).</span>
+                          <span class="en">Clearly defines clinical relevance of the issue (1–2 sentences).</span>
+                        </li>
+                        <li>
+                          <span class="ua">Сформульовано невирішене питання або прогалину в сучасній хірургічній практиці.</span>
+                          <span class="en">Formulates the unresolved question or gap in modern surgery.</span>
+                        </li>
+                        <li>
+                          <span class="ua">Мета починається з дієслова («Оцінити...», «Порівняти...», «Проаналізувати...») і суворо відповідає назві роботи.</span>
+                          <span class="en">Objective begins with an action verb ("Evaluate...", "Compare...", "Analyze...") and strictly matches the title.</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <!-- 3. Матеріали та методи (Materials & Methods) -->
+                  <div class="imrad-step-card">
+                    <div class="imrad-step-num">3</div>
+                    <div class="imrad-step-content">
+                      <div class="imrad-step-title">
+                        <span class="ua">3. Матеріали та методи (Methods)</span>
+                        <span class="en">3. Materials & Methods</span>
+                      </div>
+                      <ul class="imrad-points">
+                        <li>
+                          <span class="ua">Зазначено дизайн дослідження (проспективне, ретроспективне, когортне, рандомізоване тощо).</span>
+                          <span class="en">Study design specified (prospective, retrospective, cohort, randomized, etc.).</span>
+                        </li>
+                        <li>
+                          <span class="ua">Описано клінічну базу та період проведення дослідження.</span>
+                          <span class="en">Clinical setting and study timeframe described.</span>
+                        </li>
+                        <li>
+                          <span class="ua">Вказано обсяг вибірки: кількість пацієнтів/спостережень, критерії включення та виключення.</span>
+                          <span class="en">Sample size stated: number of patients/cases, inclusion & exclusion criteria.</span>
+                        </li>
+                        <li>
+                          <span class="ua">Чітко описано порівнювані групи (основна та контрольна), хірургічні доступи, методики втручань або маркери.</span>
+                          <span class="en">Comparison groups (main vs. control), surgical approaches, interventions, or markers detailed.</span>
+                        </li>
+                        <li>
+                          <span class="ua">Наведено методи статистичної обробки даних (назва ПЗ, критерії оцінки достовірності тощо).</span>
+                          <span class="en">Statistical methods specified (software, significance criteria, tests used).</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <!-- 4. Результати (Results) -->
+                  <div class="imrad-step-card">
+                    <div class="imrad-step-num">4</div>
+                    <div class="imrad-step-content">
+                      <div class="imrad-step-title">
+                        <span class="ua">4. Результати (Results)</span>
+                        <span class="en">4. Results</span>
+                      </div>
+                      <ul class="imrad-points">
+                        <li>
+                          <span class="ua">Наведено конкретні кількісні дані (абсолютні цифри, відсотки, медіани/середні), а не загальні описи.</span>
+                          <span class="en">Specific quantitative data provided (figures, %, medians/means), not general summaries.</span>
+                        </li>
+                        <li>
+                          <span class="ua">Зазначено показники статистичної значущості (p-значення, довірчі інтервали 95% CI тощо).</span>
+                          <span class="en">Statistical significance reported (p-values, 95% confidence intervals, etc.).</span>
+                        </li>
+                        <li>
+                          <span class="ua">Відображено ключові кінцеві точки (тривалість операції, крововтрата, ускладнення, ліжко-день, летальність).</span>
+                          <span class="en">Key primary/secondary endpoints detailed (operative time, blood loss, complications, hospital stay, mortality).</span>
+                        </li>
+                        <li>
+                          <span class="ua">Результати строго відповідають поставленій меті та наведеній методології.</span>
+                          <span class="en">Findings strictly correspond to stated objectives and methodology.</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <!-- 5. Висновки (Conclusions) -->
+                  <div class="imrad-step-card">
+                    <div class="imrad-step-num">5</div>
+                    <div class="imrad-step-content">
+                      <div class="imrad-step-title">
+                        <span class="ua">5. Висновки (Conclusions)</span>
+                        <span class="en">5. Conclusions</span>
+                      </div>
+                      <ul class="imrad-points">
+                        <li>
+                          <span class="ua">Чіткі, конкретні тези, що безпосередньо випливають з отриманих результатів (без повторення всього масиву цифр).</span>
+                          <span class="en">Clear, concise points directly stemming from results (without duplicating raw numeric tables).</span>
+                        </li>
+                        <li>
+                          <span class="ua">Дано пряму відповідь на мету дослідження.</span>
+                          <span class="en">Directly addresses the primary research objective.</span>
+                        </li>
+                        <li>
+                          <span class="ua">Сформульовано практичну цінність для хірурга або перспективи подальших досліджень.</span>
+                          <span class="en">Clinical utility for practicing surgeons or future research directions outlined.</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Технічні правила для полів вводу -->
+                <div class="imrad-tech-rules">
+                  <div class="imrad-tech-heading">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <span class="ua">Технічні правила для полів вводу</span>
+                    <span class="en">Technical Input Rules</span>
+                  </div>
+                  <div class="imrad-tech-grid">
+                    <div class="imrad-tech-item">
+                      <strong><span class="ua">🔤 Скорочення:</span><span class="en">🔤 Abbreviations:</span></strong>
+                      <span class="ua">Будь-яка абревіатура розшифровується при першому згадуванні в тексті (наприклад: трансанальна тотальна мезоректумектомія (taTME)).</span>
+                      <span class="en">Any abbreviation is spelled out upon first mention (e.g., transanal total mesorectal excision (taTME)).</span>
+                    </div>
+                    <div class="imrad-tech-item">
+                      <strong><span class="ua">📄 Без таблиць та ілюстрацій:</span><span class="en">📄 Text Only:</span></strong>
+                      <span class="ua">Поля розраховані виключно на текстовий формат. Усі ключові показники мають бути інтегровані в речення блоку «Результати».</span>
+                      <span class="en">Fields accept plain text only. All quantitative parameters must be integrated directly into sentences in the Results section.</span>
+                    </div>
+                    <div class="imrad-tech-item">
+                      <strong><span class="ua">⚖️ Академічна доброчесність:</span><span class="en">⚖️ Academic Integrity:</span></strong>
+                      <span class="ua">Плагіат, компіляція чужих текстів без посилань та фальсифікація статистичних даних суворо заборонені.</span>
+                      <span class="en">Plagiarism, unattributed copy-pasting, and statistical data fabrication are strictly prohibited.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- ============ ПОРАДА ЩОДО АВТОМАТИЧНОГО ОФОРМЛЕННЯ ТА ЛІЧИЛЬНИК СИМВОЛІВ ============ -->
             <div class="abstract-tip-banner">
               <div class="abstract-tip-header">
@@ -1092,8 +1296,8 @@
               </div>
 
               <p class="abstract-tip-message">
-                <span class="ua">💡 <strong>Зручність публікації:</strong> будь ласка, починайте введення в кожному полі безпосередньо з тексту вашого дослідження. Назви розділів («Вступ:», «Мета:», «Матеріали і методи:», «Результати:», «Висновок:») наша видавнича система додає, форматує та виділяє жирним шрифтом автоматично згідно з вимогами ВАК/НМУ.</span>
-                <span class="en">💡 <strong>Publication Convenience:</strong> please begin typing directly with the narrative of your study. Section headings ("Introduction:", "Aim:", "Materials and Methods:", "Results:", "Conclusion:") will be automatically added, styled, and bolded by our publishing system in compliance with academic editorial standards.</span>
+                <span class="ua">💡 <strong>Зручність публікації:</strong> починайте введення в кожному полі безпосередньо з тексту вашого дослідження. Назви розділів («Вступ:», «Мета:», «Матеріали і методи:», «Результати:», «Висновок:») наша видавнича система додає, форматує та виділяє жирним шрифтом автоматично згідно з вимогами ВАК/НМУ.</span>
+                <span class="en">💡 <strong>Publication Convenience:</strong> begin typing directly with the narrative of your study. Section headings ("Introduction:", "Aim:", "Materials and Methods:", "Results:", "Conclusion:") will be automatically added, styled, and bolded by our publishing system in compliance with academic editorial standards.</span>
               </p>
 
               <!-- Інтерактивний лічильник символів -->
@@ -1116,30 +1320,50 @@
             <div class="form-group">
               <label for="abstractIntro"><span class="ua">Вступ *</span><span class="en">Introduction *</span></label>
               <textarea id="abstractIntro" rows="3" placeholder="Стан досліджуваної проблеми..." data-placeholder-ua="Стан досліджуваної проблеми..." data-placeholder-en="Research background..."></textarea>
+              <span class="field-hint">
+                <span class="ua">Клінічна актуальність (1–2 речення) та невирішене питання у сучасній хірургії</span>
+                <span class="en">Clinical relevance of the issue (1–2 sentences) and unresolved surgical question</span>
+              </span>
             </div>
 
             <!-- 2. Мета: -->
             <div class="form-group">
               <label for="abstractAim"><span class="ua">Мета *</span><span class="en">Aim *</span></label>
               <textarea id="abstractAim" rows="2" placeholder="Мета дослідження та завдання..." data-placeholder-ua="Мета дослідження та завдання..." data-placeholder-en="Aim of the study and objectives..."></textarea>
+              <span class="field-hint">
+                <span class="ua">Починається з дієслова («Оцінити...», «Порівняти...», «Проаналізувати...») і суворо відповідає назві роботи</span>
+                <span class="en">Begins with an action verb ("To evaluate...", "To compare...", "To analyze...") strictly matching the title</span>
+              </span>
             </div>
 
             <!-- 3. Матеріали і методи: -->
             <div class="form-group">
               <label for="abstractMaterials"><span class="ua">Матеріали і методи *</span><span class="en">Materials and Methods *</span></label>
               <textarea id="abstractMaterials" rows="3" placeholder="Об'єкти, клінічний матеріал, методики..." data-placeholder-ua="Об'єкти, клінічний матеріал, методики..." data-placeholder-en="Subjects, clinical material, techniques..."></textarea>
+              <span class="field-hint">
+                <span class="ua">Дизайн, клінічна база, період, вибірка (включення/виключення), групи та методи статистики</span>
+                <span class="en">Design, setting, timeframe, sample size, criteria, comparison groups, and statistics</span>
+              </span>
             </div>
 
             <!-- 4. Результати: -->
             <div class="form-group">
               <label for="abstractResults"><span class="ua">Результати *</span><span class="en">Results *</span></label>
               <textarea id="abstractResults" rows="4" placeholder="Отримані наукові дані, статистичний аналіз..." data-placeholder-ua="Отримані наукові дані, статистичний аналіз..." data-placeholder-en="Scientific findings and data analysis..."></textarea>
+              <span class="field-hint">
+                <span class="ua">Конкретні кількісні дані (цифри, %, медіани), p-значення, 95% CI та кінцеві точки</span>
+                <span class="en">Specific quantitative data, p-values, 95% CI, and key clinical endpoints</span>
+              </span>
             </div>
 
             <!-- 5. Висновок: -->
             <div class="form-group">
               <label for="abstractConclusion"><span class="ua">Висновок *</span><span class="en">Conclusion *</span></label>
               <textarea id="abstractConclusion" rows="3" placeholder="Узагальнення та практичні рекомендації..." data-placeholder-ua="Узагальнення та практичні рекомендації..." data-placeholder-en="Summary and practical recommendations..."></textarea>
+              <span class="field-hint">
+                <span class="ua">Чіткі тези з результатів, пряма відповідь на мету та практична цінність для хірурга</span>
+                <span class="en">Direct takeaways from results answering the objective, with practical clinical value</span>
+              </span>
             </div>
 
             <!-- 6. Ключові слова: -->
