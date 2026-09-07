@@ -21,17 +21,16 @@
        1. Отримайте свій Measurement ID (наприклад G-7XXXXXXXXX) на analytics.google.com
        2. Замініть 'G-XXXXXXXXXX' у двох місцях нижче на ваш реальний ID.
        ======================================================== -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HZ5FZD38VT" id="gaTagScript"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    const gaMeasurementId = localStorage.getItem('ussf_ga_id') || 'G-HZ5FZD38VT;
-    gtag('config', gaMeasurementId, {
-      send_page_view: true
-    });
-  </script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HZ5FZD38VT" id="gaTagScript"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  const gaMeasurementId = localStorage.getItem('ussf_ga_id') || 'G-HZ5FZD38VT';
+  gtag('config', gaMeasurementId, {
+    send_page_view: true
+  });
+</script>
 </head>
 
 <body class="lang-ua">
