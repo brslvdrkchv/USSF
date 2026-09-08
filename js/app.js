@@ -267,6 +267,8 @@ function selectDay(dayNumber) {
       tracksNav.classList.remove('hidden');
       tracksNav.style.display = 'flex';
     }
+    const regCard = document.getElementById('day1RegulationsCard');
+    if (regCard) regCard.style.display = 'block';
     const targetPanel = document.getElementById(`panel-${currentDay1TrackId}`);
     if (targetPanel) targetPanel.classList.add('active');
   } else {
@@ -276,6 +278,8 @@ function selectDay(dayNumber) {
       tracksNav.classList.add('hidden');
       tracksNav.style.display = 'none';
     }
+    const regCard = document.getElementById('day1RegulationsCard');
+    if (regCard) regCard.style.display = 'none';
     const workshopsPanel = document.getElementById('panel-workshops');
     if (workshopsPanel) workshopsPanel.classList.add('active');
   }

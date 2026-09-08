@@ -1747,6 +1747,109 @@ nav#mainNav.scrolled {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ============ PRESENTATION REGULATIONS CARD ============ */
+.presentation-regulations-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #CBD5E1;
+  border-left: 5px solid #1D428A;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 1.6rem 2rem;
+  margin: 1.8rem auto 2.2rem;
+  max-width: 100%;
+}
+
+.pr-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.3rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.pr-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(29, 66, 138, 0.08);
+  border: 1px solid rgba(29, 66, 138, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1D428A;
+  flex-shrink: 0;
+}
+
+.pr-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #1B9AAA;
+  margin-bottom: 0.2rem;
+}
+
+.pr-title {
+  font-family: var(--font-headings);
+  font-size: 1.22rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.pr-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.2rem;
+}
+
+.pr-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background: #F8FAFC;
+  border-radius: 8px;
+  padding: 0.95rem;
+  border: 1px solid #E2E8F0;
+}
+
+.pr-item-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.pr-item-content strong {
+  display: block;
+  font-size: 0.86rem;
+  color: #1D428A;
+  margin-bottom: 0.25rem;
+}
+
+.pr-item-content p {
+  font-size: 0.82rem;
+  color: #475569;
+  line-height: 1.45;
+  margin: 0;
+}
+
+@media (max-width: 991px) {
+  .pr-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .pr-grid {
+    grid-template-columns: 1fr;
+  }
+  .presentation-regulations-card {
+    padding: 1.25rem 1.1rem;
+  }
+}
+
 .section-overview-banner {
   background: var(--white);
   border-left: 4px solid var(--nmu-blue);
@@ -5582,6 +5685,58 @@ footer#contacts {
   color: #475569;
   line-height: 1.6;
   margin-bottom: 1.2rem;
+}
+
+.workshop-card-skills {
+  margin-bottom: 1.25rem;
+  background: rgba(29, 66, 138, 0.035);
+  border: 1px solid rgba(29, 66, 138, 0.12);
+  border-radius: 8px;
+  padding: 0.95rem 1.05rem;
+}
+
+.skills-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1D428A;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.65rem;
+}
+
+.skills-heading svg {
+  color: #1B9AAA;
+  flex-shrink: 0;
+}
+
+.skills-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.skills-list li {
+  position: relative;
+  padding-left: 1.25rem;
+  font-size: 0.85rem;
+  line-height: 1.48;
+  color: #334155;
+}
+
+.skills-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #10B981;
+  font-weight: 800;
+  font-size: 0.88rem;
 }
 
 .workshop-card-equip {
