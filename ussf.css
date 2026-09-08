@@ -3223,11 +3223,11 @@ footer#contacts {
   transform: translateY(-2px);
 }
 
-/* 3. SCROLL REVEAL ANIMATIONS (IntersectionObserver) - Noticeably Smooth & Cinematic */
+/* 3. SCROLL REVEAL ANIMATIONS (IntersectionObserver) - Noticeably Smooth & Crisp */
 .reveal {
   opacity: 0;
-  transform: translateY(55px);
-  transition: opacity 1.85s cubic-bezier(0.16, 1, 0.3, 1), transform 1.85s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(32px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
@@ -3238,8 +3238,8 @@ footer#contacts {
 
 .reveal-left {
   opacity: 0;
-  transform: translateX(-55px);
-  transition: opacity 1.85s cubic-bezier(0.16, 1, 0.3, 1), transform 1.85s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateX(-32px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
@@ -3250,8 +3250,8 @@ footer#contacts {
 
 .reveal-right {
   opacity: 0;
-  transform: translateX(55px);
-  transition: opacity 1.85s cubic-bezier(0.16, 1, 0.3, 1), transform 1.85s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateX(32px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
@@ -3262,8 +3262,8 @@ footer#contacts {
 
 .reveal-scale {
   opacity: 0;
-  transform: scale(0.92) translateY(35px);
-  transition: opacity 1.85s cubic-bezier(0.16, 1, 0.3, 1), transform 1.85s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(0.96) translateY(24px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
@@ -3272,28 +3272,29 @@ footer#contacts {
   transform: scale(1) translateY(0);
 }
 
-/* Stagger Delays - Long, Smooth, Noticeably Sequential */
-.delay-1 { transition-delay: 0.2s !important; }
-.delay-2 { transition-delay: 0.42s !important; }
-.delay-3 { transition-delay: 0.64s !important; }
-.delay-4 { transition-delay: 0.86s !important; }
-.delay-5 { transition-delay: 1.08s !important; }
-.delay-6 { transition-delay: 1.30s !important; }
-.delay-7 { transition-delay: 1.52s !important; }
-.delay-8 { transition-delay: 1.74s !important; }
-.delay-9 { transition-delay: 1.96s !important; }
-.delay-10 { transition-delay: 2.18s !important; }
+/* Stagger Delays - Balanced, Refined Sequential Pace */
+.delay-1  { transition-delay: 0.05s !important; }
+.delay-2  { transition-delay: 0.10s !important; }
+.delay-3  { transition-delay: 0.15s !important; }
+.delay-4  { transition-delay: 0.20s !important; }
+.delay-5  { transition-delay: 0.25s !important; }
+.delay-6  { transition-delay: 0.30s !important; }
+.delay-7  { transition-delay: 0.35s !important; }
+.delay-8  { transition-delay: 0.40s !important; }
+.delay-9  { transition-delay: 0.45s !important; }
+.delay-10 { transition-delay: 0.50s !important; }
+.delay-11 { transition-delay: 0.55s !important; }
 
-/* Organizers & Committee Staggered Wave Reveal - Cinematic Pace */
+/* Organizers & Committee Staggered Wave Reveal - Balanced, Smooth & Crisp Pace */
 .organizers-grid .organizer-card,
 .committee-grid .leader-card {
   opacity: 0;
-  transform: translateY(55px) scale(0.95);
-  transition: opacity 1.85s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 1.85s cubic-bezier(0.16, 1, 0.3, 1),
-              background 0.4s ease,
-              border-color 0.4s ease,
-              box-shadow 0.4s ease !important;
+  transform: translateY(28px) scale(0.98);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.35s ease,
+              border-color 0.35s ease,
+              box-shadow 0.35s ease !important;
   will-change: opacity, transform;
 }
 
@@ -3308,25 +3309,25 @@ footer#contacts {
   transform: translateY(-4px) scale(1) !important;
 }
 
-.organizers-grid .organizer-card:nth-child(1) { transition-delay: 0.2s !important; }
-.organizers-grid .organizer-card:nth-child(2) { transition-delay: 0.45s !important; }
-.organizers-grid .organizer-card:nth-child(3) { transition-delay: 0.7s !important; }
+.organizers-grid .organizer-card:nth-child(1) { transition-delay: 0.05s !important; }
+.organizers-grid .organizer-card:nth-child(2) { transition-delay: 0.12s !important; }
+.organizers-grid .organizer-card:nth-child(3) { transition-delay: 0.19s !important; }
 
-.committee-grid .leader-card:nth-child(1)  { transition-delay: 0.2s !important; }
-.committee-grid .leader-card:nth-child(2)  { transition-delay: 0.42s !important; }
-.committee-grid .leader-card:nth-child(3)  { transition-delay: 0.64s !important; }
-.committee-grid .leader-card:nth-child(4)  { transition-delay: 0.86s !important; }
-.committee-grid .leader-card:nth-child(5)  { transition-delay: 1.08s !important; }
-.committee-grid .leader-card:nth-child(6)  { transition-delay: 1.30s !important; }
-.committee-grid .leader-card:nth-child(7)  { transition-delay: 1.52s !important; }
-.committee-grid .leader-card:nth-child(8)  { transition-delay: 1.74s !important; }
-.committee-grid .leader-card:nth-child(9)  { transition-delay: 1.96s !important; }
-.committee-grid .leader-card:nth-child(10) { transition-delay: 2.18s !important; }
-.committee-grid .leader-card:nth-child(11) { transition-delay: 2.40s !important; }
-.committee-grid .leader-card:nth-child(12) { transition-delay: 2.62s !important; }
-.committee-grid .leader-card:nth-child(13) { transition-delay: 2.84s !important; }
-.committee-grid .leader-card:nth-child(14) { transition-delay: 3.06s !important; }
-.committee-grid .leader-card:nth-child(n+15) { transition-delay: 3.28s !important; }
+.committee-grid .leader-card:nth-child(1)  { transition-delay: 0.04s !important; }
+.committee-grid .leader-card:nth-child(2)  { transition-delay: 0.08s !important; }
+.committee-grid .leader-card:nth-child(3)  { transition-delay: 0.12s !important; }
+.committee-grid .leader-card:nth-child(4)  { transition-delay: 0.16s !important; }
+.committee-grid .leader-card:nth-child(5)  { transition-delay: 0.20s !important; }
+.committee-grid .leader-card:nth-child(6)  { transition-delay: 0.24s !important; }
+.committee-grid .leader-card:nth-child(7)  { transition-delay: 0.28s !important; }
+.committee-grid .leader-card:nth-child(8)  { transition-delay: 0.32s !important; }
+.committee-grid .leader-card:nth-child(9)  { transition-delay: 0.36s !important; }
+.committee-grid .leader-card:nth-child(10) { transition-delay: 0.40s !important; }
+.committee-grid .leader-card:nth-child(11) { transition-delay: 0.44s !important; }
+.committee-grid .leader-card:nth-child(12) { transition-delay: 0.48s !important; }
+.committee-grid .leader-card:nth-child(13) { transition-delay: 0.52s !important; }
+.committee-grid .leader-card:nth-child(14) { transition-delay: 0.56s !important; }
+.committee-grid .leader-card:nth-child(n+15) { transition-delay: 0.60s !important; }
 
 
 /* 4. HERO SECTION ANIMATIONS (Exact liveronco.com style) */
