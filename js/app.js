@@ -421,7 +421,7 @@ window.onTurnstileExpired = function() {
   window.currentTurnstileToken = null;
 };
 
-function openRegistrationModal() {
+function openRegistrationModal(tab = 'abstracts', workshopId = null) {
   if (regModal) {
     regModal.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -430,7 +430,13 @@ function openRegistrationModal() {
     window.formOpenedTimestamp = Date.now();
     initReferencesBuilder();
     updateAbstractCharCounter();
-    window.trackGAEvent('registration_modal_open', { event_category: 'engagement' });
+    window.trackGAEvent('registration_modal_open', { event_category: 'engagement', tab: tab });
+
+    switchRegistrationTab(tab);
+    if (tab === 'workshops' && workshopId) {
+      const p1 = document.getElementById('wsPriority1');
+      if (p1) p1.value = workshopId;
+    }
   }
 }
 
@@ -456,12 +462,84 @@ function closeRegistrationModal(resetForm = false) {
       const formPreviewStep = document.getElementById('formPreviewStep');
       if (formPreviewStep) formPreviewStep.style.display = 'none';
       if (formSuccessMessage) formSuccessMessage.style.display = 'none';
-      if (resetForm && forumRegForm) {
-        forumRegForm.reset();
+      
+      const wsForm = document.getElementById('workshopRegForm');
+      const wsSuccess = document.getElementById('workshopSuccessMessage');
+      if (wsForm) wsForm.style.display = 'block';
+      if (wsSuccess) wsSuccess.style.display = 'none';
+
+      if (resetForm) {
+        if (forumRegForm) forumRegForm.reset();
+        if (wsForm) wsForm.reset();
         initReferencesBuilder(true);
       }
       updateAbstractCharCounter();
     }, 350);
+  }
+}
+
+function switchRegistrationTab(tab) {
+  const tabBtnAbstracts = document.getElementById('tabBtnAbstracts');
+  const tabBtnWorkshops = document.getElementById('tabBtnWorkshops');
+  const panelAbstracts = document.getElementById('panelAbstractsForm');
+  const panelWorkshops = document.getElementById('panelWorkshopsForm');
+
+  if (tab === 'workshops') {
+    if (tabBtnAbstracts) tabBtnAbstracts.classList.remove('active');
+    if (tabBtnWorkshops) tabBtnWorkshops.classList.add('active');
+    if (panelAbstracts) panelAbstracts.style.display = 'none';
+    if (panelWorkshops) panelWorkshops.style.display = 'block';
+    window.trackGAEvent('registration_tab_switch', { tab: 'workshops' });
+  } else {
+    if (tabBtnAbstracts) tabBtnAbstracts.classList.add('active');
+    if (tabBtnWorkshops) tabBtnWorkshops.classList.remove('active');
+    if (panelAbstracts) panelAbstracts.style.display = 'block';
+    if (panelWorkshops) panelWorkshops.style.display = 'none';
+    window.trackGAEvent('registration_tab_switch', { tab: 'abstracts' });
+  }
+}
+
+function openAcademicGuideModal() {
+  const modal = document.getElementById('academicGuideModal');
+  if (modal) {
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    window.trackGAEvent('academic_guide_modal_open', { event_category: 'engagement' });
+  }
+}
+
+function closeAcademicGuideModal() {
+  const modal = document.getElementById('academicGuideModal');
+  if (modal) {
+    modal.classList.remove('open');
+    if (!regModal || !regModal.classList.contains('open')) {
+      document.body.style.overflow = '';
+    }
+  }
+}
+
+function openPrivacyModal(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const modal = document.getElementById('privacyModal');
+  if (modal) {
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if (typeof window.trackGAEvent === 'function') {
+      window.trackGAEvent('privacy_modal_open', { event_category: 'engagement' });
+    }
+  }
+}
+
+function closePrivacyModal() {
+  const modal = document.getElementById('privacyModal');
+  if (modal) {
+    modal.classList.remove('open');
+    if (!regModal || !regModal.classList.contains('open')) {
+      document.body.style.overflow = '';
+    }
   }
 }
 
@@ -472,6 +550,16 @@ function closeRegistrationModal(resetForm = false) {
 // Close on Escape key
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
+    const privacyModal = document.getElementById('privacyModal');
+    if (privacyModal && privacyModal.classList.contains('open')) {
+      closePrivacyModal();
+      return;
+    }
+    const guideModal = document.getElementById('academicGuideModal');
+    if (guideModal && guideModal.classList.contains('open')) {
+      closeAcademicGuideModal();
+      return;
+    }
     const smtpModal = document.getElementById('smtpModal');
     if (smtpModal && smtpModal.classList.contains('open')) {
       closeSmtpModal();
@@ -1162,6 +1250,23 @@ function handleFormReview(e) {
     }
   }
 
+  // VALIDATION 4: Consent to personal data processing
+  const consentCheckbox = document.getElementById('consentPersonalData');
+  if (consentCheckbox && !consentCheckbox.checked) {
+    const isEn = document.documentElement.getAttribute('lang') === 'en';
+    alert(isEn
+      ? '⚠️ Please provide consent to personal data processing in accordance with the Privacy Policy to proceed.'
+      : '⚠️ Будь ласка, надайте згоду на обробку персональних даних відповідно до Політики конфіденційності для продовження реєстрації.');
+    const card = document.getElementById('consentCardMain') || consentCheckbox.closest('.consent-checkbox-card');
+    if (card) {
+      card.classList.add('shake-highlight');
+      setTimeout(() => card.classList.remove('shake-highlight'), 800);
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    consentCheckbox.focus();
+    return;
+  }
+
   const now = new Date();
   const pad = n => String(n).padStart(2, '0');
   const formattedDate = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
@@ -1192,6 +1297,7 @@ function handleFormReview(e) {
     email,
     phone,
     telegram,
+    consentPersonalData: true,
     website_hp_check: hpCheck ? hpCheck.value : '',
     submissionElapsedMs: elapsedMs,
     turnstileToken: turnstileToken
@@ -2131,11 +2237,294 @@ window.closeGoogleSheetsModal = closeGoogleSheetsModal;
 window.copyGoogleAppsScriptCode = copyGoogleAppsScriptCode;
 window.saveGoogleSheetsConfig = saveGoogleSheetsConfig;
 
+// ==========================================
+// 8.2. WORKSHOP REGISTRATION HANDLER
+// ==========================================
+async function handleWorkshopSubmit(e) {
+  if (e) e.preventDefault();
+
+  const fullName = (document.getElementById('wsFullName')?.value || '').trim();
+  const institution = (document.getElementById('wsInstitution')?.value || '').trim();
+  const academicStatusEl = document.getElementById('wsAcademicStatus');
+  const academicStatus = academicStatusEl ? academicStatusEl.value : '';
+  const academicStatusText = academicStatusEl ? academicStatusEl.options[academicStatusEl.selectedIndex]?.text : '';
+  const courseSpecialty = (document.getElementById('wsCourseSpecialty')?.value || '').trim();
+  const hasOralPaper = !!document.getElementById('wsHasOralPaper')?.checked;
+  const p1El = document.getElementById('wsPriority1');
+  const priority1 = p1El ? p1El.value : '';
+  const priority1Text = p1El ? p1El.options[p1El.selectedIndex]?.text : '';
+  const p2El = document.getElementById('wsPriority2');
+  const priority2 = p2El ? p2El.value : '';
+  const priority2Text = p2El ? p2El.options[p2El.selectedIndex]?.text : '';
+  const comment = (document.getElementById('wsComment')?.value || '').trim();
+  const email = (document.getElementById('wsEmail')?.value || '').trim();
+  const phone = (document.getElementById('wsPhone')?.value || '').trim();
+  const telegram = (document.getElementById('wsTelegram')?.value || '').trim();
+
+  // Honeypot check
+  const hpCheck = document.getElementById('websiteHpCheckWs');
+  if (hpCheck && hpCheck.value.trim() !== '') {
+    alert('⚠️ Помилка верифікації форми. Запит відхилено системою безпеки.');
+    return;
+  }
+
+  // Time-lock check
+  const elapsedMs = window.formOpenedTimestamp ? (Date.now() - window.formOpenedTimestamp) : 10000;
+  if (elapsedMs < 2000) {
+    alert('⚠️ Будь ласка, перевірте внесені дані перед відправкою.');
+    return;
+  }
+
+  // Duplicate priority validation
+  if (priority1 && priority2 && priority1 === priority2 && priority2 !== 'none') {
+    alert('⚠️ Будь ласка, оберіть інший воркшоп для 2-го пріоритету або оберіть варіант «Немає другого пріоритету».');
+    return;
+  }
+
+  // Phone validation
+  const phoneDigits = phone.replace(/\D/g, '');
+  if (phoneDigits.length !== 12 || !phoneDigits.startsWith('380')) {
+    alert('Будь ласка, введіть дійсний номер телефону у форматі +380 (XX) XXX-XX-XX');
+    return;
+  }
+
+  // Consent validation
+  const wsConsentCheckbox = document.getElementById('wsConsentPersonalData');
+  if (wsConsentCheckbox && !wsConsentCheckbox.checked) {
+    const isEn = document.documentElement.getAttribute('lang') === 'en';
+    alert(isEn
+      ? '⚠️ Please provide consent to personal data processing in accordance with the Privacy Policy to submit your workshop application.'
+      : '⚠️ Будь ласка, надайте згоду на обробку персональних даних відповідно до Політики конфіденційності для подання заявки на воркшоп.');
+    const card = document.getElementById('consentCardWs') || wsConsentCheckbox.closest('.consent-checkbox-card');
+    if (card) {
+      card.classList.add('shake-highlight');
+      setTimeout(() => card.classList.remove('shake-highlight'), 800);
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    wsConsentCheckbox.focus();
+    return;
+  }
+
+  const btnSubmit = document.getElementById('btnSubmitWorkshop');
+  if (btnSubmit) {
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = 'Зачекайте, реєстрація...';
+  }
+
+  const workshopSubmission = {
+    submissionId: 'WS-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+    timestamp: new Date().toISOString(),
+    isWorkshop: true,
+    partFormat: 'workshop',
+    fullName: fullName,
+    institution: institution,
+    academicStatus: academicStatus,
+    academicStatusText: academicStatusText,
+    courseSpecialty: courseSpecialty,
+    hasOralPaper: hasOralPaper,
+    priority1: priority1,
+    priority1Text: priority1Text,
+    priority2: priority2,
+    priority2Text: priority2Text,
+    comment: comment,
+    email: email,
+    phone: phone,
+    telegram: telegram,
+    consentPersonalData: true,
+    submissionElapsedMs: elapsedMs
+  };
+
+  // Post to backend
+  try {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+    const localBase = window.location.port ? window.location.origin : 'http://127.0.0.1:5050';
+    const apiUrl = isLocal
+      ? `${localBase}/api/submit-abstract`
+      : (window.location.origin.includes('onrender.com') ? '/api/submit-abstract' : 'https://ussf-n7ui.onrender.com/api/submit-abstract');
+
+    await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(workshopSubmission)
+    }).catch(e => console.warn('Workshop server note:', e));
+  } catch (err) {}
+
+  window.trackGAEvent('workshop_registration_success', {
+    event_category: 'conversion',
+    workshop_p1: priority1,
+    has_oral_paper: hasOralPaper
+  });
+
+  // Display success view
+  const wsForm = document.getElementById('workshopRegForm');
+  const wsSuccess = document.getElementById('workshopSuccessMessage');
+  const wsSummary = document.getElementById('wsSummaryDisplay');
+
+  if (wsSummary) {
+    wsSummary.innerHTML = `
+      <div style="font-weight:700; color:#1D428A; margin-bottom:0.5rem; font-size:1rem;">
+        👤 ${escapeHtml(fullName)} (${escapeHtml(institution)})
+      </div>
+      <div style="margin-bottom:0.35rem;">
+        <strong>🎯 1-й пріоритет:</strong> ${escapeHtml(priority1Text)}
+      </div>
+      ${priority2 && priority2 !== 'none' ? `<div style="margin-bottom:0.35rem;"><strong>🔄 2-й пріоритет:</strong> ${escapeHtml(priority2Text)}</div>` : ''}
+      <div style="margin-bottom:0.35rem;">
+        <strong>⭐ Статус пріоритету:</strong> ${hasOralPaper ? '<span style="color:#15803D; font-weight:700;">Пріоритетне зарахування (усна доповідь)</span>' : 'Черга вільних слухачів'}
+      </div>
+      <div style="margin-top:0.6rem; padding-top:0.5rem; border-top:1px dashed #cbd5e1; color:#64748B; font-size:0.82rem;">
+        ✉️ Підтвердження надіслано на ${escapeHtml(email)} · ID заявки: <strong>${workshopSubmission.submissionId}</strong>
+      </div>
+    `;
+  }
+
+  if (wsForm) wsForm.style.display = 'none';
+  if (wsSuccess) wsSuccess.style.display = 'block';
+
+  if (btnSubmit) {
+    btnSubmit.disabled = false;
+    btnSubmit.innerHTML = `
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right: 0.45rem; vertical-align: -2px;"><polyline points="20 6 9 17 4 12"/></svg>
+      <span class="ua">Подати заявку на воркшоп</span><span class="en">Submit Workshop Request</span>
+    `;
+  }
+}
+
+// ==========================================
+// 8.3. FAQ ACCORDION & REAL-TIME SEARCH
+// ==========================================
+function toggleFaqItem(btn) {
+  const item = btn.closest('.faq-item');
+  if (!item) return;
+  const isOpen = item.classList.contains('open');
+
+  // Close other open items in the same group for accordion effect
+  const parentList = item.closest('.faq-items-list') || item.parentElement;
+  if (parentList) {
+    parentList.querySelectorAll('.faq-item.open').forEach(openItem => {
+      if (openItem !== item) {
+        openItem.classList.remove('open');
+        const qBtn = openItem.querySelector('.faq-question-btn');
+        if (qBtn) qBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  if (isOpen) {
+    item.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+  } else {
+    item.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+    window.trackGAEvent('faq_item_open', { faq_id: item.getAttribute('data-faq-id') });
+  }
+}
+
+function filterFaq(rawQuery) {
+  const query = (rawQuery || '').trim().toLowerCase();
+  const clearBtn = document.getElementById('faqSearchClear');
+  const metaDisplay = document.getElementById('faqSearchMeta');
+  const noResults = document.getElementById('faqNoResults');
+  const accordionContainer = document.getElementById('faqAccordionContainer');
+  const categoryBlocks = document.querySelectorAll('.faq-category-block');
+  const allItems = document.querySelectorAll('.faq-item');
+
+  if (clearBtn) {
+    clearBtn.style.display = query.length > 0 ? 'inline-block' : 'none';
+  }
+
+  if (!query) {
+    if (accordionContainer) accordionContainer.style.display = 'flex';
+    if (noResults) noResults.style.display = 'none';
+    if (metaDisplay) metaDisplay.style.display = 'none';
+
+    categoryBlocks.forEach(b => b.style.display = '');
+    allItems.forEach(it => {
+      it.style.display = '';
+      it.classList.remove('open');
+      const btn = it.querySelector('.faq-question-btn');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    });
+    return;
+  }
+
+  let totalMatches = 0;
+
+  categoryBlocks.forEach(block => {
+    let blockMatches = 0;
+    const items = block.querySelectorAll('.faq-item');
+
+    items.forEach(item => {
+      const qText = item.querySelector('.faq-q-text')?.innerText.toLowerCase() || '';
+      const aText = item.querySelector('.faq-answer-content')?.innerText.toLowerCase() || '';
+
+      if (qText.includes(query) || aText.includes(query)) {
+        item.style.display = '';
+        item.classList.add('open');
+        const btn = item.querySelector('.faq-question-btn');
+        if (btn) btn.setAttribute('aria-expanded', 'true');
+        blockMatches++;
+        totalMatches++;
+      } else {
+        item.style.display = 'none';
+        item.classList.remove('open');
+        const btn = item.querySelector('.faq-question-btn');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    if (blockMatches > 0) {
+      block.style.display = '';
+    } else {
+      block.style.display = 'none';
+    }
+  });
+
+  if (totalMatches === 0) {
+    if (accordionContainer) accordionContainer.style.display = 'none';
+    if (noResults) noResults.style.display = 'block';
+    if (metaDisplay) {
+      metaDisplay.style.display = 'block';
+      metaDisplay.textContent = 'Збігів не знайдено';
+    }
+  } else {
+    if (accordionContainer) accordionContainer.style.display = 'flex';
+    if (noResults) noResults.style.display = 'none';
+    if (metaDisplay) {
+      metaDisplay.style.display = 'block';
+      metaDisplay.textContent = `Знайдено запитань: ${totalMatches}`;
+    }
+  }
+
+  window.trackGAEvent('faq_search', { search_term: query, results_count: totalMatches });
+}
+
+function clearFaqSearch() {
+  const input = document.getElementById('faqSearchInput');
+  if (input) input.value = '';
+  filterFaq('');
+}
+
+// Window exports
+window.switchRegistrationTab = switchRegistrationTab;
+window.openRegistrationModal = openRegistrationModal;
+window.closeRegistrationModal = closeRegistrationModal;
+window.openAcademicGuideModal = openAcademicGuideModal;
+window.closeAcademicGuideModal = closeAcademicGuideModal;
+window.openPrivacyModal = openPrivacyModal;
+window.closePrivacyModal = closePrivacyModal;
+window.handleWorkshopSubmit = handleWorkshopSubmit;
+window.toggleFaqItem = toggleFaqItem;
+window.filterFaq = filterFaq;
+window.clearFaqSearch = clearFaqSearch;
+
 // Initialize phone, telegram masks, abstract character counter, auto-capitalization and references builder
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     setupPhoneInputMask(document.getElementById('phone'));
     setupTelegramInputMask(document.getElementById('telegram'));
+    setupPhoneInputMask(document.getElementById('wsPhone'));
+    setupTelegramInputMask(document.getElementById('wsTelegram'));
     initAbstractCharCounter();
     initStructureAutoCapitalizeAndTab();
     initReferencesBuilder();
@@ -2144,6 +2533,8 @@ if (document.readyState === 'loading') {
 } else {
   setupPhoneInputMask(document.getElementById('phone'));
   setupTelegramInputMask(document.getElementById('telegram'));
+  setupPhoneInputMask(document.getElementById('wsPhone'));
+  setupTelegramInputMask(document.getElementById('wsTelegram'));
   initAbstractCharCounter();
   initStructureAutoCapitalizeAndTab();
   initReferencesBuilder();
