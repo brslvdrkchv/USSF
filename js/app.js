@@ -2539,7 +2539,16 @@ if (document.readyState === 'loading') {
   initStructureAutoCapitalizeAndTab();
   initReferencesBuilder();
   initGAOutboundTracking();
+// Dynamic Mobile Viewport Height Calculation (--vh) to fix address bar / browser toolbar clipping
+function updateMobileVh() {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
 }
+updateMobileVh();
+window.addEventListener('resize', updateMobileVh, { passive: true });
+window.addEventListener('orientationchange', () => {
+  setTimeout(updateMobileVh, 100);
+});
 
 function initGAOutboundTracking() {
   document.querySelectorAll('.nav-map-btn').forEach(btn => {
