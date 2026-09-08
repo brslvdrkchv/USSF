@@ -233,6 +233,25 @@ function doGet(e) {
 }
 
 /**
+ * 🧪 Функція для перевірки та одноразової авторизації доступу до Google Диска
+ * 
+ * Як авторизувати:
+ * 1. У верхньому меню Apps Script біля кнопки "Виконати" (Run) виберіть "testDrivePermission".
+ * 2. Натисніть "Виконати" (Run).
+ * 3. Google покаже вікно: "Потрібна авторизація" -> виберіть свій акаунт -> "Advanced" (Додатково) -> "Go to ... (unsafe)" -> "Allow" (Дозволити).
+ * 4. Усе! Тепер скрипт має офіційний дозвіл створювати файли у вашій папці на Google Диску.
+ */
+function testDrivePermission() {
+  var folderName = "Заяви USSF 2026";
+  var folders = DriveApp.getFoldersByName(folderName);
+  var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+  var testBlob = Utilities.newBlob("Тестова перевірка дозволів Google Drive", "text/plain", "test_permission.txt");
+  var file = folder.createFile(testBlob);
+  Logger.log("✅ Успішно створено тестовий файл: " + file.getUrl());
+  file.setTrashed(true); // одразу видаляємо тимчасовий тестовий файл
+}
+
+/**
  * 🛠️ Функція для швидкого виправлення вже наявних помилок #ERROR! у таблиці.
  * 
  * Як скористатися:
