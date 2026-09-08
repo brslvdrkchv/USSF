@@ -271,6 +271,94 @@ def send_to_google_sheet(data, docx_path=None, webhook_url=None):
             'message': f"Помилка з'єднання з Google Таблицею: {exc}"
         }
 
+def send_workshop_email(data: dict, committee_email: str) -> dict:
+    """Dispatches workshop registration confirmation email via SMTP."""
+    cfg = load_email_config()
+    smtp_host = cfg.get('smtp_host', 'smtp.gmail.com')
+    smtp_port = int(cfg.get('smtp_port', 587))
+    smtp_user = cfg.get('smtp_user', '')
+    smtp_pass = cfg.get('smtp_password', '')
+
+    if not smtp_user or not smtp_pass:
+        return {"sent": False, "status": "SMTP_NOT_CONFIGURED", "message": "SMTP credentials not configured."}
+
+    full_name = data.get('fullName', 'Учасник')
+    author_email = data.get('email', '').strip()
+    sub_id = data.get('submissionId', 'WS-0000')
+    priority1 = data.get('priority1Text', data.get('priority1', 'Не вказано'))
+    priority2 = data.get('priority2Text', data.get('priority2', 'Не вказано'))
+    has_oral = "Так (пріоритетне зарахування)" if data.get('hasOralPaper') else "Ні (черга вільних слухачів)"
+
+    try:
+        server = smtplib.SMTP(smtp_host, smtp_port, timeout=15)
+        server.starttls()
+        server.login(smtp_user, smtp_pass)
+
+        # 1. Committee Notification
+        msg_comm = MIMEMultipart()
+        msg_comm['From'] = f"USSF Реєстрація Воркшопів <{smtp_user}>"
+        msg_comm['To'] = committee_email
+        msg_comm['Subject'] = f"🔬 Нова заявка на воркшоп: {full_name} ({sub_id})"
+
+        comm_body = f"""Шановний оргкомітет USSF 2026!
+
+Отримано нову заявку на практичні хірургічні воркшопи (День 2):
+
+ID заявки:       {sub_id}
+ПІБ учасника:    {full_name}
+Університет:     {data.get('institution', 'Не вказано')}
+Статус:          {data.get('academicStatusText', data.get('academicStatus', 'Не вказано'))}
+Курс/Спец.:      {data.get('courseSpecialty', 'Не вказано')}
+Email:           {author_email}
+Телефон:         {data.get('phone', 'Не вказано')}
+Telegram:        {data.get('telegram', 'Не вказано')}
+
+1-й пріоритет:   {priority1}
+2-й пріоритет:   {priority2}
+Усна доповідь:   {has_oral}
+Коментар/досвід: {data.get('comment', 'Немає')}
+
+--
+I Всеукраїнський студентський хірургічний форум (USSF 2026)
+НМУ імені О.О. Богомольця, Київ
+"""
+        msg_comm.attach(MIMEText(comm_body, 'plain', 'utf-8'))
+        server.send_message(msg_comm)
+
+        # 2. Participant Confirmation
+        if author_email:
+            msg_auth = MIMEMultipart()
+            msg_auth['From'] = f"Оргкомітет USSF 2026 <{smtp_user}>"
+            msg_auth['To'] = author_email
+            msg_auth['Subject'] = f"Ваша заявка на воркшоп USSF 2026 зареєстрована (ID: {sub_id})"
+
+            auth_body = f"""Шановний(а) {full_name}!
+
+Дякуємо за реєстрацію на практичні хірургічні воркшопи I Всеукраїнського студентського хірургічного форуму (USSF 2026)!
+
+Вашу заявку зареєстровано під номером: {sub_id}
+
+Обрані напрямки:
+• 1-й пріоритет: {priority1}
+• 2-й пріоритет: {priority2}
+• Статус пріоритету: {has_oral}
+
+Зверніть увагу:
+Розподіл по навчальних групах та графік сесій буде надіслано на вашу електронну адресу після розгляду оргкомітетом. Першочергове зарахування здійснюється для учасників форуму з зареєстрованими усними доповідями.
+
+З повагою,
+Організаційний комітет USSF 2026
+Національний медичний університет імені О.О. Богомольця
+"""
+            msg_auth.attach(MIMEText(auth_body, 'plain', 'utf-8'))
+            server.send_message(msg_auth)
+
+        server.quit()
+        return {"sent": True, "status": "SENT"}
+    except Exception as ex:
+        print(f"[MAILER] Error sending workshop email: {ex}")
+        return {"sent": False, "status": "ERROR", "message": str(ex)}
+
 
 
 class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
@@ -464,95 +552,6 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
 
         # 4. DEFAULT STATIC FILE SERVING (index.html, ussf.css, js/, images/, USSF2026_Program.pdf)
         return super().do_GET()
-
-
-def send_workshop_email(data: dict, committee_email: str) -> dict:
-    """Dispatches workshop registration confirmation email via SMTP."""
-    cfg = load_email_config()
-    smtp_host = cfg.get('smtp_host', 'smtp.gmail.com')
-    smtp_port = int(cfg.get('smtp_port', 587))
-    smtp_user = cfg.get('smtp_user', '')
-    smtp_pass = cfg.get('smtp_password', '')
-
-    if not smtp_user or not smtp_pass:
-        return {"sent": False, "status": "SMTP_NOT_CONFIGURED", "message": "SMTP credentials not configured."}
-
-    full_name = data.get('fullName', 'Учасник')
-    author_email = data.get('email', '').strip()
-    sub_id = data.get('submissionId', 'WS-0000')
-    priority1 = data.get('priority1Text', data.get('priority1', 'Не вказано'))
-    priority2 = data.get('priority2Text', data.get('priority2', 'Не вказано'))
-    has_oral = "Так (пріоритетне зарахування)" if data.get('hasOralPaper') else "Ні (черга вільних слухачів)"
-
-    try:
-        server = smtplib.SMTP(smtp_host, smtp_port, timeout=15)
-        server.starttls()
-        server.login(smtp_user, smtp_pass)
-
-        # 1. Committee Notification
-        msg_comm = MIMEMultipart()
-        msg_comm['From'] = f"USSF Реєстрація Воркшопів <{smtp_user}>"
-        msg_comm['To'] = committee_email
-        msg_comm['Subject'] = f"🔬 Нова заявка на воркшоп: {full_name} ({sub_id})"
-
-        comm_body = f"""Шановний оргкомітет USSF 2026!
-
-Отримано нову заявку на практичні хірургічні воркшопи (День 2):
-
-ID заявки:       {sub_id}
-ПІБ учасника:    {full_name}
-Університет:     {data.get('institution', 'Не вказано')}
-Статус:          {data.get('academicStatusText', data.get('academicStatus', 'Не вказано'))}
-Курс/Спец.:      {data.get('courseSpecialty', 'Не вказано')}
-Email:           {author_email}
-Телефон:         {data.get('phone', 'Не вказано')}
-Telegram:        {data.get('telegram', 'Не вказано')}
-
-1-й пріоритет:   {priority1}
-2-й пріоритет:   {priority2}
-Усна доповідь:   {has_oral}
-Коментар/досвід: {data.get('comment', 'Немає')}
-
---
-I Всеукраїнський студентський хірургічний форум (USSF 2026)
-НМУ імені О.О. Богомольця, Київ
-"""
-        msg_comm.attach(MIMEText(comm_body, 'plain', 'utf-8'))
-        server.send_message(msg_comm)
-
-        # 2. Participant Confirmation
-        if author_email:
-            msg_auth = MIMEMultipart()
-            msg_auth['From'] = f"Оргкомітет USSF 2026 <{smtp_user}>"
-            msg_auth['To'] = author_email
-            msg_auth['Subject'] = f"Ваша заявка на воркшоп USSF 2026 зареєстрована (ID: {sub_id})"
-
-            auth_body = f"""Шановний(а) {full_name}!
-
-Дякуємо за реєстрацію на практичні хірургічні воркшопи I Всеукраїнського студентського хірургічного форуму (USSF 2026)!
-
-Вашу заявку зареєстровано під номером: {sub_id}
-
-Обрані напрямки:
-• 1-й пріоритет: {priority1}
-• 2-й пріоритет: {priority2}
-• Статус пріоритету: {has_oral}
-
-Зверніть увагу:
-Розподіл по навчальних групах та графік сесій буде надіслано на вашу електронну адресу після розгляду оргкомітетом. Першочергове зарахування здійснюється для учасників форуму з зареєстрованими усними доповідями.
-
-З повагою,
-Організаційний комітет USSF 2026
-Національний медичний університет імені О.О. Богомольця
-"""
-            msg_auth.attach(MIMEText(auth_body, 'plain', 'utf-8'))
-            server.send_message(msg_auth)
-
-        server.quit()
-        return {"sent": True, "status": "SENT"}
-    except Exception as ex:
-        print(f"[MAILER] Error sending workshop email: {ex}")
-        return {"sent": False, "status": "ERROR", "message": str(ex)}
 
 
     def do_POST(self):
