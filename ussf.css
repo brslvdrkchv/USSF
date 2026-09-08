@@ -594,7 +594,7 @@ nav#mainNav.scrolled {
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding-top: clamp(78px, 10vh, 105px);
+  padding-top: clamp(94px, 12vh, 120px);
   padding-bottom: clamp(1rem, 3vh, 2.5rem);
   box-sizing: border-box;
 }
@@ -3788,7 +3788,7 @@ footer#contacts {
     min-height: 100dvh;
     max-height: calc(var(--vh, 1vh) * 100);
     max-height: 100dvh;
-    padding-top: calc(52px + env(safe-area-inset-top, 0px));
+    padding-top: calc(68px + env(safe-area-inset-top, 0px));
     padding-bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
     padding-left: 1rem;
     padding-right: 1rem;
@@ -3975,7 +3975,7 @@ footer#contacts {
 
   @media (max-height: 620px) {
     #hero {
-      padding-top: calc(46px + env(safe-area-inset-top, 0px));
+      padding-top: calc(56px + env(safe-area-inset-top, 0px));
       padding-bottom: calc(0.45rem + env(safe-area-inset-bottom, 0px));
     }
     .hero-title {
