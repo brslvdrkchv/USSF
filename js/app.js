@@ -1469,9 +1469,9 @@ function confirmAndSubmitRegistration() {
           sheetsStatus = `<div style="margin-top:0.35rem;">📊 <span>Синхронізовано з Google Таблицею оргкомітету.</span></div>`;
         }
         savedFilePathDisplay.innerHTML = `
-          <div>📁 <span style="color:#15803D;font-weight:600;">Файл тез (.docx) збережено в папку оргкомітету «заявки_тези».</span></div>
+          <div>📁 <span style="color:#15803D;font-weight:600;">Файл тез (.docx) успішно завантажено на Google Диск («Заяви USSF 2026»).</span></div>
           ${sheetsStatus}
-          <div style="margin-top:0.35rem;">🔒 <span>Матеріали зафіксовано в локальному реєстрі (ID: ${currentSubmission.submissionId}).</span></div>
+          <div style="margin-top:0.35rem;">🔒 <span>Матеріали зафіксовано в реєстрі (ID: ${currentSubmission.submissionId}).</span></div>
           ${emailStatus}
         `;
       }
@@ -1482,7 +1482,7 @@ function confirmAndSubmitRegistration() {
       if (savedFilePathDisplay) {
         savedFilePathDisplay.innerHTML = `
           <div>📁 <span style="color:#15803D;font-weight:600;">Файл тез (.docx) та заявку передано оргкомітету.</span></div>
-          <div style="margin-top:0.35rem;">📊 <span>Дані надіслано до Google Таблиці (клієнтська синхронізація).</span></div>
+          <div style="margin-top:0.35rem;">📊 <span>Дані надіслано до Google Таблиці.</span></div>
           <div style="margin-top:0.35rem;">🔒 <span>Заявку зареєстровано під номером ${currentSubmission.submissionId}.</span></div>
         `;
       }
