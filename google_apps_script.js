@@ -53,31 +53,37 @@ var COLUMN_HEADERS = [
 ];
 
 /**
- * Автоматична ініціалізація шапки таблиці, якщо вона порожня
+ * Форматування шапки таблиці у фірмовому стилі форуму
+ */
+function formatHeaderRow(sheet) {
+  var headerRange = sheet.getRange(1, 1, 1, COLUMN_HEADERS.length);
+  headerRange.setFontWeight("bold");
+  headerRange.setFontFamily("Roboto");
+  headerRange.setFontSize(10);
+  headerRange.setBackground("#1D428A"); // Фірмовий темно-синій колір НМУ
+  headerRange.setFontColor("#FFFFFF");
+  headerRange.setHorizontalAlignment("center");
+  headerRange.setVerticalAlignment("middle");
+  headerRange.setWrap(true);
+  sheet.setRowHeight(1, 42);
+  sheet.setFrozenRows(1); // Закріпити шапку при прокручуванні вниз
+}
+
+/**
+ * Автоматична ініціалізація шапки таблиці, якщо вона порожня або неповна
  */
 function ensureHeaders(sheet) {
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(COLUMN_HEADERS);
-    var headerRange = sheet.getRange(1, 1, 1, COLUMN_HEADERS.length);
-    headerRange.setFontWeight("bold");
-    headerRange.setBackground("#1D428A"); // Фірмовий темно-синій колір НМУ
-    headerRange.setFontColor("#FFFFFF");
-    headerRange.setHorizontalAlignment("center");
-    headerRange.setVerticalAlignment("middle");
-    sheet.setRowHeight(1, 38);
-    sheet.setFrozenRows(1); // Закріпити шапку при прокручуванні вниз
+    formatHeaderRow(sheet);
   } else {
-    // Якщо шапка вже створена, перевіряємо наявність стовпця для файлу Google Диска
+    // Якщо шапка вже створена, перевіряємо наявність усіх 23 стовпчиків
     var lastCol = sheet.getLastColumn();
     if (lastCol < COLUMN_HEADERS.length) {
-      var newColIdx = COLUMN_HEADERS.length;
-      var cell = sheet.getRange(1, newColIdx);
-      cell.setValue(COLUMN_HEADERS[newColIdx - 1]);
-      cell.setFontWeight("bold");
-      cell.setBackground("#1D428A");
-      cell.setFontColor("#FFFFFF");
-      cell.setHorizontalAlignment("center");
-      cell.setVerticalAlignment("middle");
+      for (var col = lastCol + 1; col <= COLUMN_HEADERS.length; col++) {
+        sheet.getRange(1, col).setValue(COLUMN_HEADERS[col - 1]);
+      }
+      formatHeaderRow(sheet);
     }
   }
 }
@@ -221,12 +227,150 @@ function doPost(e) {
 }
 
 /**
+ * 🛠️ РОЗУМНЕ ВІДНОВЛЕННЯ ТА ВПОРЯДКУВАННЯ ТАБЛИЦІ (Всі 23 стовпчики)
+ * 
+ * Як скористатися:
+ * 1. У верхньому меню редактора Apps Script у випадаючому списку виберіть "repairAndAlignTable".
+ * 2. Натисніть кнопку "Виконати" (Run).
+ * 3. Готово! Скрипт автоматично перевірить таблицю, розпізнає стовпчики (навіть якщо ви їх перемістили),
+ *    переставить дані у правильний порядок та відновить ідеальні фірмові заголовки!
+ */
+function repairAndAlignTable() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var lastCol = Math.max(sheet.getLastColumn(), COLUMN_HEADERS.length);
+  var lastRow = sheet.getLastRow();
+
+  if (lastRow === 0) {
+    sheet.appendRow(COLUMN_HEADERS);
+    formatHeaderRow(sheet);
+    Logger.log("✅ Створено нову шапку на порожньому аркуші.");
+    return;
+  }
+
+  var currentHeaders = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+
+  // Патерни для розпізнавання стовпчиків, якщо назви або порядок було змінено
+  var COLUMN_MATCHERS = [
+    [/id|номер|№|заявк|submission/i],                        // 1. № / ID Заявки
+    [/дата|час|date|time|реєстрац/i],                       // 2. Дата і час реєстрації
+    [/піб|фіо|учасник|name|автор/i],                        // 3. ПІБ учасника
+    [/email|пошта|e-mail|мейл/i],                           // 4. Email адреса
+    [/телефон|phone|номер тел|тел/i],                       // 5. Контактний телефон
+    [/telegram|телеграм|тг|@/i],                            // 6. Telegram
+    [/заклад|університет|установ|нму|інститут|institution/i],// 7. Навчальний заклад / Установа
+    [/статус|курс|студент|інтерн|status/i],                 // 8. Статус учасника
+    [/форма|усна|слухач|доповідь|format|participation/i],   // 9. Форма участі
+    [/секція|секці|section/i],                              // 10. Секція форуму
+    [/тема|робот|title|тез/i],                              // 11. Тема наукової роботи / тез
+    [/керівник|науковий|supervisor/i],                      // 12. Науковий керівник
+    [/кафедра|department/i],                                // 13. Кафедра
+    [/завідувач|зав\.|head/i],                              // 14. Завідувач кафедри
+    [/місто|країна|city|country/i],                         // 15. Місто, країна
+    [/вступ|intro|актуальн/i],                              // 16. Вступ
+    [/мета|aim|ціль/i],                                     // 17. Мета
+    [/матеріал|метод|materials|methods/i],                  // 18. Матеріали і методи
+    [/результат|results/i],                                 // 19. Результати
+    [/виснов|conclusion/i],                                 // 20. Висновок
+    [/ключов|keywords|слова/i],                             // 21. Ключові слова
+    [/літератур|джерел|references|список/i],                // 22. Список літератури
+    [/файл|диск|docx|drive|посилання/i]                     // 23. Файл тез (.docx на Google Диску)
+  ];
+
+  if (lastRow > 1) {
+    var allData = sheet.getRange(1, 1, lastRow, lastCol).getValues();
+    var reorderedData = [];
+
+    for (var r = 0; r < lastRow; r++) {
+      reorderedData.push(new Array(COLUMN_HEADERS.length).fill(""));
+    }
+
+    for (var c = 0; c < COLUMN_HEADERS.length; c++) {
+      reorderedData[0][c] = COLUMN_HEADERS[c];
+    }
+
+    var mappedCols = {};
+    for (var srcCol = 0; srcCol < currentHeaders.length; srcCol++) {
+      var hText = String(currentHeaders[srcCol] || "").trim();
+      if (!hText) continue;
+
+      var targetIdx = -1;
+      // 1. Точний збіг назви
+      for (var t = 0; t < COLUMN_HEADERS.length; t++) {
+        if (!mappedCols[t] && hText.toLowerCase() === COLUMN_HEADERS[t].toLowerCase()) {
+          targetIdx = t;
+          break;
+        }
+      }
+      // 2. Збіг за ключовими словами
+      if (targetIdx === -1) {
+        for (var t = 0; t < COLUMN_MATCHERS.length; t++) {
+          if (mappedCols[t]) continue;
+          var matchers = COLUMN_MATCHERS[t];
+          for (var m = 0; m < matchers.length; m++) {
+            if (matchers[m].test(hText)) {
+              targetIdx = t;
+              break;
+            }
+          }
+          if (targetIdx !== -1) break;
+        }
+      }
+
+      if (targetIdx !== -1) {
+        mappedCols[targetIdx] = true;
+        for (var rowIdx = 1; rowIdx < lastRow; rowIdx++) {
+          reorderedData[rowIdx][targetIdx] = allData[rowIdx][srcCol];
+        }
+      } else if (srcCol < COLUMN_HEADERS.length && !mappedCols[srcCol]) {
+        for (var rowIdx = 1; rowIdx < lastRow; rowIdx++) {
+          reorderedData[rowIdx][srcCol] = allData[rowIdx][srcCol];
+        }
+      }
+    }
+
+    sheet.getRange(1, 1, lastRow, COLUMN_HEADERS.length).setValues(reorderedData);
+  } else {
+    sheet.getRange(1, 1, 1, COLUMN_HEADERS.length).setValues([COLUMN_HEADERS]);
+  }
+
+  formatHeaderRow(sheet);
+
+  // Форматуємо телефонний стовпчик E як простий текст для наявних рядків
+  if (lastRow > 1) {
+    sheet.getRange(2, 5, lastRow - 1, 1).setNumberFormat("@");
+  }
+
+  Logger.log("✅ Таблицю успішно відновлено та впорядковано (23 стовпчики).");
+}
+
+/**
+ * ⚡ ШВИДКЕ ВІДНОВЛЕННЯ ТІЛЬКИ НАЗВ ШАПКИ
+ * Якщо дані в рядках не рухалися, а тільки збилися назви у 1-му рядку
+ */
+function resetOnlyHeaders() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var headerRange = sheet.getRange(1, 1, 1, COLUMN_HEADERS.length);
+  headerRange.setValues([COLUMN_HEADERS]);
+  formatHeaderRow(sheet);
+  Logger.log("✅ Шапку 1-го рядка відновлено за стандартом.");
+}
+
+/**
  * Обробка GET запиту для швидкої перевірки статусу в браузері
  */
 function doGet(e) {
+  if (e && e.parameter && (e.parameter.action === "repair" || e.parameter.action === "fixHeaders")) {
+    repairAndAlignTable();
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "success",
+      message: "Шапку та стовпчики Google Таблиці успішно відновлено та впорядковано (23 стовпчики)!",
+      headers: COLUMN_HEADERS
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
   return ContentService.createTextOutput(JSON.stringify({
     status: "active",
-    name: "USSF 2026 Google Sheets Sync Webhook",
+    name: "USSF 2026 Google Sheets & Drive Sync Webhook",
     timestamp: new Date().toISOString(),
     message: "Вебхук USSF Google Sheets активний і готовий приймати реєстрації!"
   })).setMimeType(ContentService.MimeType.JSON);
