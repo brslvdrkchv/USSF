@@ -174,6 +174,27 @@ def send_to_google_sheet(data, docx_path=None, webhook_url=None):
             return "'" + s
         return s
 
+    is_ws = bool(data.get('isWorkshop') or data.get('partFormat') == 'workshop')
+    if is_ws:
+        p1 = data.get('priority1Text') or data.get('priority1') or ''
+        p2 = data.get('priority2Text') or data.get('priority2') or ''
+        has_oral = "Так (пріоритетне зарахування)" if data.get('hasOralPaper') else "Ні (черга)"
+        comment_txt = data.get('comment') or 'Немає'
+        status_txt = data.get('academicStatusText') or data.get('academicStatus') or ''
+        course_txt = data.get('courseSpecialty') or ''
+        full_status = f"{status_txt} ({course_txt})" if course_txt else status_txt
+
+        part_format = "Практичний воркшоп"
+        section = f"1-й пріоритет: {p1}" if p1 else "Практичні воркшопи"
+        title = f"1-й: {p1} | 2-й: {p2}" if (p1 or p2) else "Реєстрація на воркшоп"
+        intro = f"Усна доповідь: {has_oral}. Досвід/коментар: {comment_txt}"
+    else:
+        part_format = clean_sheet_val(data.get('partFormatText') or data.get('partFormat', ''))
+        section = clean_sheet_val(data.get('sectionText') or (f"Секція {data.get('targetSection')}" if data.get('targetSection') else ''))
+        title = clean_sheet_val(data.get('abstractTitle', ''))
+        intro = clean_sheet_val(data.get('abstractIntro', ''))
+        full_status = clean_sheet_val(data.get('academicStatusText') or data.get('academicStatus', ''))
+
     payload = {
         'submissionId': clean_sheet_val(data.get('submissionId') or default_id),
         'formattedDate': clean_sheet_val(data.get('formattedDate') or default_date),
@@ -182,15 +203,15 @@ def send_to_google_sheet(data, docx_path=None, webhook_url=None):
         'phone': clean_sheet_val(data.get('phone', '')),
         'telegram': clean_sheet_val(data.get('telegram', '')),
         'institution': clean_sheet_val(data.get('institution', '')),
-        'academicStatusText': clean_sheet_val(data.get('academicStatusText') or data.get('academicStatus', '')),
-        'partFormatText': clean_sheet_val(data.get('partFormatText') or data.get('partFormat', '')),
-        'sectionText': clean_sheet_val(data.get('sectionText') or (f"Секція {data.get('targetSection')}" if data.get('targetSection') else '')),
-        'abstractTitle': clean_sheet_val(data.get('abstractTitle', '')),
+        'academicStatusText': full_status,
+        'partFormatText': part_format,
+        'sectionText': section,
+        'abstractTitle': title,
         'scientificSupervisor': clean_sheet_val(data.get('scientificSupervisor', '')),
         'department': clean_sheet_val(data.get('department', '')),
         'headOfDepartment': clean_sheet_val(data.get('headOfDepartment', '')),
         'cityCountry': clean_sheet_val(data.get('cityCountry', '')),
-        'abstractIntro': clean_sheet_val(data.get('abstractIntro', '')),
+        'abstractIntro': intro,
         'abstractAim': clean_sheet_val(data.get('abstractAim', '')),
         'abstractMaterials': clean_sheet_val(data.get('abstractMaterials', '')),
         'abstractResults': clean_sheet_val(data.get('abstractResults') or data.get('abstractBody', '')),
