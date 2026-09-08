@@ -143,9 +143,10 @@ def verify_cloudflare_turnstile(token, client_ip, secret_key):
 
 
 
-def send_to_google_sheet(data, webhook_url=None):
+def send_to_google_sheet(data, docx_path=None, webhook_url=None):
     """
-    Send registration text fields to administrator's Google Apps Script Webhook.
+    Send registration text fields and optional .docx file to administrator's Google Apps Script Webhook.
+    Files are automatically uploaded into the Google Drive folder "Заяви USSF 2026".
     Returns dict: {'synced': bool, 'status': str, 'message': str, 'response': dict}
     """
     if not webhook_url:
@@ -195,8 +196,20 @@ def send_to_google_sheet(data, webhook_url=None):
         'abstractResults': clean_sheet_val(data.get('abstractResults') or data.get('abstractBody', '')),
         'abstractConclusion': clean_sheet_val(data.get('abstractConclusion', '')),
         'abstractKeywords': clean_sheet_val(data.get('abstractKeywords', '')),
-        'abstractReferences': clean_sheet_val(data.get('abstractReferences', ''))
+        'abstractReferences': clean_sheet_val(data.get('abstractReferences', '')),
+        'driveFolderName': 'Заяви USSF 2026'
     }
+
+    # Attach base64 DOCX if provided
+    if docx_path and os.path.exists(docx_path):
+        try:
+            import base64
+            with open(docx_path, 'rb') as f_in:
+                payload['fileBase64'] = base64.b64encode(f_in.read()).decode('utf-8')
+                payload['fileName'] = os.path.basename(docx_path)
+            print(f"[GOOGLE DRIVE] Attached DOCX to payload: {payload['fileName']}")
+        except Exception as enc_err:
+            print(f"[GOOGLE DRIVE WARN] Could not encode DOCX for Google Drive: {enc_err}")
 
     try:
         if requests is not None:
@@ -204,7 +217,7 @@ def send_to_google_sheet(data, webhook_url=None):
                 webhook_url,
                 json=payload,
                 headers={'Content-Type': 'application/json'},
-                timeout=15,
+                timeout=30,
                 allow_redirects=True
             )
             if resp.status_code in (200, 201, 302):
@@ -646,6 +659,13 @@ I Всеукраїнський студентський хірургічний �
                     sheets_result = send_to_google_sheet(data)
                     print(f"[SERVER] Workshop Google Sheets sync result: {sheets_result}")
 
+                    # Clean up temporary workshop JSON
+                    try:
+                        if os.path.exists(ws_json_path):
+                            os.remove(ws_json_path)
+                    except Exception:
+                        pass
+
                     self.send_response(200)
                     self.send_header('Content-Type', 'application/json; charset=utf-8')
                     self.end_headers()
@@ -691,9 +711,19 @@ I Всеукраїнський студентський хірургічний �
                 email_result = send_abstract_email_docx(generated_docx, data, RECIPIENT)
                 print(f"[SERVER] Email dispatch result: {email_result}")
                 
-                # 4. Instant Google Sheet synchronization (Row append)
-                sheets_result = send_to_google_sheet(data)
-                print(f"[SERVER] Google Sheets sync result: {sheets_result}")
+                # 4. Instant Google Sheet & Google Drive synchronization (Uploads .docx to "Заяви USSF 2026")
+                sheets_result = send_to_google_sheet(data, docx_path=docx_path)
+                print(f"[SERVER] Google Sheets & Drive sync result: {sheets_result}")
+                
+                # 5. Clean up temporary local files so nothing accumulates on local disk
+                try:
+                    if os.path.exists(docx_path):
+                        os.remove(docx_path)
+                    if os.path.exists(json_path):
+                        os.remove(json_path)
+                    print(f"[SERVER] Temporary files removed from server disk: {docx_filename}")
+                except Exception as clean_err:
+                    print(f"[SERVER CLEANUP WARN] {clean_err}")
                 
                 response_data = {
                     "status": "success",

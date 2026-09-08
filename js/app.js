@@ -1441,7 +1441,7 @@ function confirmAndSubmitRegistration() {
     const localBase = window.location.port ? window.location.origin : 'http://127.0.0.1:5050';
     const apiUrl = isLocal
       ? `${localBase}/api/submit-abstract`
-      : (window.location.origin.includes('onrender.com') ? '/api/submit-abstract' : 'https://ussf-n7ui.onrender.com/api/submit-abstract');
+      : '/api/submit-abstract';
 
     fetch(apiUrl, {
       method: 'POST',
@@ -2344,7 +2344,7 @@ async function handleWorkshopSubmit(e) {
     const localBase = window.location.port ? window.location.origin : 'http://127.0.0.1:5050';
     const apiUrl = isLocal
       ? `${localBase}/api/submit-abstract`
-      : (window.location.origin.includes('onrender.com') ? '/api/submit-abstract' : 'https://ussf-n7ui.onrender.com/api/submit-abstract');
+      : '/api/submit-abstract';
 
     await fetch(apiUrl, {
       method: 'POST',

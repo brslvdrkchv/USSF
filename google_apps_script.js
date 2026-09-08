@@ -48,7 +48,8 @@ var COLUMN_HEADERS = [
   "Результати",
   "Висновок",
   "Ключові слова",
-  "Список літератури"
+  "Список літератури",
+  "Файл тез (.docx на Google Диску)"
 ];
 
 /**
@@ -65,6 +66,19 @@ function ensureHeaders(sheet) {
     headerRange.setVerticalAlignment("middle");
     sheet.setRowHeight(1, 38);
     sheet.setFrozenRows(1); // Закріпити шапку при прокручуванні вниз
+  } else {
+    // Якщо шапка вже створена, перевіряємо наявність стовпця для файлу Google Диска
+    var lastCol = sheet.getLastColumn();
+    if (lastCol < COLUMN_HEADERS.length) {
+      var newColIdx = COLUMN_HEADERS.length;
+      var cell = sheet.getRange(1, newColIdx);
+      cell.setValue(COLUMN_HEADERS[newColIdx - 1]);
+      cell.setFontWeight("bold");
+      cell.setBackground("#1D428A");
+      cell.setFontColor("#FFFFFF");
+      cell.setHorizontalAlignment("center");
+      cell.setVerticalAlignment("middle");
+    }
   }
 }
 
@@ -115,6 +129,27 @@ function doPost(e) {
     var submissionId = data.submissionId || defaultId;
     var registrationDate = data.formattedDate || defaultTimestamp;
 
+    // 1. Автоматичне збереження файлу тез у папку "Заяви USSF 2026" на Google Диску
+    var docxDriveUrl = "";
+    if (data.fileBase64 && data.fileName) {
+      try {
+        var folderName = data.driveFolderName || "Заяви USSF 2026";
+        var folders = DriveApp.getFoldersByName(folderName);
+        var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+
+        var decodedBytes = Utilities.base64Decode(data.fileBase64);
+        var blob = Utilities.newBlob(
+          decodedBytes,
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          data.fileName
+        );
+        var createdFile = folder.createFile(blob);
+        docxDriveUrl = createdFile.getUrl();
+      } catch (driveErr) {
+        Logger.log("Помилка збереження файлу на Google Диск: " + driveErr.toString());
+      }
+    }
+
     var newRow = [
       sanitizeForSheets(submissionId),
       sanitizeForSheets(registrationDate),
@@ -137,7 +172,8 @@ function doPost(e) {
       sanitizeForSheets(data.abstractResults || data.abstractBody),
       sanitizeForSheets(data.abstractConclusion),
       sanitizeForSheets(data.abstractKeywords),
-      sanitizeForSheets(data.abstractReferences)
+      sanitizeForSheets(data.abstractReferences),
+      docxDriveUrl ? docxDriveUrl : ""
     ];
 
     sheet.appendRow(newRow);
@@ -151,11 +187,27 @@ function doPost(e) {
     phoneTelegramRange.setNumberFormat("@");
     phoneTelegramRange.setHorizontalAlignment("center");
 
+    // Форматуємо посилання на файл Google Drive (стовпець 23) як клікабельний текст
+    if (docxDriveUrl) {
+      try {
+        var fileCell = sheet.getRange(lastRowIdx, 23);
+        var richText = SpreadsheetApp.newRichTextValue()
+          .setText("📄 Відкрити .docx")
+          .setLinkUrl(docxDriveUrl)
+          .build();
+        fileCell.setRichTextValue(richText);
+        fileCell.setHorizontalAlignment("center");
+      } catch (linkErr) {
+        sheet.getRange(lastRowIdx, 23).setValue(docxDriveUrl);
+      }
+    }
+
     return ContentService.createTextOutput(JSON.stringify({
       status: "success",
-      message: "Заявку успішно додано до таблиці",
+      message: "Заявку успішно додано до таблиці та збережено файл на Google Диск",
       id: submissionId,
-      row: lastRowIdx
+      row: lastRowIdx,
+      fileUrl: docxDriveUrl
     })).setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
