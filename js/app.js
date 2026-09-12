@@ -148,6 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   const progressBar = document.getElementById('scrollProgressBar');
   const backToTopBtn = document.getElementById('backToTopBtn');
+  const floatingActionDock = document.getElementById('floatingActionDock');
   const mobileStickyBar = document.getElementById('mobileStickyBar');
 
   window.addEventListener('scroll', () => {
@@ -158,16 +159,25 @@ document.addEventListener('DOMContentLoaded', () => {
       progressBar.style.width = `${pct}%`;
     }
 
+    const isModalOpen = regModal && regModal.classList.contains('open');
+
     if (backToTopBtn) {
-      if (scrollTop > 350) {
+      if (scrollTop > 350 && !isModalOpen) {
         backToTopBtn.classList.add('visible');
       } else {
         backToTopBtn.classList.remove('visible');
       }
     }
 
+    if (floatingActionDock) {
+      if (scrollTop > 350 && !isModalOpen) {
+        floatingActionDock.classList.add('visible');
+      } else {
+        floatingActionDock.classList.remove('visible');
+      }
+    }
+
     if (mobileStickyBar) {
-      const isModalOpen = regModal && regModal.classList.contains('open');
       if (scrollTop > 380 && !isModalOpen) {
         mobileStickyBar.classList.add('visible');
       } else {
@@ -431,6 +441,10 @@ function openRegistrationModal(tab = 'abstracts', workshopId = null) {
     document.body.style.overflow = 'hidden';
     const mobileStickyBar = document.getElementById('mobileStickyBar');
     if (mobileStickyBar) mobileStickyBar.classList.remove('visible');
+    const floatingActionDock = document.getElementById('floatingActionDock');
+    if (floatingActionDock) floatingActionDock.classList.remove('visible');
+    const backToTopBtn = document.getElementById('backToTopBtn');
+    if (backToTopBtn) backToTopBtn.classList.remove('visible');
     window.formOpenedTimestamp = Date.now();
     initReferencesBuilder();
     updateAbstractCharCounter();
@@ -453,6 +467,14 @@ function closeRegistrationModal(resetForm = false) {
     const mobileStickyBar = document.getElementById('mobileStickyBar');
     if (mobileStickyBar && window.scrollY > 380) {
       mobileStickyBar.classList.add('visible');
+    }
+    const floatingActionDock = document.getElementById('floatingActionDock');
+    if (floatingActionDock && window.scrollY > 350) {
+      floatingActionDock.classList.add('visible');
+    }
+    const backToTopBtn = document.getElementById('backToTopBtn');
+    if (backToTopBtn && window.scrollY > 350) {
+      backToTopBtn.classList.add('visible');
     }
     window.currentTurnstileToken = null;
     if (window.turnstile && typeof window.turnstile.reset === 'function') {
