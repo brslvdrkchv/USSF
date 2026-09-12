@@ -497,9 +497,9 @@ nav#mainNav.scrolled {
 
 /* Language Toggle Button */
 .lang-btn {
-  background: transparent;
-  border: 1.5px solid var(--brand-cyan);
-  color: var(--brand-cyan);
+  background: #000000;
+  border: 1.5px solid #000000;
+  color: #ffffff;
   font-family: var(--font-body);
   font-size: 0.76rem;
   font-weight: 700;
@@ -510,12 +510,27 @@ nav#mainNav.scrolled {
   cursor: pointer;
   transition: all var(--transition-fast);
   white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .lang-btn:hover {
-  background: var(--brand-cyan);
+  background: #252525;
+  border-color: #252525;
   color: #ffffff;
-  box-shadow: 0 0 15px rgba(27, 154, 170, 0.45);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
+}
+
+.mobile-menu .lang-btn {
+  background: #000000;
+  border: 1.5px solid rgba(255, 255, 255, 0.65);
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.12);
+}
+
+.mobile-menu .lang-btn:hover {
+  background: #111e38;
+  border-color: #ffffff;
 }
 
 .hamburger {
@@ -4107,17 +4122,17 @@ footer#contacts {
 
   .hero-3d-art {
     position: absolute;
-    right: -60px;
-    top: 25px;
-    width: clamp(460px, 142vw, 640px);
+    right: clamp(-5px, 0vw, 5px);
+    top: clamp(80px, 13.5vh, 115px);
+    width: clamp(430px, 122vw, 520px);
     height: auto;
     max-height: none;
     max-width: none;
-    transform: rotate(-48deg);
-    transform-origin: 65% 35%;
+    transform: rotate(-44deg);
+    transform-origin: 64% 36%;
     z-index: 2;
     pointer-events: none;
-    filter: brightness(0.68) contrast(1.1);
+    filter: brightness(0.9) contrast(1.15) drop-shadow(0 0 30px rgba(34, 211, 238, 0.25));
     display: block;
     margin: 0;
   }
@@ -4195,10 +4210,10 @@ footer#contacts {
 
   .hero-white-ussf-logo {
     position: relative;
-    z-index: 2;
-    width: clamp(220px, 70vw, 310px);
+    z-index: 4;
+    width: clamp(210px, 68vw, 290px);
     height: auto;
-    max-height: clamp(82px, 16vh, 130px);
+    max-height: clamp(86px, 15vh, 125px);
     object-fit: contain;
     filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 35px rgba(27, 154, 170, 0.65));
     pointer-events: none;
@@ -4269,11 +4284,15 @@ footer#contacts {
       padding-top: calc(56px + env(safe-area-inset-top, 0px));
       padding-bottom: calc(0.45rem + env(safe-area-inset-bottom, 0px));
     }
+    .hero-3d-art {
+      top: clamp(65px, 11vh, 85px);
+      width: clamp(380px, 115vw, 440px);
+    }
     .hero-title {
       font-size: 0.98rem;
     }
     .hero-white-ussf-logo {
-      max-height: 70px;
+      max-height: 75px;
       width: 190px;
     }
     .hero-ctas {
