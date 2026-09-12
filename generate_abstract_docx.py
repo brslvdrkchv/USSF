@@ -97,7 +97,233 @@ def add_blank_line(doc):
     p.paragraph_format.line_spacing = 1.0
     p.paragraph_format.space_before = Pt(0)
     p.paragraph_format.space_after = Pt(0)
-    return p
+def ensure_apa_format(ref_text: str) -> str:
+    """
+    Standardizes a reference citation to APA (7th edition) format.
+    Handles ДСТУ (//), Vancouver (Year;Vol:Pages), Books (City: Publisher),
+    as well as citations that are already in APA style.
+    """
+    if not ref_text or not ref_text.strip():
+        return ""
+    text = ref_text.strip()
+    # Strip leading numbering
+    text = re.sub(r"^(\[\d+\]|\d+[\.\)\s\t]+)", "", text).strip()
+    if not text:
+        return ""
+
+    # Extract DOI or URL
+    doi_part = ""
+    doi_match = re.search(r"(https?://[^\s]+|doi:\s*[^\s]+)", text, re.I)
+    if doi_match:
+        doi_val = doi_match.group(1).strip().rstrip(".,;")
+        if doi_val.lower().startswith("doi:"):
+            doi_val = "https://doi.org/" + doi_val[4:].strip()
+        doi_part = doi_val
+        text = text[:doi_match.start()] + text[doi_match.end():]
+        text = text.strip()
+
+    def format_single_author(author_raw: str) -> str:
+        a = author_raw.strip()
+        if not a:
+            return ""
+        if re.search(r"\b(et al\.?|та ін\.?|и др\.?)\b", a, re.I):
+            return a
+        m = re.match(r"^([A-ZА-ЯҐЄІЇ][a-zа-яґєії\w\-]+)[,\s]+([A-ZА-ЯҐЄІЇ])\.?\s*([A-ZА-ЯҐЄІЇ])?\.?$", a)
+        if m:
+            surname = m.group(1)
+            i1 = m.group(2)
+            i2 = m.group(3)
+            return f"{surname}, {i1}. {i2}." if i2 else f"{surname}, {i1}."
+        return a
+
+    def format_authors_list(authors_str: str) -> str:
+        if not authors_str:
+            return ""
+        has_et_al = bool(re.search(r"\b(et al\.?|та ін\.?|и др\.?)\b", authors_str, re.I))
+        clean_auth = re.sub(r"\b(et al\.?|та ін\.?|и др\.?)\b", "", authors_str, flags=re.I).strip().rstrip(".,")
+        raw_list = re.split(r",\s*(?=[A-ZА-ЯҐЄІЇ][a-zа-яґєії\w\-]+[,\s]+[A-ZА-ЯҐЄІЇ])|;\s*|\s+(?:та|and|&)\s+", clean_auth)
+        formatted = [format_single_author(x) for x in raw_list if x.strip()]
+        if not formatted:
+            return authors_str
+        if len(formatted) == 1:
+            res = formatted[0]
+        elif len(formatted) == 2:
+            res = f"{formatted[0]}, & {formatted[1]}"
+        else:
+            res = ", ".join(formatted[:-1]) + f", & {formatted[-1]}"
+        if has_et_al:
+            res += ", et al."
+        return res
+
+    # Check if already APA
+    already_apa = re.match(r"^(.+?)\s*\(((?:19|20)\d\d[a-z]?)\)\.\s*(.+)$", text)
+    if already_apa:
+        authors = already_apa.group(1).strip()
+        year = already_apa.group(2).strip()
+        rest = already_apa.group(3).strip()
+        rest = re.sub(r"(\d+)\s*[-–—]\s*(\d+)", r"\1–\2", rest)
+        authors = format_authors_list(authors)
+        res = f"{authors} ({year}). {rest}"
+        if not res.endswith('.'):
+            res += '.'
+        if doi_part:
+            res += f" {doi_part}"
+        return res
+
+    # Extract Year
+    year = ""
+    year_match = re.search(r"[-–—.;,\s(]\s*((?:19|20)\d\d)\s*[-–—.;,)\s]", text) or re.search(r"\b((?:19|20)\d\d)\b", text)
+    if year_match:
+        year = year_match.group(1)
+
+    # Extract Pages
+    pages = ""
+    p_match = re.search(r"(?:[СсPp]\.?|pages?|pp?\.?)\s*(\d+)\s*[-–—]\s*(\d+)", text)
+    if p_match:
+        pages = f"{p_match.group(1)}–{p_match.group(2)}"
+    else:
+        p_single = re.search(r"(?:[СсPp]\.?)\s*(\d+)(?!\s*с\b)", text)
+        if p_single:
+            pages = p_single.group(1)
+        else:
+            v_match = re.search(r":\s*(\d+)\s*[-–—]\s*(\d+)", text)
+            if v_match:
+                pages = f"{v_match.group(1)}–{v_match.group(2)}"
+
+    # Extract Volume & Issue
+    vol = ""
+    issue = ""
+    vol_match = re.search(r"(?:Т\.|Том|Vol\.?|v\.)\s*(\d+)", text, re.I)
+    if vol_match:
+        vol = vol_match.group(1)
+    iss_match = re.search(r"(?:№|No\.?|Issue|вип\.)\s*(\d+)", text, re.I)
+    if iss_match:
+        issue = iss_match.group(1)
+    vanc_vol_iss = re.search(r"\b(\d+)\s*\(\s*(\d+)\s*\)", text)
+    if vanc_vol_iss and not vol:
+        vol = vanc_vol_iss.group(1)
+        issue = vanc_vol_iss.group(2)
+
+    # ДСТУ with //
+    if "//" in text:
+        parts = text.split("//", 1)
+        before = parts[0].strip()
+        after = parts[1].strip()
+
+        author_match = re.match(r"^((?:[A-ZА-ЯҐЄІЇ][a-zа-яґєії\w\-]+[,\s]+[A-ZА-ЯҐЄІЇ]\.?\s*[A-ZА-ЯҐЄІЇ]?\.?(?:,\s*|;\s*|\s+(?:та|and|&)\s+)?)+)(.+)$", before)
+        if author_match:
+            raw_authors = author_match.group(1).strip().rstrip(".,")
+            title = author_match.group(2).strip().rstrip(".,")
+        elif " / " in before:
+            b_parts = before.split(" / ", 1)
+            title = b_parts[0].strip().rstrip(".,")
+            raw_authors = b_parts[1].strip().rstrip(".,")
+        else:
+            first_dot = before.find(".")
+            if first_dot != -1 and first_dot < 45:
+                raw_authors = before[:first_dot].strip()
+                title = before[first_dot + 1:].strip().rstrip(".,")
+            else:
+                raw_authors = ""
+                title = before.strip().rstrip(".,")
+
+        journal_match = re.match(r"^([^\.\–\—\-]+)", after)
+        journal = journal_match.group(1).strip() if journal_match else after.split(".")[0].strip()
+
+        pub_info = journal
+        if vol and issue:
+            pub_info += f", {vol}({issue})"
+        elif vol:
+            pub_info += f", {vol}"
+        elif issue:
+            pub_info += f", ({issue})"
+        if pages:
+            pub_info += f", {pages}"
+
+        apa_authors = format_authors_list(raw_authors)
+        year_str = f" ({year})" if year else ""
+        title_str = f". {title[0].upper() + title[1:]}" if title else ""
+        pub_str = f". {pub_info}" if pub_info else ""
+
+        res = f"{apa_authors}{year_str}{title_str}{pub_str}.".strip()
+        res = re.sub(r"\.\.+", ".", res)
+        if doi_part:
+            res += f" {doi_part}"
+        return res
+
+    # Vancouver style
+    vanc_match = re.search(r"(\b(?:19|20)\d\d)\s*;\s*(?:(\d+)\s*(?:\(([^)]+)\))?\s*:\s*)?(\d+)\s*[-–—]\s*(\d+)", text)
+    if vanc_match:
+        v_year = vanc_match.group(1)
+        v_vol = vanc_match.group(2) or ""
+        v_iss = vanc_match.group(3) or ""
+        v_pages = f"{vanc_match.group(4)}–{vanc_match.group(5)}"
+        before_v = text[:vanc_match.start()].strip().rstrip(".;,")
+        segments = re.split(r"\.\s+", before_v)
+
+        if len(segments) >= 3:
+            v_authors = segments[0].strip()
+            v_title = segments[1].strip()
+            v_journal = ". ".join(segments[2:]).strip()
+        elif len(segments) == 2:
+            v_authors = segments[0].strip()
+            v_title = segments[1].strip()
+            v_journal = ""
+        else:
+            v_authors = before_v
+            v_title = ""
+            v_journal = ""
+
+        pub = v_journal
+        if v_vol and v_iss:
+            pub += f", {v_vol}({v_iss})"
+        elif v_vol:
+            pub += f", {v_vol}"
+        elif v_iss:
+            pub += f", ({v_iss})"
+        if v_pages:
+            pub += f", {v_pages}"
+
+        apa_authors = format_authors_list(v_authors)
+        title_str = f". {v_title[0].upper() + v_title[1:]}" if v_title else ""
+        pub_str = f". {pub}" if pub else ""
+        res = f"{apa_authors} ({v_year}){title_str}{pub_str}.".strip()
+        res = re.sub(r"\.\.+", ".", res)
+        if doi_part:
+            res += f" {doi_part}"
+        return res
+
+    # Book style
+    book_match = re.search(r"[-–—.\s]*([A-ZА-ЯҐЄІЇ][a-zа-яґєії\w\s]+)\s*:\s*([A-ZА-ЯҐЄІЇ][a-zа-яґєії\w\s]+)[,\s]+((?:19|20)\d\d)", text)
+    if book_match:
+        publisher = book_match.group(2).strip()
+        b_year = book_match.group(3).strip()
+        before_b = text[:book_match.start()].strip().rstrip(".–—- ")
+        first_dot = before_b.find(".")
+        if first_dot != -1 and first_dot < 45:
+            b_authors = before_b[:first_dot].strip()
+            b_title = before_b[first_dot + 1:].strip().lstrip(". ").rstrip(".,")
+        else:
+            b_authors = ""
+            b_title = before_b
+        apa_authors = format_authors_list(b_authors)
+        title_str = f". {b_title[0].upper() + b_title[1:]}" if b_title else ""
+        res = f"{apa_authors} ({b_year}){title_str}. {publisher}.".strip()
+        res = re.sub(r"\.\.+", ".", res)
+        if doi_part:
+            res += f" {doi_part}"
+        return res
+
+    # Fallback
+    fallback = re.sub(r"(\d+)\s*[-–—]\s*(\d+)", r"\1–\2", text)
+    if year and f"({year})" not in fallback:
+        fallback = re.sub(rf"\b{year}\b", f"({year})", fallback, count=1)
+    fallback = fallback[0].upper() + fallback[1:]
+    if not fallback.endswith('.'):
+        fallback += '.'
+    if doi_part:
+        fallback += f" {doi_part}"
+    return fallback
 
 
 def create_abstract_docx(data: dict, output_path: str = None) -> str:
@@ -195,10 +421,12 @@ def create_abstract_docx(data: dict, output_path: str = None) -> str:
         prefix = "" if scientific_supervisor.lower().startswith("науковий керівник") else "Науковий керівник: "
         affil_items.append(f"{prefix}{scientific_supervisor}")
     if department:
-        prefix = "" if department.lower().startswith("кафедра") else "Кафедра "
+        no_prefix = bool(re.match(r'^(кафедра|відділення|клініка|інститут|центр|лабораторія|department|clinic|division|institute)\b', department.strip(), re.I))
+        prefix = "" if no_prefix else "Кафедра "
         affil_items.append(f"{prefix}{department}")
     if head_of_department:
-        prefix = "" if head_of_department.lower().startswith("завідувач кафедри") else "Завідувач кафедри: "
+        no_prefix = bool(re.match(r'^(завідувач|керівник|головний лікар|директор|head|chief|director)\b', head_of_department.strip(), re.I))
+        prefix = "" if no_prefix else "Завідувач кафедри: "
         affil_items.append(f"{prefix}{head_of_department}")
     if institution:
         affil_items.append(institution)
@@ -296,9 +524,13 @@ def create_abstract_docx(data: dict, output_path: str = None) -> str:
         r_ref_head.font.size = Pt(12)
 
         ref_items = [r.lstrip('\t ').strip() for r in references.split('\n') if r.strip()]
+        ref_items = ref_items[:10]
         for idx, ref_item in enumerate(ref_items):
             clean_item = re.sub(r'^(\[\d+\]|\d+[\.\)\s\t]+)', '', ref_item).strip()
             clean_item = clean_item.lstrip('\t ').strip()
+            if not clean_item:
+                continue
+            clean_item = ensure_apa_format(clean_item)
             if not clean_item:
                 continue
             clean_item = clean_item[0].upper() + clean_item[1:]

@@ -939,8 +939,10 @@ function initStructureAutoCapitalizeAndTab() {
 }
 
 // ==========================================
-// 8.4. DYNAMIC REFERENCES CONSTRUCTOR (ДЖЕРЕЛА)
+// 8.4. DYNAMIC REFERENCES CONSTRUCTOR & APA FORMATTER (Items 3 & 5)
 // ==========================================
+
+const MAX_REFERENCES = 10;
 
 const DEFAULT_REF_PLACEHOLDERS = [
   {
@@ -957,6 +959,264 @@ const DEFAULT_REF_PLACEHOLDERS = [
   }
 ];
 
+/**
+ * Format raw citation string to APA 7th Edition standard
+ */
+function formatReferenceToAPA(rawText) {
+  if (!rawText || !rawText.trim()) return '';
+  let text = rawText.trim();
+
+  // 1. Strip leading numbering like "1.", "[1]", "1) "
+  text = text.replace(/^(\[\d+\]|\d+[\.\)\s\t]+)/, '').trim();
+  if (!text) return '';
+
+  // 2. Extract DOI or URL
+  let doiPart = '';
+  const doiRegex = /(https?:\/\/[^\s]+|doi:\s*[^\s]+)/i;
+  const doiMatch = text.match(doiRegex);
+  if (doiMatch) {
+    let doiVal = doiMatch[0].trim().replace(/[.,;]+$/, '');
+    if (/^doi:/i.test(doiVal)) {
+      doiVal = 'https://doi.org/' + doiVal.replace(/^doi:\s*/i, '');
+    }
+    doiPart = doiVal;
+    text = (text.slice(0, doiMatch.index) + text.slice(doiMatch.index + doiMatch[0].length)).trim();
+  }
+
+  // Helper: Format single author into "Surname, I. O."
+  function formatSingleAuthor(raw) {
+    const a = raw.trim();
+    if (!a) return '';
+    if (/\b(et al\.?|та ін\.?|и др\.?)\b/i.test(a)) return a;
+    const m = a.match(/^([A-ZА-ЯҐЄІЇ][a-zа-яґєії\w\-]+)[,\s]+([A-ZА-ЯҐЄІЇ])\.?\s*([A-ZА-ЯҐЄІЇ])?\.?$/);
+    if (m) {
+      const surname = m[1];
+      const i1 = m[2];
+      const i2 = m[3];
+      return i2 ? `${surname}, ${i1}. ${i2}.` : `${surname}, ${i1}.`;
+    }
+    return a;
+  }
+
+  // Helper: Format author list with APA "&" and Oxford comma
+  function formatAuthorsList(authorsStr) {
+    if (!authorsStr) return '';
+    const hasEtAl = /\b(et al\.?|та ін\.?|и др\.?)\b/i.test(authorsStr);
+    const cleanAuth = authorsStr.replace(/\b(et al\.?|та ін\.?|и др\.?)\b/gi, '').trim().replace(/[.,]+$/, '');
+    const rawList = cleanAuth.split(/,\s*(?=[A-ZА-ЯҐЄІЇ][a-zа-яґєії\w\-]+[,\s]+[A-ZА-ЯҐЄІЇ])|;\s*|\s+(?:та|and|&)\s+/);
+    const formatted = rawList.map(formatSingleAuthor).filter(Boolean);
+    if (formatted.length === 0) return authorsStr;
+
+    let res = '';
+    if (formatted.length === 1) {
+      res = formatted[0];
+    } else if (formatted.length === 2) {
+      res = `${formatted[0]}, & ${formatted[1]}`;
+    } else {
+      res = formatted.slice(0, -1).join(', ') + `, & ${formatted[formatted.length - 1]}`;
+    }
+    if (hasEtAl) res += ', et al.';
+    return res;
+  }
+
+  // 3. Check if already formatted as standard APA: "Author(s) (Year). Title. Source."
+  const alreadyApaMatch = text.match(/^(.+?)\s*\(((?:19|20)\d\d[a-z]?)\)\.\s*(.+)$/);
+  if (alreadyApaMatch) {
+    let authors = alreadyApaMatch[1].trim();
+    const year = alreadyApaMatch[2].trim();
+    let rest = alreadyApaMatch[3].trim();
+    rest = rest.replace(/(\d+)\s*[-–—]\s*(\d+)/g, '$1–$2');
+    authors = formatAuthorsList(authors);
+    let result = `${authors} (${year}). ${rest}`;
+    if (!result.endsWith('.')) result += '.';
+    if (doiPart) result += ` ${doiPart}`;
+    return result;
+  }
+
+  // 4. Extract 4-digit Year
+  let year = '';
+  const yearMatch = text.match(/[-–—.;,\s(]\s*((?:19|20)\d\d)\s*[-–—.;,)\s]/) || text.match(/\b((?:19|20)\d\d)\b/);
+  if (yearMatch) {
+    year = yearMatch[1];
+  }
+
+  // 5. Extract Pages
+  let pages = '';
+  const pMatch = text.match(/(?:[СсPp]\.?|pages?|pp?\.?)\s*(\d+)\s*[-–—]\s*(\d+)/);
+  if (pMatch) {
+    pages = `${pMatch[1]}–${pMatch[2]}`;
+  } else {
+    const pSingle = text.match(/(?:[СсPp]\.?)\s*(\d+)(?!\s*с\b)/);
+    if (pSingle) {
+      pages = pSingle[1];
+    } else {
+      const vancPages = text.match(/:\s*(\d+)\s*[-–—]\s*(\d+)/);
+      if (vancPages) pages = `${vancPages[1]}–${vancPages[2]}`;
+    }
+  }
+
+  // 6. Extract Volume and Issue
+  let vol = '';
+  let issue = '';
+  const volMatch = text.match(/(?:Т\.|Том|Vol\.?|v\.)\s*(\d+)/i);
+  if (volMatch) vol = volMatch[1];
+  const issMatch = text.match(/(?:№|No\.?|Issue|вип\.)\s*(\d+)/i);
+  if (issMatch) issue = issMatch[1];
+  const vancVolIss = text.match(/\b(\d+)\s*\(\s*(\d+)\s*\)/);
+  if (vancVolIss && !vol) {
+    vol = vancVolIss[1];
+    issue = vancVolIss[2];
+  }
+
+  // 7. Case A: ДСТУ format with "//"
+  if (text.includes('//')) {
+    const parts = text.split('//');
+    const before = parts[0].trim();
+    const after = parts[1].trim();
+
+    let rawAuthors = '';
+    let title = '';
+
+    const authorMatch = before.match(/^((?:[A-ZА-ЯҐЄІЇ][a-zа-яґєії\w\-]+[,\s]+[A-ZА-ЯҐЄІЇ]\.?\s*[A-ZА-ЯҐЄІЇ]?\.?(?:,\s*|;\s*|\s+(?:та|and|&)\s+)?)+)(.+)$/);
+    if (authorMatch) {
+      rawAuthors = authorMatch[1].trim().replace(/[.,]+$/, '');
+      title = authorMatch[2].trim().replace(/[.,]+$/, '');
+    } else if (before.includes(' / ')) {
+      const bParts = before.split(' / ');
+      title = bParts[0].trim().replace(/[.,]+$/, '');
+      rawAuthors = bParts[1].trim().replace(/[.,]+$/, '');
+    } else {
+      const firstDot = before.indexOf('.');
+      if (firstDot !== -1 && firstDot < 45) {
+        rawAuthors = before.slice(0, firstDot).trim();
+        title = before.slice(firstDot + 1).trim().replace(/^[.\s]+/, '').replace(/[.,]+$/, '');
+      } else {
+        title = before.trim().replace(/[.,]+$/, '');
+      }
+    }
+
+    const journalMatch = after.match(/^([^\.\–\—\-]+)/);
+    let journal = journalMatch ? journalMatch[1].trim() : after.split('.')[0].trim();
+
+    let pubInfo = journal;
+    if (vol && issue) pubInfo += `, ${vol}(${issue})`;
+    else if (vol) pubInfo += `, ${vol}`;
+    else if (issue) pubInfo += `, (${issue})`;
+    if (pages) pubInfo += `, ${pages}`;
+
+    const apaAuthors = formatAuthorsList(rawAuthors);
+    const yearStr = year ? ` (${year})` : '';
+    const titleStr = title ? `. ${title.charAt(0).toUpperCase() + title.slice(1)}` : '';
+    const pubStr = pubInfo ? `. ${pubInfo}` : '';
+
+    let res = `${apaAuthors}${yearStr}${titleStr}${pubStr}.`.trim();
+    res = res.replace(/\.\.+/g, '.');
+    if (doiPart) res += ` ${doiPart}`;
+    return res;
+  }
+
+  // 8. Case B: Vancouver format e.g. "Smith J, Doe A. Modern approaches. Ann Surg. 2021; 273(4): 112-118."
+  const vancPattern = text.match(/(\b(?:19|20)\d\d)\s*;\s*(?:(\d+)\s*(?:\(([^)]+)\))?\s*:\s*)?(\d+)\s*[-–—]\s*(\d+)/);
+  if (vancPattern) {
+    const vYear = vancPattern[1];
+    const vVol = vancPattern[2] || '';
+    const vIss = vancPattern[3] || '';
+    const vPages = `${vancPattern[4]}–${vancPattern[5]}`;
+    const beforeVanc = text.slice(0, vancPattern.index).trim().replace(/[.;,]+$/, '');
+    const segments = beforeVanc.split(/\.\s+/);
+
+    let vAuthors = '';
+    let vTitle = '';
+    let vJournal = '';
+    if (segments.length >= 3) {
+      vAuthors = segments[0].trim();
+      vTitle = segments[1].trim();
+      vJournal = segments.slice(2).join('. ').trim();
+    } else if (segments.length === 2) {
+      vAuthors = segments[0].trim();
+      vTitle = segments[1].trim();
+    } else {
+      vAuthors = beforeVanc;
+    }
+
+    let pub = vJournal;
+    if (vVol && vIss) pub += `, ${vVol}(${vIss})`;
+    else if (vVol) pub += `, ${vVol}`;
+    else if (vIss) pub += `, (${vIss})`;
+    if (vPages) pub += `, ${vPages}`;
+
+    const apaAuthors = formatAuthorsList(vAuthors);
+    const titleStr = vTitle ? `. ${vTitle.charAt(0).toUpperCase() + vTitle.slice(1)}` : '';
+    const pubStr = pub ? `. ${pub}` : '';
+    let res = `${apaAuthors} (${vYear})${titleStr}${pubStr}.`.trim().replace(/\.\.+/g, '.');
+    if (doiPart) res += ` ${doiPart}`;
+    return res;
+  }
+
+  // 9. Case C: Book format e.g. "Мельник С.В. Госпітальна допомога. – Київ: Медицина, 2021. – 142 с."
+  const bookMatch = text.match(/[-–—.\s]*([A-ZА-ЯҐЄІЇ][a-zа-яґєії\w\s]+)\s*:\s*([A-ZА-ЯҐЄІЇ][a-zа-яґєії\w\s]+)[,\s]+((?:19|20)\d\d)/);
+  if (bookMatch) {
+    const publisher = bookMatch[2].trim();
+    const bYear = bookMatch[3].trim();
+    const beforeBook = text.slice(0, bookMatch.index).trim().replace(/[.\–\—\-]+$/, '');
+    const firstDot = beforeBook.indexOf('.');
+    let bAuthors = '';
+    let bTitle = '';
+    if (firstDot !== -1 && firstDot < 45) {
+      bAuthors = beforeBook.slice(0, firstDot).trim();
+      bTitle = beforeBook.slice(firstDot + 1).trim().replace(/^[.\s]+/, '').replace(/[.,]+$/, '');
+    } else {
+      bTitle = beforeBook;
+    }
+    const apaAuthors = formatAuthorsList(bAuthors);
+    const titleStr = bTitle ? `. ${bTitle.charAt(0).toUpperCase() + bTitle.slice(1)}` : '';
+    let res = `${apaAuthors} (${bYear})${titleStr}. ${publisher}.`.trim().replace(/\.\.+/g, '.');
+    if (doiPart) res += ` ${doiPart}`;
+    return res;
+  }
+
+  // 10. Fallback
+  let fallback = text.replace(/(\d+)\s*[-–—]\s*(\d+)/g, '$1–$2');
+  if (year && !fallback.includes(`(${year})`)) {
+    fallback = fallback.replace(new RegExp(`\\b${year}\\b`), `(${year})`);
+  }
+  fallback = fallback.charAt(0).toUpperCase() + fallback.slice(1);
+  if (!fallback.endsWith('.')) fallback += '.';
+  if (doiPart) fallback += ` ${doiPart}`;
+  return fallback;
+}
+
+function updateRefCounter() {
+  const list = document.getElementById('referencesBuilderList');
+  const countEl = document.getElementById('refCountNum');
+  const countEnEl = document.getElementById('refCountNumEn');
+  const pill = document.getElementById('refCounterPill');
+  const addBtn = document.getElementById('btnAddReference');
+  if (!list) return;
+
+  const count = list.querySelectorAll('.ref-builder-row').length;
+  if (countEl) countEl.textContent = String(count);
+  if (countEnEl) countEnEl.textContent = String(count);
+
+  if (addBtn) {
+    if (count >= MAX_REFERENCES) {
+      addBtn.disabled = true;
+      addBtn.setAttribute('title', 'Досягнуто ліміт 10 джерел / Max 10 sources reached');
+    } else {
+      addBtn.disabled = false;
+      addBtn.removeAttribute('title');
+    }
+  }
+
+  if (pill) {
+    if (count >= MAX_REFERENCES) {
+      pill.classList.add('limit-reached');
+    } else {
+      pill.classList.remove('limit-reached');
+    }
+  }
+}
+
 function initReferencesBuilder(forceReset = false) {
   const list = document.getElementById('referencesBuilderList');
   const hiddenTextarea = document.getElementById('abstractReferences');
@@ -967,6 +1227,7 @@ function initReferencesBuilder(forceReset = false) {
     if (hiddenTextarea) hiddenTextarea.value = '';
     addReferenceItem('', false);
     addReferenceItem('', false);
+    updateRefCounter();
     return;
   }
 
@@ -974,6 +1235,7 @@ function initReferencesBuilder(forceReset = false) {
   if (list.children.length > 0) {
     renumberReferenceItems();
     syncReferencesToHidden();
+    updateRefCounter();
     return;
   }
 
@@ -981,9 +1243,11 @@ function initReferencesBuilder(forceReset = false) {
   if (hiddenTextarea && hiddenTextarea.value.trim()) {
     const lines = hiddenTextarea.value.split('\n')
       .map(l => l.replace(/^(\[\d+\]|\d+[\.\)\s\t]+)/, '').trim())
-      .filter(Boolean);
+      .filter(Boolean)
+      .slice(0, MAX_REFERENCES);
     if (lines.length > 0) {
       lines.forEach(val => addReferenceItem(val, false));
+      updateRefCounter();
       return;
     }
   }
@@ -991,6 +1255,7 @@ function initReferencesBuilder(forceReset = false) {
   // Default: start with 2 clean reference inputs
   addReferenceItem('', false);
   addReferenceItem('', false);
+  updateRefCounter();
 }
 
 function addReferenceItem(initialVal = '', autoFocus = false) {
@@ -998,6 +1263,11 @@ function addReferenceItem(initialVal = '', autoFocus = false) {
   if (!list) return;
 
   const currentCount = list.children.length;
+  if (currentCount >= MAX_REFERENCES) {
+    updateRefCounter();
+    return;
+  }
+
   const newIndex = currentCount + 1;
   const placeholderObj = DEFAULT_REF_PLACEHOLDERS[(newIndex - 1) % DEFAULT_REF_PLACEHOLDERS.length];
   const isEn = document.documentElement.lang === 'en';
@@ -1017,6 +1287,9 @@ function addReferenceItem(initialVal = '', autoFocus = false) {
              data-placeholder-en="${placeholderObj.en}"
              value="${escapeHtmlAttr(initialVal)}">
     </div>
+    <button type="button" class="btn-ref-apa" title="Оформити за стандартом APA 7th / Format in APA style" onclick="formatSingleReference(this)">
+      <span class="apa-icon">🪄</span><span class="apa-label">APA</span>
+    </button>
     <button type="button" class="btn-ref-remove" title="Видалити джерело" onclick="removeReferenceItem(this)">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
     </button>
@@ -1031,14 +1304,30 @@ function addReferenceItem(initialVal = '', autoFocus = false) {
       syncReferencesToHidden();
     });
 
-    input.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        addReferenceItem('', true);
+    // Auto-APA on blur if user entered something
+    input.addEventListener('blur', function() {
+      if (!this.value.trim()) return;
+      const formatted = formatReferenceToAPA(this.value);
+      if (formatted && formatted !== this.value) {
+        this.value = formatted;
+        this.classList.remove('apa-flash');
+        void this.offsetWidth;
+        this.classList.add('apa-flash');
+        setTimeout(() => this.classList.remove('apa-flash'), 1000);
+        syncReferencesToHidden();
       }
     });
 
-    // Smart paste: if multi-line citations are pasted, split them into sequential rows
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (list.children.length < MAX_REFERENCES) {
+          addReferenceItem('', true);
+        }
+      }
+    });
+
+    // Smart paste: clamp up to MAX_REFERENCES and format with APA
     input.addEventListener('paste', function(e) {
       const clipboard = (e.clipboardData || window.clipboardData);
       const text = clipboard ? clipboard.getData('text') : '';
@@ -1052,14 +1341,24 @@ function addReferenceItem(initialVal = '', autoFocus = false) {
 
       if (cleanLines.length === 0) return;
 
-      this.value = cleanLines[0].charAt(0).toUpperCase() + cleanLines[0].slice(1);
+      const maxSlots = MAX_REFERENCES - list.querySelectorAll('.ref-builder-row').length + 1;
+      const linesToAdd = cleanLines.slice(0, maxSlots);
 
-      for (let i = 1; i < cleanLines.length; i++) {
-        addReferenceItem(cleanLines[i], false);
+      this.value = formatReferenceToAPA(linesToAdd[0]);
+      this.classList.remove('apa-flash');
+      void this.offsetWidth;
+      this.classList.add('apa-flash');
+      setTimeout(() => this.classList.remove('apa-flash'), 1000);
+
+      for (let i = 1; i < linesToAdd.length; i++) {
+        if (list.children.length < MAX_REFERENCES) {
+          addReferenceItem(formatReferenceToAPA(linesToAdd[i]), false);
+        }
       }
 
       renumberReferenceItems();
       syncReferencesToHidden();
+      updateRefCounter();
     });
 
     if (autoFocus) {
@@ -1069,6 +1368,24 @@ function addReferenceItem(initialVal = '', autoFocus = false) {
 
   renumberReferenceItems();
   syncReferencesToHidden();
+  updateRefCounter();
+}
+
+function formatSingleReference(btn) {
+  const row = btn.closest('.ref-builder-row');
+  if (!row) return;
+  const input = row.querySelector('.ref-item-input');
+  if (!input || !input.value.trim()) return;
+
+  const formatted = formatReferenceToAPA(input.value);
+  if (formatted) {
+    input.value = formatted;
+    input.classList.remove('apa-flash');
+    void input.offsetWidth;
+    input.classList.add('apa-flash');
+    setTimeout(() => input.classList.remove('apa-flash'), 1000);
+    syncReferencesToHidden();
+  }
 }
 
 function removeReferenceItem(btn) {
@@ -1078,7 +1395,6 @@ function removeReferenceItem(btn) {
 
   const rows = list.querySelectorAll('.ref-builder-row');
   if (rows.length <= 1) {
-    // Keep at least one row, just clear input value
     const input = row.querySelector('.ref-item-input');
     if (input) {
       input.value = '';
@@ -1090,6 +1406,7 @@ function removeReferenceItem(btn) {
 
   renumberReferenceItems();
   syncReferencesToHidden();
+  updateRefCounter();
 }
 
 function renumberReferenceItems() {
@@ -1119,8 +1436,8 @@ function syncReferencesToHidden() {
     if (!val) return;
     val = val.replace(/^(\[\d+\]|\d+[\.\)\s\t]+)/, '').trim();
     if (val) {
-      const capVal = val.charAt(0).toUpperCase() + val.slice(1);
-      formattedItems.push(`${formattedItems.length + 1}. ${capVal}`);
+      const apaVal = formatReferenceToAPA(val);
+      formattedItems.push(`${formattedItems.length + 1}. ${apaVal}`);
     }
   });
 
@@ -1137,6 +1454,56 @@ function escapeHtmlAttr(str) {
     .replace(/>/g, '&gt;');
 }
 
+// ==========================================
+// 8.5. LEADERSHIP & DEPARTMENT HELPERS (Item 4)
+// ==========================================
+
+function assembleLeadership(position, degree, name) {
+  const p = (position || '').trim();
+  const d = (degree || '').trim();
+  const n = (name || '').trim();
+  const titles = [p, d].filter(Boolean).join(', ');
+  if (titles && n) return `${titles} ${n}`;
+  return titles || n || '';
+}
+
+function updateLeadershipHiddenFields() {
+  const supPos = document.getElementById('supervisorPosition') ? document.getElementById('supervisorPosition').value.trim() : '';
+  const supDeg = document.getElementById('supervisorDegree') ? document.getElementById('supervisorDegree').value.trim() : '';
+  const supName = document.getElementById('supervisorName') ? document.getElementById('supervisorName').value.trim() : '';
+
+  const headPos = document.getElementById('headPosition') ? document.getElementById('headPosition').value.trim() : '';
+  const headDeg = document.getElementById('headDegree') ? document.getElementById('headDegree').value.trim() : '';
+  const headName = document.getElementById('headName') ? document.getElementById('headName').value.trim() : '';
+
+  const supFull = assembleLeadership(supPos, supDeg, supName);
+  const headFull = assembleLeadership(headPos, headDeg, headName);
+
+  const supHidden = document.getElementById('scientificSupervisor');
+  if (supHidden && supFull) supHidden.value = supFull;
+
+  const headHidden = document.getElementById('headOfDepartment');
+  if (headHidden && headFull) headHidden.value = headFull;
+}
+
+function initLeadershipInputs() {
+  const ids = ['supervisorPosition', 'supervisorDegree', 'supervisorName', 'headPosition', 'headDegree', 'headName'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', () => {
+        updateLeadershipHiddenFields();
+      });
+    }
+  });
+}
+
+window.formatReferenceToAPA = formatReferenceToAPA;
+window.formatSingleReference = formatSingleReference;
+window.updateRefCounter = updateRefCounter;
+window.assembleLeadership = assembleLeadership;
+window.updateLeadershipHiddenFields = updateLeadershipHiddenFields;
+window.initLeadershipInputs = initLeadershipInputs;
 window.addReferenceItem = addReferenceItem;
 window.removeReferenceItem = removeReferenceItem;
 window.initReferencesBuilder = initReferencesBuilder;
@@ -1175,8 +1542,22 @@ function handleFormReview(e) {
   const fullName = document.getElementById('fullName').value.trim();
   const institution = document.getElementById('institution').value.trim();
   const department = document.getElementById('department') ? document.getElementById('department').value.trim() : '';
-  const headOfDepartment = document.getElementById('headOfDepartment') ? document.getElementById('headOfDepartment').value.trim() : '';
-  const scientificSupervisor = document.getElementById('scientificSupervisor') ? document.getElementById('scientificSupervisor').value.trim() : '';
+
+  const supervisorPosition = document.getElementById('supervisorPosition') ? document.getElementById('supervisorPosition').value.trim() : '';
+  const supervisorDegree = document.getElementById('supervisorDegree') ? document.getElementById('supervisorDegree').value.trim() : '';
+  const supervisorName = document.getElementById('supervisorName') ? document.getElementById('supervisorName').value.trim() : '';
+
+  const headPosition = document.getElementById('headPosition') ? document.getElementById('headPosition').value.trim() : '';
+  const headDegree = document.getElementById('headDegree') ? document.getElementById('headDegree').value.trim() : '';
+  const headName = document.getElementById('headName') ? document.getElementById('headName').value.trim() : '';
+
+  const scientificSupervisor = assembleLeadership(supervisorPosition, supervisorDegree, supervisorName) || (document.getElementById('scientificSupervisor') ? document.getElementById('scientificSupervisor').value.trim() : '');
+  const headOfDepartment = assembleLeadership(headPosition, headDegree, headName) || (document.getElementById('headOfDepartment') ? document.getElementById('headOfDepartment').value.trim() : '');
+
+  // Keep hidden inputs up to date
+  if (document.getElementById('scientificSupervisor')) document.getElementById('scientificSupervisor').value = scientificSupervisor;
+  if (document.getElementById('headOfDepartment')) document.getElementById('headOfDepartment').value = headOfDepartment;
+
   const cityCountry = document.getElementById('cityCountry') ? document.getElementById('cityCountry').value.trim() : 'м. Київ, Україна';
 
   const academicStatusEl = document.getElementById('academicStatus');
@@ -1242,8 +1623,51 @@ function handleFormReview(e) {
     return;
   }
 
-  // VALIDATION 3: 3200 characters limit without spaces for 5 abstract sections
+  // VALIDATION 3: Abstract requirements (Department, Supervisor, Head, References limit, Character limit)
+  const isEn = document.documentElement.getAttribute('lang') === 'en';
   if (partFormat !== 'listener') {
+    if (!department) {
+      alert(isEn ? '⚠️ Please specify Department / Place of Work.' : '⚠️ Будь ласка, вкажіть кафедру або місце роботи.');
+      const dEl = document.getElementById('department');
+      if (dEl) dEl.focus();
+      return;
+    }
+    if (!supervisorPosition) {
+      alert(isEn ? '⚠️ Please specify the position of the scientific supervisor.' : '⚠️ Будь ласка, вкажіть посаду наукового керівника.');
+      const spEl = document.getElementById('supervisorPosition');
+      if (spEl) spEl.focus();
+      return;
+    }
+    if (!supervisorName) {
+      alert(isEn ? '⚠️ Please specify the full name of the scientific supervisor.' : '⚠️ Будь ласка, вкажіть ПІБ наукового керівника.');
+      const snEl = document.getElementById('supervisorName');
+      if (snEl) snEl.focus();
+      return;
+    }
+    if (!headPosition) {
+      alert(isEn ? '⚠️ Please specify the position of the department head / institution head.' : '⚠️ Будь ласка, вкажіть посаду завідувача кафедри або керівника установи.');
+      const hpEl = document.getElementById('headPosition');
+      if (hpEl) hpEl.focus();
+      return;
+    }
+    if (!headName) {
+      alert(isEn ? '⚠️ Please specify the full name of the department head / institution head.' : '⚠️ Будь ласка, вкажіть ПІБ завідувача кафедри або керівника установи.');
+      const hnEl = document.getElementById('headName');
+      if (hnEl) hnEl.focus();
+      return;
+    }
+
+    // References limit check: max 10
+    const list = document.getElementById('referencesBuilderList');
+    const refRowsCount = list ? list.querySelectorAll('.ref-builder-row').length : 0;
+    if (refRowsCount > MAX_REFERENCES) {
+      alert(isEn
+        ? `⚠️ Maximum ${MAX_REFERENCES} references allowed. You currently have ${refRowsCount}.`
+        : `⚠️ Дозволено не більше ${MAX_REFERENCES} джерел. Наразі додано ${refRowsCount}.`);
+      return;
+    }
+
+    // Character limit check
     const totalCharsWithoutSpaces = countAbstractCharsWithoutSpaces();
     if (totalCharsWithoutSpaces > ABSTRACT_CHAR_LIMIT) {
       const over = totalCharsWithoutSpaces - ABSTRACT_CHAR_LIMIT;
@@ -1283,8 +1707,14 @@ function handleFormReview(e) {
     fullName,
     institution,
     department,
-    headOfDepartment,
+    supervisorPosition,
+    supervisorDegree,
+    supervisorName,
     scientificSupervisor,
+    headPosition,
+    headDegree,
+    headName,
+    headOfDepartment,
     cityCountry,
     academicStatusText,
     partFormat,
@@ -1535,11 +1965,15 @@ function buildAbstractHTML(s) {
     affilLines.push(`${p}${s.scientificSupervisor}`);
   }
   if (s.department) {
-    const p = s.department.toLowerCase().startsWith('кафедра') ? '' : 'Кафедра ';
+    const depLower = s.department.toLowerCase();
+    const noPrefix = /^(кафедра|відділення|клініка|інститут|центр|лабораторія|department|clinic|division|institute)/i.test(depLower);
+    const p = noPrefix ? '' : 'Кафедра ';
     affilLines.push(`${p}${s.department}`);
   }
   if (s.headOfDepartment) {
-    const p = s.headOfDepartment.toLowerCase().startsWith('завідувач кафедри') ? '' : 'Завідувач кафедри: ';
+    const headLower = s.headOfDepartment.toLowerCase();
+    const noPrefix = /^(завідувач|керівник|головний лікар|директор|head|chief|director)/i.test(headLower);
+    const p = noPrefix ? '' : 'Завідувач кафедри: ';
     affilLines.push(`${p}${s.headOfDepartment}`);
   }
   if (s.institution) {
@@ -1593,8 +2027,9 @@ function buildAbstractHTML(s) {
 
   const refItems = (s.abstractReferences || '').split('\n')
     .map(r => r.replace(/^(\[\d+\]|\d+[\.\)\s\t]+)/, '').replace(/^[\t\s]+/, '').trim())
-    .filter(Boolean);
-  const formattedRefs = refItems.map(item => item.charAt(0).toUpperCase() + item.slice(1));
+    .filter(Boolean)
+    .slice(0, MAX_REFERENCES);
+  const formattedRefs = refItems.map(item => formatReferenceToAPA(item));
   const refHtml = formattedRefs.length > 0
     ? `<p class="ref-heading">Джерела:</p><ol class="ref-list">${formattedRefs.map(item => `<li>${item}</li>`).join('')}</ol>`
     : '';
@@ -1875,8 +2310,9 @@ function renderEmailFallbackOptions(sub, reasonMsg) {
     `Надсилаю наукові тези для участі у форумі:\n` +
     `• Автор: ${sub.fullName || ''}\n` +
     `• Установа: ${sub.institution || ''}\n` +
-    `• Кафедра: ${sub.department || '-'}\n` +
+    `• Кафедра / Місце роботи: ${sub.department || '-'}\n` +
     `• Науковий керівник: ${sub.scientificSupervisor || '-'}\n` +
+    `• Завідувач / Керівник: ${sub.headOfDepartment || '-'}\n` +
     `• Секція: ${sub.sectionText || '-'}\n` +
     `• Тема: ${sub.abstractTitle || '-'}\n` +
     `• Контакти: ${sub.email || ''}, ${sub.phone || ''}\n\n` +
@@ -2532,6 +2968,7 @@ if (document.readyState === 'loading') {
     initAbstractCharCounter();
     initStructureAutoCapitalizeAndTab();
     initReferencesBuilder();
+    initLeadershipInputs();
     initGAOutboundTracking();
   });
 } else {
@@ -2542,6 +2979,7 @@ if (document.readyState === 'loading') {
   initAbstractCharCounter();
   initStructureAutoCapitalizeAndTab();
   initReferencesBuilder();
+  initLeadershipInputs();
   initGAOutboundTracking();
 }
 

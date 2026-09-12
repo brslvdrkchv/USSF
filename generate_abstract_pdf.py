@@ -220,11 +220,13 @@ def create_abstract_pdf(data: dict, output_path: str = None) -> str:
         affil_lines.append(f"{prefix}{scientific_supervisor}")
 
     if department:
-        prefix = "" if department.lower().startswith("кафедра") else "Кафедра "
+        no_prefix = bool(re.match(r'^(кафедра|відділення|клініка|інститут|центр|лабораторія|department|clinic|division|institute)\b', department.strip(), re.I))
+        prefix = "" if no_prefix else "Кафедра "
         affil_lines.append(f"{prefix}{department}")
 
     if head_of_department:
-        prefix = "" if head_of_department.lower().startswith("завідувач кафедри") else "Завідувач кафедри: "
+        no_prefix = bool(re.match(r'^(завідувач|керівник|головний лікар|директор|head|chief|director)\b', head_of_department.strip(), re.I))
+        prefix = "" if no_prefix else "Завідувач кафедри: "
         affil_lines.append(f"{prefix}{head_of_department}")
 
     if institution:
@@ -265,8 +267,12 @@ def create_abstract_pdf(data: dict, output_path: str = None) -> str:
         story.append(Paragraph("<b>Список літератури:</b>", ref_heading_style))
         # Split references line-by-line if multiple
         ref_lines = [r.strip() for r in references.split('\n') if r.strip()]
+        ref_lines = ref_lines[:10]
+        from generate_abstract_docx import ensure_apa_format
         for ref_line in ref_lines:
-            story.append(Paragraph(ref_line, ref_item_style))
+            clean_item = re.sub(r'^(\[\d+\]|\d+[\.\)\s\t]+)', '', ref_line).strip()
+            clean_item = ensure_apa_format(clean_item)
+            story.append(Paragraph(clean_item, ref_item_style))
 
     doc.build(story)
     return os.path.abspath(output_path)

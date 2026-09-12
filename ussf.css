@@ -2892,6 +2892,81 @@ footer#contacts {
   gap: 0.5rem;
 }
 
+/* ========================================================
+   LEADERSHIP & DEPARTMENT SUBFIELDS (Item 4)
+======================================================== */
+.leadership-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 3.5px solid var(--brand-cyan);
+  border-radius: 8px;
+  padding: 0.95rem 1.05rem 0.85rem;
+  margin-bottom: 1.2rem;
+  transition: all var(--transition-fast);
+}
+
+.leadership-card:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.leadership-card:focus-within {
+  background: #ffffff;
+  border-color: var(--brand-cyan);
+  box-shadow: 0 2px 8px rgba(27, 154, 170, 0.1);
+}
+
+.leadership-card-title {
+  font-family: var(--font-headings);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--brand-main);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.leadership-card-title svg {
+  color: var(--brand-cyan);
+  flex-shrink: 0;
+}
+
+.leadership-subgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.25fr;
+  gap: 0.85rem;
+}
+
+.leadership-subgrid .form-group {
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.leadership-subgrid label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.35rem;
+  line-height: 1.3;
+}
+
+.leadership-subgrid input {
+  font-size: 0.86rem;
+  padding: 0.55rem 0.7rem;
+}
+
+@media (max-width: 768px) {
+  .leadership-subgrid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
 .abstract-criteria-info {
   font-size: 0.78rem;
   color: #475569;
@@ -3275,10 +3350,10 @@ footer#contacts {
 /* 2. FLOATING BACK TO TOP BUTTON */
 #backToTopBtn {
   position: fixed;
-  bottom: 2.2rem;
+  bottom: 8.8rem;
   right: 2.2rem;
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: rgba(16, 42, 67, 0.92);
   backdrop-filter: blur(10px);
@@ -3324,6 +3399,107 @@ footer#contacts {
 
 #backToTopBtn:hover svg {
   transform: translateY(-2px);
+}
+
+/* 2.1. PERSISTENT FLOATING QUICK ACTION DOCK */
+.floating-action-dock {
+  position: fixed;
+  bottom: 2.2rem;
+  right: 2.2rem;
+  z-index: 998;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  align-items: flex-end;
+  pointer-events: auto;
+}
+
+.floating-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.floating-action-btn svg {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.floating-btn-reg {
+  background: linear-gradient(135deg, #1D428A 0%, #102A43 100%);
+  border: 1.5px solid #D4A843;
+  color: #FFFFFF;
+  padding: 0.72rem 1.25rem;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 24px rgba(16, 42, 67, 0.4), 0 0 14px rgba(212, 168, 67, 0.3);
+}
+
+.floating-btn-reg:hover {
+  background: linear-gradient(135deg, #2251A8 0%, #16385C 100%);
+  border-color: #F3E5AB;
+  color: #FFFFFF;
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 12px 30px rgba(16, 42, 67, 0.55), 0 0 20px rgba(212, 168, 67, 0.45);
+}
+
+.floating-btn-reg:hover svg {
+  transform: scale(1.1);
+}
+
+.floating-btn-faq {
+  background: rgba(16, 42, 67, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(212, 168, 67, 0.5);
+  color: #F8FAFC;
+  padding: 0.58rem 1.1rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.82rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.floating-btn-faq:hover {
+  background: rgba(29, 66, 138, 0.95);
+  border-color: #D4A843;
+  color: #D4A843;
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.floating-btn-faq:hover svg {
+  transform: rotate(-10deg);
+}
+
+@media (max-width: 768px) {
+  .floating-action-dock {
+    bottom: 1.2rem;
+    right: 1rem;
+    gap: 0.5rem;
+  }
+  .floating-btn-reg {
+    padding: 0.6rem 1rem;
+    font-size: 0.82rem;
+  }
+  .floating-btn-faq {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.78rem;
+  }
+  #backToTopBtn {
+    bottom: 7.2rem;
+    right: 1rem;
+    width: 42px;
+    height: 42px;
+  }
 }
 
 /* 3. SCROLL REVEAL ANIMATIONS (IntersectionObserver) - Noticeably Smooth & Crisp */
@@ -5450,6 +5626,57 @@ footer#contacts {
   font-size: 0.83rem;
 }
 
+.btn-ref-apa {
+  background: rgba(212, 168, 67, 0.12);
+  color: #B48418;
+  border: 1px solid rgba(212, 168, 67, 0.45);
+  border-radius: 5px;
+  padding: 0.28rem 0.55rem;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.btn-ref-apa:hover {
+  background: #D4A843;
+  color: #FFFFFF;
+  border-color: #D4A843;
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 2px 8px rgba(212, 168, 67, 0.35);
+}
+
+.btn-ref-apa:active {
+  transform: scale(0.97);
+}
+
+.btn-ref-apa .apa-icon {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+@keyframes apaFlashAnim {
+  0% {
+    background-color: rgba(212, 168, 67, 0.35);
+    box-shadow: 0 0 0 2px rgba(212, 168, 67, 0.5);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+.ref-item-input.apa-flash {
+  animation: apaFlashAnim 1s ease-out;
+}
+
 .btn-ref-remove {
   background: transparent;
   border: none;
@@ -5484,6 +5711,42 @@ footer#contacts {
   border-top: 1px dashed #e2e8f0;
 }
 
+.ref-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.ref-counter-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 0.28rem 0.65rem;
+  border-radius: 20px;
+  user-select: none;
+  transition: all var(--transition-fast);
+}
+
+.ref-counter-pill strong {
+  color: var(--brand-cyan);
+  margin-right: 0.15rem;
+}
+
+.ref-counter-pill.limit-reached {
+  background: #FEF3C7;
+  border-color: #F59E0B;
+  color: #92400E;
+}
+
+.ref-counter-pill.limit-reached strong {
+  color: #B45309;
+}
+
 .btn-add-reference {
   display: inline-flex;
   align-items: center;
@@ -5508,6 +5771,17 @@ footer#contacts {
   box-shadow: 0 3px 10px rgba(27, 154, 170, 0.25);
 }
 
+.btn-add-reference:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+  border-color: #cbd5e1;
+  color: #94a3b8;
+  background: #f1f5f9;
+  transform: none;
+  box-shadow: none;
+}
+
 .ref-builder-hint {
   font-size: 0.78rem;
   color: #64748b;
@@ -5522,9 +5796,13 @@ footer#contacts {
     flex-direction: column;
     align-items: stretch;
   }
+  .ref-footer-left {
+    width: 100%;
+    justify-content: space-between;
+  }
   .btn-add-reference {
     justify-content: center;
-    width: 100%;
+    flex: 1;
   }
 }
 

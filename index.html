@@ -39,7 +39,6 @@
     <a href="#about" onclick="closeMobileMenu()"><span class="ua">Про форум</span><span class="en">About</span></a>
     <a href="#program" onclick="closeMobileMenu()"><span class="ua">Програма</span><span class="en">Program</span></a>
     <a href="#formats" onclick="closeMobileMenu()"><span class="ua">Формати</span><span class="en">Formats</span></a>
-    <a href="#prizes" onclick="closeMobileMenu()"><span class="ua">Нагороди</span><span class="en">Awards</span></a>
     <a href="#registration" onclick="closeMobileMenu()"><span class="ua">Реєстрація</span><span class="en">Registration</span></a>
     <a href="#organizers" onclick="closeMobileMenu()"><span class="ua">Організатори</span><span class="en">Organizers</span></a>
     <a href="#venue" onclick="closeMobileMenu()"><span class="ua">Локація</span><span class="en">Venue</span></a>
@@ -58,7 +57,6 @@
       <li><a href="#about"><span class="ua">Про форум</span><span class="en">About</span></a></li>
       <li><a href="#program"><span class="ua">Програма</span><span class="en">Program</span></a></li>
       <li><a href="#formats"><span class="ua">Формати</span><span class="en">Formats</span></a></li>
-      <li><a href="#prizes"><span class="ua">Нагороди</span><span class="en">Awards</span></a></li>
       <li><a href="#registration"><span class="ua">Реєстрація</span><span class="en">Registration</span></a></li>
       <li><a href="#organizers"><span class="ua">Організатори</span><span class="en">Organizers</span></a></li>
       <li><a href="#venue"><span class="ua">Локація</span><span class="en">Venue</span></a></li>
@@ -806,33 +804,6 @@
             <span class="format-badge"><span class="ua">Очно або Zoom</span><span class="en">In-person or Zoom</span></span>
           </div>
         </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ PRIZES & AWARDS SECTION ============ -->
-  <!-- ФОН СЕКЦІЇ (розкоментуйте або замініть шлях, щоб змінити фонове зображення): -->
-  <!-- style="background-image: url('images/Myroniuk/back2_dark.jpeg');" -->
-  <section id="prizes" class="section-placeholder" style="background-image: url('images/Myroniuk/back2_dark.jpeg');">
-    <div class="section-inner">
-      <div class="section-label center">
-        <span class="ua">Відзнаки та нагороди</span>
-        <span class="en">Awards & Recognition</span>
-      </div>
-      <h2 class="section-title reveal" style="text-align: center;">
-        <span class="ua">Нагороди та номінації</span>
-        <span class="en">Awards & Nominations</span>
-      </h2>
-      <div class="divider center"></div>
-
-      <div class="placeholder-content-card reveal">
-        <div class="placeholder-icon-box">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="36" height="36"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
-        </div>
-        <p class="placeholder-text">
-          <span class="ua">Інформація про нагородний фонд, спеціальні академічні відзнаки наукових секцій, практичних хірургічних воркшопів та цінні нагороди від генеральних партнерів і організаційного комітету незабаром з'явиться тут.</span>
-          <span class="en">Information regarding the awards fund, scientific section honors, practical surgical workshop distinctions, and partner awards will be announced soon.</span>
-        </p>
       </div>
     </div>
   </section>
@@ -1716,7 +1687,6 @@
             <li><a href="#about"><span class="ua">Про форум</span><span class="en">About</span></a></li>
             <li><a href="#program"><span class="ua">Програма</span><span class="en">Program</span></a></li>
             <li><a href="#formats"><span class="ua">Формати</span><span class="en">Formats</span></a></li>
-            <li><a href="#prizes"><span class="ua">Нагороди</span><span class="en">Awards</span></a></li>
             <li><a href="#registration"><span class="ua">Реєстрація</span><span class="en">Registration</span></a></li>
             <li><a href="#organizers"><span class="ua">Організатори</span><span class="en">Organizers</span></a></li>
             <li><a href="#venue"><span class="ua">Локація</span><span class="en">Venue</span></a></li>
@@ -1881,22 +1851,78 @@
               <span class="en">Department and Academic Leadership Details</span>
             </div>
 
+            <!-- Кафедра / Місце роботи -->
+            <div class="form-group">
+              <label for="department"><span class="ua">Кафедра / Місце роботи *</span><span class="en">Department / Place of Work *</span></label>
+              <input type="text" id="department" placeholder="Кафедра хірургії №1 / Клініка / Відділення..." data-placeholder-ua="Кафедра хірургії №1 / Клініка / Відділення..." data-placeholder-en="Department of Surgery No. 1 / Clinic / Division...">
+            </div>
+
             <!-- Науковий керівник -->
-            <div class="form-group">
-              <label for="scientificSupervisor"><span class="ua">Науковий керівник (посада, наукове звання, ПІБ) *</span><span class="en">Scientific Supervisor (title, name) *</span></label>
-              <input type="text" id="scientificSupervisor" placeholder="асист. Іванченко І. І." data-placeholder-ua="асист. Іванченко І. І." data-placeholder-en="Asst. Prof. Ivanchenko I. I.">
+            <div class="leadership-card">
+              <div class="leadership-card-title">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span class="ua">Науковий керівник *</span>
+                <span class="en">Scientific Supervisor *</span>
+              </div>
+              <div class="leadership-subgrid">
+                <div class="form-group">
+                  <label for="supervisorPosition">
+                    <span class="ua">Посада *</span>
+                    <span class="en">Position *</span>
+                  </label>
+                  <input type="text" id="supervisorPosition" placeholder="асистент / доцент / професор / лікар" data-placeholder-ua="асистент / доцент / професор / лікар" data-placeholder-en="assistant / associate prof. / professor">
+                </div>
+                <div class="form-group">
+                  <label for="supervisorDegree">
+                    <span class="ua">Вчене звання / ступінь (за наявності)</span>
+                    <span class="en">Academic Degree / Title (if any)</span>
+                  </label>
+                  <input type="text" id="supervisorDegree" placeholder="д.мед.н., проф. / к.мед.н. / PhD" data-placeholder-ua="д.мед.н., проф. / к.мед.н. / PhD" data-placeholder-en="MD, PhD / Prof.">
+                </div>
+                <div class="form-group">
+                  <label for="supervisorName">
+                    <span class="ua">ПІБ керівника *</span>
+                    <span class="en">Full Name *</span>
+                  </label>
+                  <input type="text" id="supervisorName" placeholder="Іванченко І. І." data-placeholder-ua="Іванченко І. І." data-placeholder-en="Ivanchenko I. I.">
+                </div>
+              </div>
+              <!-- Приховане поле для автоматичної збірки та зворотної сумісності -->
+              <input type="hidden" id="scientificSupervisor" name="scientificSupervisor">
             </div>
 
-            <!-- Кафедра -->
-            <div class="form-group">
-              <label for="department"><span class="ua">Кафедра *</span><span class="en">Department *</span></label>
-              <input type="text" id="department" placeholder="Кафедра хірургії №1" data-placeholder-ua="Кафедра хірургії №1" data-placeholder-en="Department of Surgery No. 1">
-            </div>
-
-            <!-- Завідувач кафедри -->
-            <div class="form-group">
-              <label for="headOfDepartment"><span class="ua">Завідувач кафедри (посада, наукове звання, ПІБ) *</span><span class="en">Head of Department *</span></label>
-              <input type="text" id="headOfDepartment" placeholder="д.мед.н., проф. Іванченко І. І." data-placeholder-ua="д.мед.н., проф. Іванченко І. І." data-placeholder-en="Prof. Ivanchenko I. I.">
+            <!-- Завідувач кафедри / Керівник установи -->
+            <div class="leadership-card">
+              <div class="leadership-card-title">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span class="ua">Завідувач кафедри / Керівник установи *</span>
+                <span class="en">Head of Department / Institution *</span>
+              </div>
+              <div class="leadership-subgrid">
+                <div class="form-group">
+                  <label for="headPosition">
+                    <span class="ua">Посада *</span>
+                    <span class="en">Position *</span>
+                  </label>
+                  <input type="text" id="headPosition" placeholder="завідувач кафедри / головний лікар" data-placeholder-ua="завідувач кафедри / головний лікар" data-placeholder-en="head of department / chief">
+                </div>
+                <div class="form-group">
+                  <label for="headDegree">
+                    <span class="ua">Вчене звання / ступінь (за наявності)</span>
+                    <span class="en">Academic Degree / Title (if any)</span>
+                  </label>
+                  <input type="text" id="headDegree" placeholder="д.мед.н., проф." data-placeholder-ua="д.мед.н., проф." data-placeholder-en="MD, Prof.">
+                </div>
+                <div class="form-group">
+                  <label for="headName">
+                    <span class="ua">ПІБ завідувача / керівника *</span>
+                    <span class="en">Full Name *</span>
+                  </label>
+                  <input type="text" id="headName" placeholder="Ковальчук В. М." data-placeholder-ua="Ковальчук В. М." data-placeholder-en="Kovalchuk V. M.">
+                </div>
+              </div>
+              <!-- Приховане поле для автоматичної збірки та зворотної сумісності -->
+              <input type="hidden" id="headOfDepartment" name="headOfDepartment">
             </div>
 
             <div class="form-group">
@@ -2061,13 +2087,19 @@
                 </div>
 
                 <div class="ref-builder-footer">
-                  <button type="button" class="btn-add-reference" id="btnAddReference" onclick="addReferenceItem()">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    <span class="ua">Додати джерело</span><span class="en">Add Reference</span>
-                  </button>
+                  <div class="ref-footer-left">
+                    <button type="button" class="btn-add-reference" id="btnAddReference" onclick="addReferenceItem()">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      <span class="ua">Додати джерело</span><span class="en">Add Reference</span>
+                    </button>
+                    <span class="ref-counter-pill" id="refCounterPill">
+                      <span class="ua">Джерел: <strong id="refCountNum">2</strong> / 10</span>
+                      <span class="en">Sources: <strong id="refCountNumEn">2</strong> / 10</span>
+                    </span>
+                  </div>
                   <span class="ref-builder-hint">
-                    <span class="ua">Джерела автоматично нумеруються та оформлюються у документі</span>
-                    <span class="en">Sources are automatically numbered and formatted in the document</span>
+                    <span class="ua">Автоматичне оформлення за стилем APA (макс. 10 джерел)</span>
+                    <span class="en">Automatic APA formatting (max 10 sources)</span>
                   </span>
                 </div>
               </div>
@@ -2852,6 +2884,28 @@
       <span class="ua">Зареєструватися</span><span class="en">Register</span>
       <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
+  </div>
+
+  <!-- Persistent Floating Quick Action Buttons (Bottom-Right) -->
+  <div class="floating-action-dock" id="floatingActionDock">
+    <a href="#registration" class="floating-action-btn floating-btn-reg" id="floatingRegBtn">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="8.5" cy="7" r="4"/>
+        <polyline points="17 11 19 13 23 9"/>
+      </svg>
+      <span class="ua">Зареєструватись</span>
+      <span class="en">Register</span>
+    </a>
+    <a href="#faq" class="floating-action-btn floating-btn-faq" id="floatingFaqBtn">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <span class="ua">FAQ</span>
+      <span class="en">FAQ</span>
+    </a>
   </div>
 
   <!-- Floating Back to Top Button -->
