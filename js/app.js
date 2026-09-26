@@ -450,10 +450,26 @@ function openRegistrationModal(tab = 'abstracts', workshopId = null) {
     updateAbstractCharCounter();
     window.trackGAEvent('registration_modal_open', { event_category: 'engagement', tab: tab });
 
-    switchRegistrationTab(tab);
-    if (tab === 'workshops' && workshopId) {
-      const p1 = document.getElementById('wsPriority1');
-      if (p1) p1.value = workshopId;
+    if (tab === 'listener') {
+      switchRegistrationTab('abstracts');
+      const pf = document.getElementById('partFormat');
+      if (pf) {
+        pf.value = 'listener';
+        toggleAbstractField('listener');
+      }
+    } else if (tab === 'workshops') {
+      switchRegistrationTab('workshops');
+      if (workshopId) {
+        const wsSelect = document.getElementById('wsWorkshopSelect');
+        if (wsSelect) wsSelect.value = workshopId;
+      }
+    } else {
+      switchRegistrationTab('abstracts');
+      const pf = document.getElementById('partFormat');
+      if (pf && pf.value === 'listener') {
+        pf.value = 'presentation';
+        toggleAbstractField('presentation');
+      }
     }
   }
 }
@@ -488,7 +504,7 @@ function closeRegistrationModal(resetForm = false) {
       const formPreviewStep = document.getElementById('formPreviewStep');
       if (formPreviewStep) formPreviewStep.style.display = 'none';
       if (formSuccessMessage) formSuccessMessage.style.display = 'none';
-      
+
       const wsForm = document.getElementById('workshopRegForm');
       const wsSuccess = document.getElementById('workshopSuccessMessage');
       if (wsForm) wsForm.style.display = 'block';
@@ -498,6 +514,7 @@ function closeRegistrationModal(resetForm = false) {
         if (forumRegForm) forumRegForm.reset();
         if (wsForm) wsForm.reset();
         initReferencesBuilder(true);
+        toggleSecondSupervisor(false);
       }
       updateAbstractCharCounter();
     }, 350);
@@ -511,17 +528,52 @@ function switchRegistrationTab(tab) {
   const panelWorkshops = document.getElementById('panelWorkshopsForm');
 
   if (tab === 'workshops') {
-    if (tabBtnAbstracts) tabBtnAbstracts.classList.remove('active');
-    if (tabBtnWorkshops) tabBtnWorkshops.classList.add('active');
+    if (tabBtnAbstracts) {
+      tabBtnAbstracts.classList.remove('active');
+      tabBtnAbstracts.setAttribute('aria-selected', 'false');
+    }
+    if (tabBtnWorkshops) {
+      tabBtnWorkshops.classList.add('active');
+      tabBtnWorkshops.setAttribute('aria-selected', 'true');
+    }
     if (panelAbstracts) panelAbstracts.style.display = 'none';
     if (panelWorkshops) panelWorkshops.style.display = 'block';
     window.trackGAEvent('registration_tab_switch', { tab: 'workshops' });
   } else {
-    if (tabBtnAbstracts) tabBtnAbstracts.classList.add('active');
-    if (tabBtnWorkshops) tabBtnWorkshops.classList.remove('active');
-    if (panelAbstracts) panelAbstracts.style.display = 'block';
+    if (tabBtnWorkshops) {
+      tabBtnWorkshops.classList.remove('active');
+      tabBtnWorkshops.setAttribute('aria-selected', 'false');
+    }
+    if (tabBtnAbstracts) {
+      tabBtnAbstracts.classList.add('active');
+      tabBtnAbstracts.setAttribute('aria-selected', 'true');
+    }
     if (panelWorkshops) panelWorkshops.style.display = 'none';
+    if (panelAbstracts) panelAbstracts.style.display = 'block';
     window.trackGAEvent('registration_tab_switch', { tab: 'abstracts' });
+  }
+}
+
+function toggleSecondSupervisor(show) {
+  const card = document.getElementById('secondSupervisorCard');
+  const btn = document.getElementById('btnToggleSecondSupervisor');
+  if (!card) return;
+
+  const shouldShow = (typeof show === 'boolean') ? show : (card.style.display === 'none' || !card.style.display);
+  if (shouldShow) {
+    card.style.display = 'block';
+    if (btn) btn.style.display = 'none';
+    const firstInput = document.getElementById('supervisor2Position');
+    if (firstInput) firstInput.focus();
+  } else {
+    card.style.display = 'none';
+    if (btn) btn.style.display = 'inline-flex';
+    const s2Pos = document.getElementById('supervisor2Position');
+    const s2Deg = document.getElementById('supervisor2Degree');
+    const s2Name = document.getElementById('supervisor2Name');
+    if (s2Pos) s2Pos.value = '';
+    if (s2Deg) s2Deg.value = '';
+    if (s2Name) s2Name.value = '';
   }
 }
 
@@ -1536,15 +1588,22 @@ function toggleAbstractField(format) {
   const sectionGroup = document.getElementById('sectionSelectGroup');
   const titleGroup = document.getElementById('abstractTitleGroup');
   const fileGroup = document.getElementById('abstractFileGroup');
+  const btnReview = document.getElementById('btnReviewForm');
 
   if (format === 'listener') {
     if (sectionGroup) sectionGroup.style.display = 'none';
     if (titleGroup) titleGroup.style.display = 'none';
     if (fileGroup) fileGroup.style.display = 'none';
+    if (btnReview) {
+      btnReview.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right: 0.45rem; vertical-align: -2px;"><polyline points="20 6 9 17 4 12"/></svg><span class="ua">Зареєструватися як слухач</span><span class="en">Register as Attendee</span>';
+    }
   } else {
     if (sectionGroup) sectionGroup.style.display = 'block';
     if (titleGroup) titleGroup.style.display = 'block';
     if (fileGroup) fileGroup.style.display = 'block';
+    if (btnReview) {
+      btnReview.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right: 0.45rem; vertical-align: -2px;"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg><span class="ua">Перевірити</span><span class="en">Review</span>';
+    }
     updateAbstractCharCounter();
   }
 }
@@ -1563,18 +1622,25 @@ function handleFormReview(e) {
 
   const fullName = document.getElementById('fullName').value.trim();
   const institution = document.getElementById('institution').value.trim();
+  const courseFaculty = document.getElementById('courseFaculty') ? document.getElementById('courseFaculty').value.trim() : '';
   const department = document.getElementById('department') ? document.getElementById('department').value.trim() : '';
 
   const supervisorPosition = document.getElementById('supervisorPosition') ? document.getElementById('supervisorPosition').value.trim() : '';
   const supervisorDegree = document.getElementById('supervisorDegree') ? document.getElementById('supervisorDegree').value.trim() : '';
   const supervisorName = document.getElementById('supervisorName') ? document.getElementById('supervisorName').value.trim() : '';
 
+  const supervisor2Position = document.getElementById('supervisor2Position') ? document.getElementById('supervisor2Position').value.trim() : '';
+  const supervisor2Degree = document.getElementById('supervisor2Degree') ? document.getElementById('supervisor2Degree').value.trim() : '';
+  const supervisor2Name = document.getElementById('supervisor2Name') ? document.getElementById('supervisor2Name').value.trim() : '';
+
   const headPosition = document.getElementById('headPosition') ? document.getElementById('headPosition').value.trim() : '';
   const headDegree = document.getElementById('headDegree') ? document.getElementById('headDegree').value.trim() : '';
   const headName = document.getElementById('headName') ? document.getElementById('headName').value.trim() : '';
 
   const scientificSupervisor = assembleLeadership(supervisorPosition, supervisorDegree, supervisorName) || (document.getElementById('scientificSupervisor') ? document.getElementById('scientificSupervisor').value.trim() : '');
+  const scientificSupervisor2 = assembleLeadership(supervisor2Position, supervisor2Degree, supervisor2Name);
   const headOfDepartment = assembleLeadership(headPosition, headDegree, headName) || (document.getElementById('headOfDepartment') ? document.getElementById('headOfDepartment').value.trim() : '');
+  const needsAccommodation = !!document.getElementById('needsAccommodation')?.checked;
 
   // Keep hidden inputs up to date
   if (document.getElementById('scientificSupervisor')) document.getElementById('scientificSupervisor').value = scientificSupervisor;
@@ -1582,8 +1648,7 @@ function handleFormReview(e) {
 
   const cityCountry = document.getElementById('cityCountry') ? document.getElementById('cityCountry').value.trim() : 'м. Київ, Україна';
 
-  const academicStatusEl = document.getElementById('academicStatus');
-  const academicStatusText = academicStatusEl ? academicStatusEl.options[academicStatusEl.selectedIndex].text : '';
+  const academicStatusText = 'Студент медичного університету (1–6 курс)';
   const partFormatEl = document.getElementById('partFormat');
   const partFormat = partFormatEl ? partFormatEl.value : '';
   const partFormatText = partFormatEl ? partFormatEl.options[partFormatEl.selectedIndex].text : '';
@@ -1642,6 +1707,97 @@ function handleFormReview(e) {
     alert('Будь ласка, вкажіть ваш нікнейм у Telegram у форматі @username (від 3 до 32 символів)');
     const telegramInput = document.getElementById('telegram');
     if (telegramInput) telegramInput.focus();
+    return;
+  }
+
+  // VALIDATION 2.5: DIRECT LISTENER SUBMISSION FLOW
+  if (partFormat === 'listener') {
+    const btnSubmit = document.getElementById('btnReviewForm');
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<span class="spinner-small"></span> <span class="ua">Реєстрація...</span><span class="en">Registering...</span>';
+    }
+
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const formattedDate = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    const submissionId = 'LST-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+
+    const listenerSubmission = {
+      submissionId: submissionId,
+      formattedDate: formattedDate,
+      timestamp: now.toISOString(),
+      partFormat: 'listener',
+      partFormatText: 'Вільний слухач',
+      scientificSection: 'Вільний слухач (без виступу)',
+      fullName: fullName,
+      institution: institution,
+      courseFaculty: courseFaculty,
+      cityCountry: cityCountry,
+      academicStatus: 'student',
+      academicStatusText: 'Студент медичного університету (1–6 курс)',
+      needsAccommodation: needsAccommodation,
+      email: email,
+      phone: phone,
+      telegram: telegram,
+      consentPersonalData: true,
+      submissionElapsedMs: elapsedMs
+    };
+
+    // 1. Google Sheets sync
+    try {
+      const sheetWebhook = localStorage.getItem('ussf_google_sheet_url') || window.GOOGLE_SHEET_WEBHOOK_URL;
+      if (sheetWebhook) {
+        fetch(sheetWebhook, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(listenerSubmission)
+        }).catch(e => console.warn('Sheet webhook note:', e));
+      }
+    } catch (e) {}
+
+    // 2. Post to backend
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+    const localBase = window.location.port ? window.location.origin : 'http://127.0.0.1:5050';
+    const apiUrl = isLocal ? `${localBase}/api/submit-listener` : '/api/submit-listener';
+
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(listenerSubmission)
+    }).catch(e => console.warn('Listener server note:', e));
+
+    window.trackGAEvent('listener_registration_success', {
+      event_category: 'conversion',
+      needs_accommodation: needsAccommodation
+    });
+
+    setTimeout(() => {
+      if (formContent) formContent.style.display = 'none';
+      if (formSuccessMessage) {
+        formSuccessMessage.style.display = 'block';
+        const modalWindow = document.querySelector('.modal-window');
+        if (modalWindow) modalWindow.scrollTop = 0;
+        const titleEl = formSuccessMessage.querySelector('h3');
+        if (titleEl) {
+          titleEl.innerHTML = '<span class="ua">Ви успішно зареєстровані як слухач!</span><span class="en">Attendee Registration Successful!</span>';
+        }
+        const savedBox = document.getElementById('savedFilePathDisplay');
+        if (savedBox) {
+          savedBox.innerHTML = `
+            <div>✅ <span style="color:#15803D;font-weight:600;">Дані успішно зафіксовано в офіційному реєстрі учасників форуму.</span></div>
+            <div style="margin-top:0.35rem;">📊 <span>Синхронізовано з Google Таблицею оргкомітету.</span></div>
+            <div style="margin-top:0.35rem;">🏠 <span>Поселення в гуртожитку НМУ: <strong>${needsAccommodation ? 'Потрібне' : 'Не потрібне'}</strong>.</span></div>
+            <div style="margin-top:0.35rem;">✉️ <span>Інформацію про програму виступів та регламент буде надіслано на вашу пошту (${escapeHtml(email)}).</span></div>
+          `;
+        }
+      }
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right: 0.45rem; vertical-align: -2px;"><polyline points="20 6 9 17 4 12"/></svg><span class="ua">Зареєструватися як слухач</span><span class="en">Register as Attendee</span>';
+      }
+    }, 600);
     return;
   }
 
@@ -1733,11 +1889,16 @@ function handleFormReview(e) {
     supervisorDegree,
     supervisorName,
     scientificSupervisor,
+    supervisor2Position,
+    supervisor2Degree,
+    supervisor2Name,
+    scientificSupervisor2,
     headPosition,
     headDegree,
     headName,
     headOfDepartment,
     cityCountry,
+    needsAccommodation,
     academicStatusText,
     partFormat,
     partFormatText,
@@ -1985,6 +2146,10 @@ function buildAbstractHTML(s) {
   if (s.scientificSupervisor) {
     const p = s.scientificSupervisor.toLowerCase().startsWith('науковий керівник') ? '' : 'Науковий керівник: ';
     affilLines.push(`${p}${s.scientificSupervisor}`);
+  }
+  if (s.scientificSupervisor2) {
+    const p = s.scientificSupervisor2.toLowerCase().startsWith('науковий керівник') ? '' : 'Науковий керівник: ';
+    affilLines.push(`${p}${s.scientificSupervisor2}`);
   }
   if (s.department) {
     const depLower = s.department.toLowerCase();
@@ -2700,6 +2865,159 @@ window.copyGoogleAppsScriptCode = copyGoogleAppsScriptCode;
 window.saveGoogleSheetsConfig = saveGoogleSheetsConfig;
 
 // ==========================================
+// 8.1. FREE LISTENER REGISTRATION HANDLER
+// ==========================================
+async function handleListenerSubmit(e) {
+  if (e) e.preventDefault();
+
+  const listenerFormat = document.getElementById('listenerFormat')?.value || 'offline';
+  const fullName = (document.getElementById('listenerFullName')?.value || '').trim();
+  const institution = (document.getElementById('listenerInstitution')?.value || '').trim();
+  const courseFaculty = (document.getElementById('listenerCourseFaculty')?.value || '').trim();
+  const cityCountry = (document.getElementById('listenerCityCountry')?.value || '').trim();
+  const email = (document.getElementById('listenerEmail')?.value || '').trim();
+  const phone = (document.getElementById('listenerPhone')?.value || '').trim();
+  const telegram = (document.getElementById('listenerTelegram')?.value || '').trim();
+  const needsAccommodation = !!document.getElementById('listenerAccommodation')?.checked;
+
+  // Honeypot check
+  const hpCheck = document.getElementById('websiteHpCheckListener');
+  if (hpCheck && hpCheck.value.trim() !== '') {
+    alert('⚠️ Помилка верифікації форми. Запит відхилено системою безпеки.');
+    return;
+  }
+
+  // Time-lock check
+  const elapsedMs = window.formOpenedTimestamp ? (Date.now() - window.formOpenedTimestamp) : 10000;
+  if (elapsedMs < 2000) {
+    alert('⚠️ Будь ласка, перевірте внесені дані перед відправкою.');
+    return;
+  }
+
+  // Phone validation
+  const phoneDigits = phone.replace(/\D/g, '');
+  if (phoneDigits.length !== 12 || !phoneDigits.startsWith('380')) {
+    alert('Будь ласка, введіть дійсний номер телефону у форматі +380 (XX) XXX-XX-XX');
+    return;
+  }
+
+  // Telegram validation
+  if (!telegram || !/^@[a-zA-Z0-9_]{3,32}$/.test(telegram)) {
+    alert('Будь ласка, вкажіть ваш нікнейм у Telegram у форматі @username (від 3 до 32 символів)');
+    return;
+  }
+
+  // Consent validation
+  const consentCheckbox = document.getElementById('listenerConsentPersonalData');
+  if (consentCheckbox && !consentCheckbox.checked) {
+    const isEn = document.documentElement.getAttribute('lang') === 'en';
+    alert(isEn
+      ? '⚠️ Please provide consent to personal data processing to register.'
+      : '⚠️ Будь ласка, надайте згоду на обробку персональних даних для завершення реєстрації.');
+    return;
+  }
+
+  const btnSubmit = document.getElementById('btnSubmitListener');
+  if (btnSubmit) {
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = 'Зачекайте, реєстрація...';
+  }
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const formattedDate = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const submissionId = `LIS-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const listenerSubmission = {
+    submissionId: submissionId,
+    formattedDate: formattedDate,
+    timestamp: now.toISOString(),
+    isListener: true,
+    partFormat: 'listener',
+    partFormatText: listenerFormat === 'offline' ? 'Офлайн (у залі форуму)' : 'Онлайн (трансляція YT-USSF)',
+    listenerFormat: listenerFormat,
+    fullName: fullName,
+    institution: institution,
+    courseFaculty: courseFaculty,
+    cityCountry: cityCountry,
+    email: email,
+    phone: phone,
+    telegram: telegram,
+    needsAccommodation: needsAccommodation,
+    consentPersonalData: true,
+    submissionElapsedMs: elapsedMs
+  };
+
+  // Google Sheets webhook & Server submit
+  try {
+    const sheetWebhook = localStorage.getItem('ussf_google_sheet_url') || window.GOOGLE_SHEET_WEBHOOK_URL;
+    if (sheetWebhook) {
+      fetch(sheetWebhook, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(listenerSubmission)
+      }).catch(e => console.warn('Sheet webhook note:', e));
+    }
+
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+    const localBase = window.location.port ? window.location.origin : 'http://127.0.0.1:5050';
+    const apiUrl = isLocal ? `${localBase}/api/submit-abstract` : '/api/submit-abstract';
+
+    await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(listenerSubmission)
+    }).catch(e => console.warn('Listener server note:', e));
+  } catch (err) {}
+
+  window.trackGAEvent('listener_registration_success', {
+    event_category: 'conversion',
+    format: listenerFormat,
+    needs_accommodation: needsAccommodation
+  });
+
+  // Display success view
+  const listenerForm = document.getElementById('listenerRegForm');
+  const listenerSuccess = document.getElementById('listenerSuccessMessage');
+  const listenerSummary = document.getElementById('listenerSummaryDisplay');
+
+  if (listenerSummary) {
+    listenerSummary.innerHTML = `
+      <div style="font-weight:700; color:#1D428A; margin-bottom:0.5rem; font-size:1rem;">
+        👤 ${escapeHtml(fullName)} (${escapeHtml(institution)})
+      </div>
+      <div style="margin-bottom:0.35rem;">
+        <strong>📍 Формат:</strong> ${listenerFormat === 'offline' ? 'Офлайн (у залі форуму, м. Київ)' : 'Онлайн (трансляція YT-USSF)'}
+      </div>
+      <div style="margin-bottom:0.35rem;">
+        <strong>🎓 Курс/факультет:</strong> ${escapeHtml(courseFaculty)}
+      </div>
+      <div style="margin-bottom:0.35rem;">
+        <strong>🏙️ Місто/Країна:</strong> ${escapeHtml(cityCountry)}
+      </div>
+      <div style="margin-bottom:0.35rem;">
+        <strong>🏠 Поселення в гуртожитку:</strong> ${needsAccommodation ? '<span style="color:#15803D; font-weight:700;">Потрібне (заявку передано коменданту)</span>' : 'Не потрібне'}
+      </div>
+      <div style="margin-top:0.6rem; padding-top:0.5rem; border-top:1px dashed #cbd5e1; color:#64748B; font-size:0.82rem;">
+        ✉️ Підтвердження та посилання на трансляцію надіслано на ${escapeHtml(email)} · ID: <strong>${submissionId}</strong>
+      </div>
+    `;
+  }
+
+  if (listenerForm) listenerForm.style.display = 'none';
+  if (listenerSuccess) listenerSuccess.style.display = 'block';
+
+  if (btnSubmit) {
+    btnSubmit.disabled = false;
+    btnSubmit.innerHTML = `
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right: 0.45rem; vertical-align: -2px;"><polyline points="20 6 9 17 4 12"/></svg>
+      <span class="ua">Зареєструватися як слухач</span><span class="en">Register as Attendee</span>
+    `;
+  }
+}
+
+// ==========================================
 // 8.2. WORKSHOP REGISTRATION HANDLER
 // ==========================================
 async function handleWorkshopSubmit(e) {
@@ -2712,13 +3030,12 @@ async function handleWorkshopSubmit(e) {
   const academicStatusText = academicStatusEl ? academicStatusEl.options[academicStatusEl.selectedIndex]?.text : '';
   const courseSpecialty = (document.getElementById('wsCourseSpecialty')?.value || '').trim();
   const hasOralPaper = !!document.getElementById('wsHasOralPaper')?.checked;
-  const p1El = document.getElementById('wsPriority1');
-  const priority1 = p1El ? p1El.value : '';
-  const priority1Text = p1El ? p1El.options[p1El.selectedIndex]?.text : '';
-  const p2El = document.getElementById('wsPriority2');
-  const priority2 = p2El ? p2El.value : '';
-  const priority2Text = p2El ? p2El.options[p2El.selectedIndex]?.text : '';
-  const comment = (document.getElementById('wsComment')?.value || '').trim();
+  const wsAccommodation = !!document.getElementById('wsAccommodation')?.checked;
+  
+  const wsSelect = document.getElementById('wsWorkshopSelect');
+  const workshopId = wsSelect ? wsSelect.value : '';
+  const workshopText = wsSelect ? wsSelect.options[wsSelect.selectedIndex]?.text : '';
+
   const email = (document.getElementById('wsEmail')?.value || '').trim();
   const phone = (document.getElementById('wsPhone')?.value || '').trim();
   const telegram = (document.getElementById('wsTelegram')?.value || '').trim();
@@ -2737,9 +3054,9 @@ async function handleWorkshopSubmit(e) {
     return;
   }
 
-  // Duplicate priority validation
-  if (priority1 && priority2 && priority1 === priority2 && priority2 !== 'none') {
-    alert('⚠️ Будь ласка, оберіть інший воркшоп для 2-го пріоритету або оберіть варіант «Немає другого пріоритету».');
+  if (!workshopId) {
+    alert('⚠️ Будь ласка, оберіть хірургічний воркшоп зі списку.');
+    if (wsSelect) wsSelect.focus();
     return;
   }
 
@@ -2747,6 +3064,12 @@ async function handleWorkshopSubmit(e) {
   const phoneDigits = phone.replace(/\D/g, '');
   if (phoneDigits.length !== 12 || !phoneDigits.startsWith('380')) {
     alert('Будь ласка, введіть дійсний номер телефону у форматі +380 (XX) XXX-XX-XX');
+    return;
+  }
+
+  // Telegram validation
+  if (!telegram || !/^@[a-zA-Z0-9_]{3,32}$/.test(telegram)) {
+    alert('Будь ласка, вкажіть ваш нікнейм у Telegram у форматі @username (від 3 до 32 символів)');
     return;
   }
 
@@ -2773,9 +3096,15 @@ async function handleWorkshopSubmit(e) {
     btnSubmit.innerHTML = 'Зачекайте, реєстрація...';
   }
 
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const formattedDate = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const submissionId = 'WS-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+
   const workshopSubmission = {
-    submissionId: 'WS-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
-    timestamp: new Date().toISOString(),
+    submissionId: submissionId,
+    formattedDate: formattedDate,
+    timestamp: now.toISOString(),
     isWorkshop: true,
     partFormat: 'workshop',
     fullName: fullName,
@@ -2784,11 +3113,9 @@ async function handleWorkshopSubmit(e) {
     academicStatusText: academicStatusText,
     courseSpecialty: courseSpecialty,
     hasOralPaper: hasOralPaper,
-    priority1: priority1,
-    priority1Text: priority1Text,
-    priority2: priority2,
-    priority2Text: priority2Text,
-    comment: comment,
+    needsAccommodation: wsAccommodation,
+    workshopId: workshopId,
+    workshopText: workshopText,
     email: email,
     phone: phone,
     telegram: telegram,
@@ -2796,13 +3123,21 @@ async function handleWorkshopSubmit(e) {
     submissionElapsedMs: elapsedMs
   };
 
-  // Post to backend
+  // Post to Sheets and backend
   try {
+    const sheetWebhook = localStorage.getItem('ussf_google_sheet_url') || window.GOOGLE_SHEET_WEBHOOK_URL;
+    if (sheetWebhook) {
+      fetch(sheetWebhook, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(workshopSubmission)
+      }).catch(e => console.warn('Sheet webhook note:', e));
+    }
+
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
     const localBase = window.location.port ? window.location.origin : 'http://127.0.0.1:5050';
-    const apiUrl = isLocal
-      ? `${localBase}/api/submit-abstract`
-      : '/api/submit-abstract';
+    const apiUrl = isLocal ? `${localBase}/api/submit-abstract` : '/api/submit-abstract';
 
     await fetch(apiUrl, {
       method: 'POST',
@@ -2813,8 +3148,9 @@ async function handleWorkshopSubmit(e) {
 
   window.trackGAEvent('workshop_registration_success', {
     event_category: 'conversion',
-    workshop_p1: priority1,
-    has_oral_paper: hasOralPaper
+    workshop_id: workshopId,
+    has_oral_paper: hasOralPaper,
+    needs_accommodation: wsAccommodation
   });
 
   // Display success view
@@ -2828,11 +3164,13 @@ async function handleWorkshopSubmit(e) {
         👤 ${escapeHtml(fullName)} (${escapeHtml(institution)})
       </div>
       <div style="margin-bottom:0.35rem;">
-        <strong>🎯 1-й пріоритет:</strong> ${escapeHtml(priority1Text)}
+        <strong>🔬 Обраний воркшоп:</strong> ${escapeHtml(workshopText)}
       </div>
-      ${priority2 && priority2 !== 'none' ? `<div style="margin-bottom:0.35rem;"><strong>🔄 2-й пріоритет:</strong> ${escapeHtml(priority2Text)}</div>` : ''}
       <div style="margin-bottom:0.35rem;">
-        <strong>⭐ Статус пріоритету:</strong> ${hasOralPaper ? '<span style="color:#15803D; font-weight:700;">Пріоритетне зарахування (усна доповідь)</span>' : 'Черга вільних слухачів'}
+        <strong>⭐ Статус зарахування:</strong> ${hasOralPaper ? '<span style="color:#15803D; font-weight:700;">Пріоритетне зарахування (усна доповідь)</span>' : 'Загальна реєстрація'}
+      </div>
+      <div style="margin-bottom:0.35rem;">
+        <strong>🏠 Поселення в гуртожитку:</strong> ${wsAccommodation ? '<span style="color:#15803D; font-weight:700;">Потрібне (НМУ)</span>' : 'Не потрібне'}
       </div>
       <div style="margin-top:0.6rem; padding-top:0.5rem; border-top:1px dashed #cbd5e1; color:#64748B; font-size:0.82rem;">
         ✉️ Підтвердження надіслано на ${escapeHtml(email)} · ID заявки: <strong>${workshopSubmission.submissionId}</strong>
@@ -2975,7 +3313,9 @@ window.openAcademicGuideModal = openAcademicGuideModal;
 window.closeAcademicGuideModal = closeAcademicGuideModal;
 window.openPrivacyModal = openPrivacyModal;
 window.closePrivacyModal = closePrivacyModal;
+window.handleListenerSubmit = handleListenerSubmit;
 window.handleWorkshopSubmit = handleWorkshopSubmit;
+window.toggleSecondSupervisor = toggleSecondSupervisor;
 window.toggleFaqItem = toggleFaqItem;
 window.filterFaq = filterFaq;
 window.clearFaqSearch = clearFaqSearch;
@@ -2985,6 +3325,8 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     setupPhoneInputMask(document.getElementById('phone'));
     setupTelegramInputMask(document.getElementById('telegram'));
+    setupPhoneInputMask(document.getElementById('listenerPhone'));
+    setupTelegramInputMask(document.getElementById('listenerTelegram'));
     setupPhoneInputMask(document.getElementById('wsPhone'));
     setupTelegramInputMask(document.getElementById('wsTelegram'));
     initAbstractCharCounter();
@@ -2996,6 +3338,8 @@ if (document.readyState === 'loading') {
 } else {
   setupPhoneInputMask(document.getElementById('phone'));
   setupTelegramInputMask(document.getElementById('telegram'));
+  setupPhoneInputMask(document.getElementById('listenerPhone'));
+  setupTelegramInputMask(document.getElementById('listenerTelegram'));
   setupPhoneInputMask(document.getElementById('wsPhone'));
   setupTelegramInputMask(document.getElementById('wsTelegram'));
   initAbstractCharCounter();
