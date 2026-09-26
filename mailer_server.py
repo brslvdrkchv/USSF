@@ -38,9 +38,12 @@ except ImportError:
 from generate_abstract_docx import create_abstract_docx, send_abstract_email_docx, load_email_config, format_author_initials
 from generate_abstract_pdf import create_abstract_pdf, send_abstract_email
 
+import tempfile
+
 PORT = int(os.environ.get('PORT', 5050))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SUBMISSIONS_DIR = os.path.join(BASE_DIR, 'заявки_тези')
+# Temporary directory for transient DOCX files before upload to Google Drive (no persistent disk storage)
+SUBMISSIONS_DIR = os.path.join(tempfile.gettempdir(), 'ussf_temp_submissions')
 os.makedirs(SUBMISSIONS_DIR, exist_ok=True)
 
 # Load configuration
@@ -413,102 +416,17 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
         path = urllib.parse.unquote(parsed_url.path)
         query_params = urllib.parse.parse_qs(parsed_url.query)
 
-        # 1. SECURE SYNC API ENDPOINT (/api/sync and /api/secure-sync)
+        # 1. LOCAL SYNC ENDPOINT (DISABLED - submissions are stored on Google Drive, not local disk)
         if path in ('/api/sync', '/api/secure-sync'):
-            if not self._is_authenticated(query_params):
-                self.send_response(401)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                err_resp = {
-                    "status": "error",
-                    "code": 401,
-                    "message": "Помилка автентифікації. Недійсний або відсутній ключ безпеки для синхронізації."
-                }
-                self.wfile.write(json.dumps(err_resp, ensure_ascii=False).encode('utf-8'))
-                return
-
-            action = query_params.get('action', ['list'])[0]
-
-            # ACTION: LIST FILES
-            if action == 'list':
-                file_list = []
-                if os.path.exists(SUBMISSIONS_DIR):
-                    for fname in sorted(os.listdir(SUBMISSIONS_DIR)):
-                        if fname.endswith('.docx') or fname.endswith('.pdf') or fname.endswith('.json'):
-                            fpath = os.path.join(SUBMISSIONS_DIR, fname)
-                            if os.path.isfile(fpath):
-                                stat = os.stat(fpath)
-                                # Compute SHA256 checksum for end-to-end data integrity
-                                sha256_hash = hashlib.sha256()
-                                try:
-                                    with open(fpath, 'rb') as f:
-                                        for block in iter(lambda: f.read(65536), b""):
-                                            sha256_hash.update(block)
-                                    digest = sha256_hash.hexdigest()
-                                except Exception:
-                                    digest = ""
-
-                                ftype = 'docx' if fname.endswith('.docx') else ('pdf' if fname.endswith('.pdf') else 'json')
-                                file_list.append({
-                                    "filename": fname,
-                                    "size": stat.st_size,
-                                    "mtime": stat.st_mtime,
-                                    "sha256": digest,
-                                    "type": ftype,
-                                    "download_url": f"/api/sync?action=download&file={urllib.parse.quote(fname)}&token={SYNC_TOKEN}"
-                                })
-
-                # Sort newest files first
-                file_list.sort(key=lambda x: x['mtime'], reverse=True)
-
-                resp_payload = {
-                    "status": "success",
-                    "count": len(file_list),
-                    "files": file_list,
-                    "server_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                }
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps(resp_payload, ensure_ascii=False).encode('utf-8'))
-                return
-
-            # ACTION: DOWNLOAD FILE
-            elif action == 'download':
-                req_file = query_params.get('file', [''])[0]
-                try:
-                    # If raw UTF-8 was transmitted and interpreted as latin-1 by HTTP parser
-                    req_file = req_file.encode('latin-1').decode('utf-8')
-                except Exception:
-                    pass
-                req_file = urllib.parse.unquote(req_file)
-                safe_filename = os.path.basename(req_file)
-                target_path = os.path.join(SUBMISSIONS_DIR, safe_filename)
-
-                if not os.path.isfile(target_path):
-                    self.send_response(404)
-                    self.send_header('Content-Type', 'application/json; charset=utf-8')
-                    self.end_headers()
-                    self.wfile.write(json.dumps({"status": "error", "message": "Файл не знайдено."}).encode('utf-8'))
-                    return
-
-                if safe_filename.endswith('.docx'):
-                    mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                elif safe_filename.endswith('.pdf'):
-                    mime = 'application/pdf'
-                else:
-                    mime = 'application/json'
-
-                fsize = os.path.getsize(target_path)
-                self.send_response(200)
-                self.send_header('Content-Type', mime)
-                self.send_header('Content-Length', str(fsize))
-                self.send_header('Content-Disposition', f'attachment; filename="{urllib.parse.quote(safe_filename)}"')
-                self.end_headers()
-                with open(target_path, 'rb') as f:
-                    while chunk := f.read(65536):
-                        self.wfile.write(chunk)
-                return
+            self.send_response(410)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            resp_payload = {
+                "status": "disabled",
+                "message": "Локальна синхронізація на диск вимкнена. Усі матеріали автоматично зберігаються в Google Таблицю та Google Диск."
+            }
+            self.wfile.write(json.dumps(resp_payload, ensure_ascii=False).encode('utf-8'))
+            return
 
         # 1b. DIRECT PUBLIC DOWNLOAD DOCX ENDPOINT (/api/download-docx)
         if path == '/api/download-docx':
