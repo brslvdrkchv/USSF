@@ -4138,17 +4138,19 @@ footer#contacts {
 
   .hero-3d-art {
     position: absolute;
-    right: -30vw;
-    top: -6vh;
-    width: clamp(600px, 180vw, 850px);
+    bottom: -5vh;
+    right: -25vw;
+    top: auto;
+    width: clamp(550px, 160vw, 800px);
     height: auto;
     max-height: none;
     max-width: none;
-    transform: rotate(-44deg);
-    transform-origin: 64% 36%;
-    z-index: 2;
+    transform: rotate(-25deg);
+    transform-origin: bottom right;
+    z-index: 1;
     pointer-events: none;
-    filter: brightness(0.9) contrast(1.15) drop-shadow(0 0 30px rgba(34, 211, 238, 0.25));
+    opacity: 0.85;
+    filter: brightness(0.8) contrast(1.15) drop-shadow(0 0 30px rgba(34, 211, 238, 0.15));
     display: block;
     margin: 0;
   }
@@ -4177,6 +4179,7 @@ footer#contacts {
     margin: 0 auto;
     flex: 0 0 auto;
     z-index: 6;
+    position: static;
   }
 
   .hero-mobile-br {
@@ -4301,9 +4304,10 @@ footer#contacts {
       padding-bottom: calc(0.45rem + env(safe-area-inset-bottom, 0px));
     }
     .hero-3d-art {
-      top: -5vh;
-      right: -25vw;
-      width: clamp(500px, 160vw, 700px);
+      bottom: -8vh;
+      right: -20vw;
+      top: auto;
+      width: clamp(450px, 150vw, 650px);
     }
     .hero-title {
       font-size: 0.98rem;
