@@ -990,7 +990,7 @@ nav#mainNav.scrolled {
   font-family: var(--font-headings);
   font-size: clamp(1.6rem, 2.8vw, 2.2rem);
   font-weight: 700;
-  color: var(--brand-white);
+  color: var(--brand-main);
   text-shadow: none;
 }
 
@@ -4666,7 +4666,7 @@ footer#contacts {
   }
 
   .organizers-subheading h3 {
-    color: #ffffff;
+    color: var(--brand-main);
     font-family: var(--font-headings);
     font-size: 1.2rem;
     text-align: center;
