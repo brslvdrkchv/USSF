@@ -7,7 +7,7 @@
   "send_copy_to_author": true,
   "sync_secret_token": "ussf_secure_sync_2026_med_nmu",
   "program_pdf_path": "USSF2026_Program.pdf",
-  "google_sheet_webhook_url": "https://script.google.com/macros/s/AKfycbyquEMH-6X0a0Vu3bHQMvdZu_0Hll0UbXh05kZaSxVp8a3ZHuYNFl6Tlc0Cp7demWzVmA/exec",
+  "google_sheet_webhook_url": "https://script.google.com/macros/s/AKfycbz7JNUZxiuF1nSCqIy__XQEbOvhj551WUW5VxIIiReEJc42NdSvvanDwctgYXeM-B-cgA/exec",
   "turnstile_site_key": "1x00000000000000000000AA",
   "turnstile_secret_key": "1x00000000000000000000000000000000AA",
   "enable_turnstile": true,
