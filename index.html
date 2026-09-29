@@ -485,10 +485,11 @@
         </div>
 
         <div class="workshops-grid">
-          <!-- WORKSHOP 1: E-FAST & POCUS -->
-          <div class="workshop-card" id="workshop-1">
-            <div class="workshop-card-header">
-              <div class="workshop-badges">
+          <!-- WORKSHOP 1: E-FAST & POCUS -->          <div class="workshop-card" id="workshop-1">
+            <div class="workshop-flip-inner">
+              <div class="workshop-flip-front">
+                <div class="workshop-card-header">
+                  <div class="workshop-badges">
                 <span class="ws-badge ws-badge-room">
                   <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   <span class="ua">201 ауд. (2-й поверх)</span>
@@ -500,17 +501,38 @@
                 </span>
               </div>
               <span class="ws-number">#1</span>
-            </div>
-            <h4 class="workshop-card-title">
-              <span class="ua">E-FAST & POCUS: Ультразвуковий протокол у невідкладній хірургії та інтервенції під контролем УЗД</span>
+                </div>
+                <h4 class="workshop-card-title">
+                  <span class="ua">E-FAST & POCUS: Ультразвуковий протокол у невідкладній хірургії та інтервенції під контролем УЗД</span>
               <span class="en">E-FAST & POCUS: Ultrasound Protocol in Emergency Surgery & Ultrasound-Guided Interventions</span>
-            </h4>
-            <div class="workshop-card-skills" id="ws-skills-1">
-              <div class="skills-heading">
-                <span class="ua">Навички, якими ви оволодієте:</span>
-                <span class="en">Skills You Will Master:</span>
+                </h4>
+                <div class="workshop-speaker-profile">
+                  <img src="images/Myroniuk/ORG/МорозВВ.png" alt="Мороз В.В.">
+                  <div class="speaker-info-text">
+                    <span class="speaker-name">Мороз В. В.</span>
+                    <span class="speaker-title"><span class="ua">Заступник голови Оргкомітету, к.мед.н., доцент</span><span class="en">Deputy Head, PhD, Associate Prof.</span></span>
+                  </div>
+                </div>
+                <div style="flex-grow: 1;"></div>
+                <div class="flip-hint">
+                  <span class="ua">Наведіть, щоб побачити навички ➔</span>
+                  <span class="en">Hover to see skills ➔</span>
+                </div>
+                <div class="workshop-card-footer" style="margin-top: 1rem;">
+                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '1')">
+                <span class="ua">Зареєструватися на воркшоп</span>
+                <span class="en">Register for Workshop</span>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+                </div>
               </div>
-              <ul class="skills-list" id="ws-skills-list-1">
+              <div class="workshop-flip-back">
+                <h4 class="workshop-card-title" style="margin-bottom: 0.5rem; color: #1D428A; font-size: 1.05rem;">
+                  <span class="ua">Навички, якими ви оволодієте:</span>
+                  <span class="en">Skills You Will Master:</span>
+                </h4>
+                <div class="workshop-card-skills" style="border:none; background:transparent; padding:0; margin-bottom:auto; margin-top: 0;">
+                  <ul class="skills-list">
                 <li>
                   <span class="ua">Повне виконання протоколу E-FAST за &lt; 3 хв на живих волонтерах (вікна Морісона, Коллера, субксифоїдальне, надлобкове та плевральні точки).</span>
                   <span class="en">Rapid complete execution of E-FAST protocol in &lt; 3 min on standardized volunteers (Morison's, Koller's, subxiphoid, suprapubic, pleural windows).</span>
@@ -520,20 +542,23 @@
                   <span class="en">Sonographic differentiation of free fluid (hemoperitoneum, hemothorax, cardiac tamponade) and lung sliding/stratosphere signs for pneumothorax.</span>
                 </li>
               </ul>
-            </div>
-            <div class="workshop-card-footer">
-              <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '1')">
+                </div>
+                <div class="workshop-card-footer" style="margin-top: 1rem;">
+                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '1')">
                 <span class="ua">Зареєструватися на воркшоп</span>
                 <span class="en">Register for Workshop</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
               </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- WORKSHOP 2: HANDS-ON LAPAROSCOPY -->
-          <div class="workshop-card" id="workshop-2">
-            <div class="workshop-card-header">
-              <div class="workshop-badges">
+          <!-- WORKSHOP 2: HANDS-ON LAPAROSCOPY -->          <div class="workshop-card" id="workshop-2">
+            <div class="workshop-flip-inner">
+              <div class="workshop-flip-front">
+                <div class="workshop-card-header">
+                  <div class="workshop-badges">
                 <span class="ws-badge ws-badge-room">
                   <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   <span class="ua">2 лекційна (3-й поверх)</span>
@@ -545,17 +570,40 @@
                 </span>
               </div>
               <span class="ws-number">#2</span>
-            </div>
-            <h4 class="workshop-card-title">
-              <span class="ua">Hands-on Лапароскопія та ургентна хірургічна допомога</span>
+                </div>
+                <h4 class="workshop-card-title">
+                  <span class="ua">Hands-on Лапароскопія та ургентна хірургічна допомога</span>
               <span class="en">Hands-on Laparoscopy & Emergency Surgical Care</span>
-            </h4>
-            <div class="workshop-card-skills" id="ws-skills-2">
-              <div class="skills-heading">
-                <span class="ua">Навички, якими ви оволодієте:</span>
-                <span class="en">Skills You Will Master:</span>
+                </h4>
+                <div class="workshop-speaker-profile">
+                  <div class="speaker-avatar-placeholder">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-2a7 7 0 0 1 14 0v2"/></svg>
+                  </div>
+                  <div class="speaker-info-text">
+                    <span class="speaker-name"><span class="ua">Спікер уточнюється</span><span class="en">Speaker TBA</span></span>
+                    <span class="speaker-title"><span class="ua">Експерт з абдомінальної хірургії</span><span class="en">Abdominal Surgery Expert</span></span>
+                  </div>
+                </div>
+                <div style="flex-grow: 1;"></div>
+                <div class="flip-hint">
+                  <span class="ua">Наведіть, щоб побачити навички ➔</span>
+                  <span class="en">Hover to see skills ➔</span>
+                </div>
+                <div class="workshop-card-footer" style="margin-top: 1rem;">
+                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '2')">
+                <span class="ua">Зареєструватися на воркшоп</span>
+                <span class="en">Register for Workshop</span>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+                </div>
               </div>
-              <ul class="skills-list" id="ws-skills-list-2">
+              <div class="workshop-flip-back">
+                <h4 class="workshop-card-title" style="margin-bottom: 0.5rem; color: #1D428A; font-size: 1.05rem;">
+                  <span class="ua">Навички, якими ви оволодієте:</span>
+                  <span class="en">Skills You Will Master:</span>
+                </h4>
+                <div class="workshop-card-skills" style="border:none; background:transparent; padding:0; margin-bottom:auto; margin-top: 0;">
+                  <ul class="skills-list">
                 <li>
                   <span class="ua">Орієнтація у 2D-просторі відеомонітора та подолання «fulcrum effect» при роботі ендохірургічними інструментами в бокс-тренажерах.</span>
                   <span class="en">2D monitor spatial coordination and mastering the "fulcrum effect" during laparoscopic tool manipulation in box trainers.</span>
@@ -569,20 +617,23 @@
                   <span class="en">Endoclipper usage, Endoloop ligature deployment (appendectomy simulation), and closing perforated hollow organ defects on phantoms.</span>
                 </li>
               </ul>
-            </div>
-            <div class="workshop-card-footer">
-              <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '2')">
+                </div>
+                <div class="workshop-card-footer" style="margin-top: 1rem;">
+                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '2')">
                 <span class="ua">Зареєструватися на воркшоп</span>
                 <span class="en">Register for Workshop</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
               </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- WORKSHOP 3: RECONSTRUCTIVE GI SURGERY -->
-          <div class="workshop-card" id="workshop-3">
-            <div class="workshop-card-header">
-              <div class="workshop-badges">
+          <!-- WORKSHOP 3: RECONSTRUCTIVE GI SURGERY -->          <div class="workshop-card" id="workshop-3">
+            <div class="workshop-flip-inner">
+              <div class="workshop-flip-front">
+                <div class="workshop-card-header">
+                  <div class="workshop-badges">
                 <span class="ws-badge ws-badge-room">
                   <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   <span class="ua">121 ауд. (1-й поверх)</span>
@@ -594,36 +645,60 @@
                 </span>
               </div>
               <span class="ws-number">#3</span>
-            </div>
-            <h4 class="workshop-card-title">
-              <span class="ua">Реконструктивна хірургія ШКТ: Техніки накладання міжкишкового та біліодигестивного анастомозів</span>
+                </div>
+                <h4 class="workshop-card-title">
+                  <span class="ua">Реконструктивна хірургія ШКТ: Техніки накладання міжкишкового та біліодигестивного анастомозів</span>
               <span class="en">Reconstructive GI Surgery: Entero-Enteric & Biliodigestive Anastomosis Techniques</span>
-            </h4>
-            <div class="workshop-card-skills" id="ws-skills-3">
-              <div class="skills-heading">
-                <span class="ua">Навички, якими ви оволодієте:</span>
-                <span class="en">Skills You Will Master:</span>
+                </h4>
+                <div class="workshop-speaker-profile">
+                  <img src="images/Myroniuk/ORG/ЮркінДЄ.jpg" alt="Юркін Д.Є.">
+                  <div class="speaker-info-text">
+                    <span class="speaker-name">Юркін Д. Є.</span>
+                    <span class="speaker-title"><span class="ua">Асистент кафедри загальної та невідкладної хірургії</span><span class="en">Assistant of General and Emergency Surgery Dept.</span></span>
+                  </div>
+                </div>
+                <div style="flex-grow: 1;"></div>
+                <div class="flip-hint">
+                  <span class="ua">Наведіть, щоб побачити навички ➔</span>
+                  <span class="en">Hover to see skills ➔</span>
+                </div>
+                <div class="workshop-card-footer" style="margin-top: 1rem;">
+                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '3')">
+                <span class="ua">Зареєструватися на воркшоп</span>
+                <span class="en">Register for Workshop</span>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+                </div>
               </div>
-              <ul class="skills-list" id="ws-skills-list-3">
+              <div class="workshop-flip-back">
+                <h4 class="workshop-card-title" style="margin-bottom: 0.5rem; color: #1D428A; font-size: 1.05rem;">
+                  <span class="ua">Навички, якими ви оволодієте:</span>
+                  <span class="en">Skills You Will Master:</span>
+                </h4>
+                <div class="workshop-card-skills" style="border:none; background:transparent; padding:0; margin-bottom:auto; margin-top: 0;">
+                  <ul class="skills-list">
                 <li>
                   <span class="ua">Формування міжкишкових анастомозів («кінець-в-кінець» та «бік-у-бік») із обов'язковою гідропресійною пробою на герметичність.</span>
                   <span class="en">Entero-enteric anastomosis creation (end-to-end and side-to-side) verified with hydropressure leak testing for mechanical integrity.</span>
                 </li>
               </ul>
-            </div>
-            <div class="workshop-card-footer">
-              <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '3')">
+                </div>
+                <div class="workshop-card-footer" style="margin-top: 1rem;">
+                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '3')">
                 <span class="ua">Зареєструватися на воркшоп</span>
                 <span class="en">Register for Workshop</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
               </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- WORKSHOP 4: SURGICAL AIRWAY -->
-          <div class="workshop-card" id="workshop-4">
-            <div class="workshop-card-header">
-              <div class="workshop-badges">
+          <!-- WORKSHOP 4: SURGICAL AIRWAY -->          <div class="workshop-card" id="workshop-4">
+            <div class="workshop-flip-inner">
+              <div class="workshop-flip-front">
+                <div class="workshop-card-header">
+                  <div class="workshop-badges">
                 <span class="ws-badge ws-badge-room">
                   <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   <span class="ua">121 ауд. (1-й поверх)</span>
@@ -635,17 +710,40 @@
                 </span>
               </div>
               <span class="ws-number">#4</span>
-            </div>
-            <h4 class="workshop-card-title">
-              <span class="ua">Surgical Airway: Екстрений хірургічний доступ до дихальних шляхів</span>
+                </div>
+                <h4 class="workshop-card-title">
+                  <span class="ua">Surgical Airway: Екстрений хірургічний доступ до дихальних шляхів</span>
               <span class="en">Surgical Airway: Emergency Surgical Airway Access</span>
-            </h4>
-            <div class="workshop-card-skills" id="ws-skills-4">
-              <div class="skills-heading">
-                <span class="ua">Навички, якими ви оволодієте:</span>
-                <span class="en">Skills You Will Master:</span>
+                </h4>
+                <div class="workshop-speaker-profile">
+                  <div class="speaker-avatar-placeholder">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>
+                  </div>
+                  <div class="speaker-info-text">
+                    <span class="speaker-name">Середа С. О.</span>
+                    <span class="speaker-title"><span class="ua">Експерт з невідкладної хірургії дихальних шляхів</span><span class="en">Emergency Airway Surgery Expert</span></span>
+                  </div>
+                </div>
+                <div style="flex-grow: 1;"></div>
+                <div class="flip-hint">
+                  <span class="ua">Наведіть, щоб побачити навички ➔</span>
+                  <span class="en">Hover to see skills ➔</span>
+                </div>
+                <div class="workshop-card-footer" style="margin-top: 1rem;">
+                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '4')">
+                <span class="ua">Зареєструватися на воркшоп</span>
+                <span class="en">Register for Workshop</span>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+                </div>
               </div>
-              <ul class="skills-list" id="ws-skills-list-4">
+              <div class="workshop-flip-back">
+                <h4 class="workshop-card-title" style="margin-bottom: 0.5rem; color: #1D428A; font-size: 1.05rem;">
+                  <span class="ua">Навички, якими ви оволодієте:</span>
+                  <span class="en">Skills You Will Master:</span>
+                </h4>
+                <div class="workshop-card-skills" style="border:none; background:transparent; padding:0; margin-bottom:auto; margin-top: 0;">
+                  <ul class="skills-list">
                 <li>
                   <span class="ua">Екстрена хірургічна конікотомія (крікотиреотомія) за технікою «Scalpel-Bougie-Tube» (протокол ATLS) менш ніж за 60 секунд.</span>
                   <span class="en">Emergency surgical cricothyroidotomy using the Scalpel-Bougie-Tube technique according to ATLS algorithm in under 60 seconds.</span>
@@ -659,20 +757,23 @@
                   <span class="en">Systematic clinical action algorithm and complication prevention in emergency "Cannot Intubate, Cannot Oxygenate" (CICO) scenarios.</span>
                 </li>
               </ul>
-            </div>
-            <div class="workshop-card-footer">
-              <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '4')">
+                </div>
+                <div class="workshop-card-footer" style="margin-top: 1rem;">
+                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '4')">
                 <span class="ua">Зареєструватися на воркшоп</span>
                 <span class="en">Register for Workshop</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
               </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- WORKSHOP 5: NPWT & OPEN ABDOMEN -->
-          <div class="workshop-card" id="workshop-5">
-            <div class="workshop-card-header">
-              <div class="workshop-badges">
+          <!-- WORKSHOP 5: NPWT & OPEN ABDOMEN -->          <div class="workshop-card" id="workshop-5">
+            <div class="workshop-flip-inner">
+              <div class="workshop-flip-front">
+                <div class="workshop-card-header">
+                  <div class="workshop-badges">
                 <span class="ws-badge ws-badge-room">
                   <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   <span class="ua">4 лекційна (2-й поверх)</span>
@@ -684,17 +785,38 @@
                 </span>
               </div>
               <span class="ws-number">#5</span>
-            </div>
-            <h4 class="workshop-card-title">
-              <span class="ua">NPWT & Open Abdomen: Вакуумна терапія при перитоніті та політравмі</span>
+                </div>
+                <h4 class="workshop-card-title">
+                  <span class="ua">NPWT & Open Abdomen: Вакуумна терапія при перитоніті та політравмі</span>
               <span class="en">NPWT & Open Abdomen: Negative Pressure Wound Therapy in Peritonitis & Polytrauma</span>
-            </h4>
-            <div class="workshop-card-skills" id="ws-skills-5">
-              <div class="skills-heading">
-                <span class="ua">Навички, якими ви оволодієте:</span>
-                <span class="en">Skills You Will Master:</span>
+                </h4>
+                <div class="workshop-speaker-profile">
+                  <img src="images/Myroniuk/ORG/ПриступюкМО.png" alt="Приступюк М.О.">
+                  <div class="speaker-info-text">
+                    <span class="speaker-name">Приступюк М. О.</span>
+                    <span class="speaker-title"><span class="ua">к.мед.н., доцент кафедри хірургії</span><span class="en">PhD, Associate Professor of Surgery</span></span>
+                  </div>
+                </div>
+                <div style="flex-grow: 1;"></div>
+                <div class="flip-hint">
+                  <span class="ua">Наведіть, щоб побачити навички ➔</span>
+                  <span class="en">Hover to see skills ➔</span>
+                </div>
+                <div class="workshop-card-footer" style="margin-top: 1rem;">
+                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '5')">
+                <span class="ua">Зареєструватися на воркшоп</span>
+                <span class="en">Register for Workshop</span>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+                </div>
               </div>
-              <ul class="skills-list" id="ws-skills-list-5">
+              <div class="workshop-flip-back">
+                <h4 class="workshop-card-title" style="margin-bottom: 0.5rem; color: #1D428A; font-size: 1.05rem;">
+                  <span class="ua">Навички, якими ви оволодієте:</span>
+                  <span class="en">Skills You Will Master:</span>
+                </h4>
+                <div class="workshop-card-skills" style="border:none; background:transparent; padding:0; margin-bottom:auto; margin-top: 0;">
+                  <ul class="skills-list">
                 <li>
                   <span class="ua">Реалізація тактики Damage Control Laparotomy: алгоритм тимчасового закриття черевної порожнини (Open Abdomen) при тяжкому перитоніті та політравмі.</span>
                   <span class="en">Damage Control Laparotomy principles and temporary abdominal closure (Open Abdomen) protocol for severe peritonitis and polytrauma.</span>
@@ -708,13 +830,15 @@
                   <span class="en">Polyurethane sponge sizing and positioning, airtight adhesive drape application, and configuring negative pressure suction (-125 mmHg).</span>
                 </li>
               </ul>
-            </div>
-            <div class="workshop-card-footer">
-              <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '5')">
+                </div>
+                <div class="workshop-card-footer" style="margin-top: 1rem;">
+                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '5')">
                 <span class="ua">Зареєструватися на воркшоп</span>
                 <span class="en">Register for Workshop</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
               </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
