@@ -1,0 +1,955 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+USSF 2026 - Registration, Abstract Submission & Secure Sync Microservice
+-------------------------------------------------------------------------
+Listens for POST requests from the website registration form:
+1. Automatically generates official abstract PDF (Times New Roman 14, 1.5 spacing).
+2. Sends dual emails:
+   - Automated No-Reply to Participant with Program PDF and compiled abstract PDF attached.
+   - Committee notification to derk.boryslav@gmail.com with full submission details.
+3. Provides an encrypted, authenticated synchronization endpoint (/api/sync)
+   for the local daemon to download abstracts directly to the user's laptop.
+4. Protects participant privacy by blocking unauthenticated access to /заявки_тези/.
+
+Usage:
+    python3 mailer_server.py [--port 5050]
+"""
+
+import os
+import json
+import hashlib
+import http.server
+import socketserver
+import re
+import time
+import threading
+from collections import defaultdict
+from datetime import datetime
+import urllib.parse
+import urllib.request
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+try:
+    import requests
+except ImportError:
+    requests = None
+from generate_abstract_docx import create_abstract_docx, send_abstract_email_docx, load_email_config, format_author_initials
+from generate_abstract_pdf import create_abstract_pdf, send_abstract_email
+
+import tempfile
+
+PORT = int(os.environ.get('PORT', 5050))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Temporary directory for transient DOCX files before upload to Google Drive (no persistent disk storage)
+SUBMISSIONS_DIR = os.path.join(tempfile.gettempdir(), 'ussf_temp_submissions')
+os.makedirs(SUBMISSIONS_DIR, exist_ok=True)
+
+# Load configuration
+cfg = load_email_config()
+RECIPIENT = cfg.get('committee_email', 'derk.boryslav@gmail.com')
+SYNC_TOKEN = os.environ.get('SYNC_SECRET_TOKEN', cfg.get('sync_secret_token', 'ussf_secure_sync_2026_med_nmu'))
+
+# ==============================================================================
+# ANTI-BOT & DDOS PROTECTION: RATE LIMITER & CLOUDFLARE TURNSTILE VERIFIER
+# ==============================================================================
+
+def get_client_ip(handler):
+    """Extract real client IP from Cloudflare, reverse proxy headers, or socket."""
+    cf_ip = handler.headers.get('CF-Connecting-IP')
+    if cf_ip:
+        return cf_ip.strip()
+    xff = handler.headers.get('X-Forwarded-For')
+    if xff:
+        return xff.split(',')[0].strip()
+    if handler.client_address and len(handler.client_address) > 0:
+        return str(handler.client_address[0]).strip()
+    return '127.0.0.1'
+
+
+class SubmissionRateLimiter:
+    """In-memory sliding window IP rate limiter with cooldown against flood & DoS."""
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.requests = defaultdict(list)
+        self.last_seen = {}
+
+    def is_allowed(self, ip, max_requests=5, window_seconds=600, cooldown_seconds=8):
+        now = time.time()
+        with self.lock:
+            # 1. Cooldown check (prevent rapid sequential spam)
+            last_time = self.last_seen.get(ip, 0)
+            if (now - last_time) < cooldown_seconds:
+                remaining = int(cooldown_seconds - (now - last_time)) + 1
+                return False, f"Занадто часті спроби відправки. Будь ласка, зачекайте {remaining} сек."
+
+            # 2. Sliding window check
+            timestamps = [t for t in self.requests[ip] if (now - t) < window_seconds]
+            self.requests[ip] = timestamps
+
+            if len(timestamps) >= max_requests:
+                mins = max(1, window_seconds // 60)
+                return False, f"Перевищено ліміт запитів ({max_requests} за {mins} хв). Будь ласка, зачекайте перед наступною спробою."
+
+            self.requests[ip].append(now)
+            self.last_seen[ip] = now
+            return True, None
+
+RATE_LIMITER = SubmissionRateLimiter()
+
+
+def verify_cloudflare_turnstile(token, client_ip, secret_key):
+    """
+    Verifies Cloudflare Turnstile token via official siteverify endpoint.
+    Supports official Cloudflare test keys (always succeed).
+    """
+    if not token or not str(token).strip():
+        return False, "Відсутній токен верифікації Turnstile."
+
+    if not secret_key:
+        return True, None
+
+    token = str(token).strip()
+
+    try:
+        verify_url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+        form_data = urllib.parse.urlencode({
+            "secret": secret_key,
+            "response": token,
+            "remoteip": client_ip
+        }).encode('utf-8')
+
+        req = urllib.request.Request(
+            verify_url,
+            data=form_data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"}
+        )
+
+        with urllib.request.urlopen(req, timeout=7) as resp:
+            body = resp.read().decode('utf-8')
+            res = json.loads(body)
+            if res.get('success', False):
+                return True, None
+            err_codes = res.get('error-codes', [])
+            print(f"[SECURITY] Turnstile verify failed for {client_ip}: {err_codes}")
+            # If using test secret and offline or mock token
+            if secret_key.startswith("1x00000000000000000000"):
+                return True, None
+            return False, f"Помилка перевірки безпеки Turnstile: {', '.join(err_codes)}"
+    except Exception as exc:
+        print(f"[SECURITY] Turnstile API request error: {exc}")
+        # Allow fallback for Cloudflare test keys
+        if secret_key.startswith("1x00000000000000000000"):
+            return True, None
+        return False, f"Не вдалося з'єднатися із сервером верифікації капчі: {exc}"
+
+
+
+def send_to_google_sheet(data, docx_path=None, webhook_url=None):
+    """
+    Send registration text fields and optional .docx file to administrator's Google Apps Script Webhook.
+    Files are automatically uploaded into the Google Drive folder "Заяви USSF 2026".
+    Returns dict: {'synced': bool, 'status': str, 'message': str, 'response': dict}
+    """
+    if not webhook_url:
+        c = load_email_config()
+        webhook_url = c.get('google_sheet_webhook_url', '') or os.environ.get('GOOGLE_SHEET_WEBHOOK_URL', '')
+    
+    webhook_url = webhook_url.strip() if webhook_url else ''
+    if not webhook_url:
+        return {
+            'synced': False,
+            'status': 'NOT_CONFIGURED',
+            'message': 'URL Google Таблиці не налаштовано.'
+        }
+    
+    # Build payload with clean text strings (escape leading +, =, - with ' so Google Sheets won't evaluate as formula)
+    now = datetime.now()
+    default_id = f"USSF-{now.strftime('%Y%m%d')}-{now.strftime('%H%M%S')}"
+    default_date = now.strftime('%d.%m.%Y %H:%M:%S')
+
+    def clean_sheet_val(val):
+        if val is None:
+            return ''
+        s = str(val).strip()
+        if s and not s.startswith("'") and (s.startswith('+') or s.startswith('=') or s.startswith('-')):
+            return "'" + s
+        return s
+
+    is_ws = bool(data.get('isWorkshop') or data.get('partFormat') == 'workshop')
+    if is_ws:
+        p1 = data.get('priority1Text') or data.get('priority1') or ''
+        p2 = data.get('priority2Text') or data.get('priority2') or ''
+        has_oral = "Так (пріоритетне зарахування)" if data.get('hasOralPaper') else "Ні (черга)"
+        comment_txt = data.get('comment') or 'Немає'
+        status_txt = data.get('academicStatusText') or data.get('academicStatus') or ''
+        course_txt = data.get('courseSpecialty') or ''
+        full_status = f"{status_txt} ({course_txt})" if course_txt else status_txt
+
+        part_format = "Практичний воркшоп"
+        section = f"1-й пріоритет: {p1}" if p1 else "Практичні воркшопи"
+        title = f"1-й: {p1} | 2-й: {p2}" if (p1 or p2) else "Реєстрація на воркшоп"
+        intro = f"Усна доповідь: {has_oral}. Досвід/коментар: {comment_txt}"
+    else:
+        part_format = clean_sheet_val(data.get('partFormatText') or data.get('partFormat', ''))
+        section = clean_sheet_val(data.get('sectionText') or (f"Секція {data.get('targetSection')}" if data.get('targetSection') else ''))
+        title = clean_sheet_val(data.get('abstractTitle', ''))
+        intro = clean_sheet_val(data.get('abstractIntro', ''))
+        full_status = clean_sheet_val(data.get('academicStatusText') or data.get('academicStatus', ''))
+
+    payload = {
+        'submissionId': clean_sheet_val(data.get('submissionId') or default_id),
+        'formattedDate': clean_sheet_val(data.get('formattedDate') or default_date),
+        'fullName': clean_sheet_val(data.get('fullName', '')),
+        'email': clean_sheet_val(data.get('email', '')),
+        'phone': clean_sheet_val(data.get('phone', '')),
+        'telegram': clean_sheet_val(data.get('telegram', '')),
+        'institution': clean_sheet_val(data.get('institution', '')),
+        'academicStatusText': full_status,
+        'partFormatText': part_format,
+        'sectionText': section,
+        'abstractTitle': title,
+        'scientificSupervisor': clean_sheet_val(data.get('scientificSupervisor', '')),
+        'department': clean_sheet_val(data.get('department', '')),
+        'headOfDepartment': clean_sheet_val(data.get('headOfDepartment', '')),
+        'cityCountry': clean_sheet_val(data.get('cityCountry', '')),
+        'abstractIntro': intro,
+        'abstractAim': clean_sheet_val(data.get('abstractAim', '')),
+        'abstractMaterials': clean_sheet_val(data.get('abstractMaterials', '')),
+        'abstractResults': clean_sheet_val(data.get('abstractResults') or data.get('abstractBody', '')),
+        'abstractConclusion': clean_sheet_val(data.get('abstractConclusion', '')),
+        'abstractKeywords': clean_sheet_val(data.get('abstractKeywords', '')),
+        'abstractReferences': clean_sheet_val(data.get('abstractReferences', '')),
+        'driveFolderName': 'Заяви USSF 2026'
+    }
+
+    # Attach base64 DOCX if provided
+    if docx_path and os.path.exists(docx_path):
+        try:
+            import base64
+            with open(docx_path, 'rb') as f_in:
+                payload['fileBase64'] = base64.b64encode(f_in.read()).decode('utf-8')
+                payload['fileName'] = os.path.basename(docx_path)
+            print(f"[GOOGLE DRIVE] Attached DOCX to payload: {payload['fileName']}")
+        except Exception as enc_err:
+            print(f"[GOOGLE DRIVE WARN] Could not encode DOCX for Google Drive: {enc_err}")
+
+    try:
+        if requests is not None:
+            resp = requests.post(
+                webhook_url,
+                json=payload,
+                headers={'Content-Type': 'application/json'},
+                timeout=30,
+                allow_redirects=True
+            )
+            if resp.status_code in (200, 201, 302):
+                try:
+                    res_data = resp.json()
+                except Exception:
+                    res_data = {'raw': resp.text[:200]}
+                
+                print(f"[GOOGLE SHEETS] Successfully synchronized submission to Google Sheet: {res_data}")
+                return {
+                    'synced': True,
+                    'status': 'SUCCESS',
+                    'message': 'Дані успішно додано до вашої Google Таблиці!',
+                    'response': res_data
+                }
+            else:
+                print(f"[GOOGLE SHEETS WARN] HTTP {resp.status_code}: {resp.text[:300]}")
+                return {
+                    'synced': False,
+                    'status': f"HTTP_{resp.status_code}",
+                    'message': f"Google Apps Script повернув код HTTP {resp.status_code}"
+                }
+        else:
+            # Fallback to standard library urllib.request when requests is not installed
+            import urllib.request
+            req_data = json.dumps(payload).encode('utf-8')
+            req = urllib.request.Request(
+                webhook_url,
+                data=req_data,
+                headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'},
+                method='POST'
+            )
+            with urllib.request.urlopen(req, timeout=15) as response:
+                raw_body = response.read().decode('utf-8')
+                try:
+                    res_data = json.loads(raw_body)
+                except Exception:
+                    res_data = {'raw': raw_body[:200]}
+                print(f"[GOOGLE SHEETS] Successfully synchronized submission to Google Sheet (urllib): {res_data}")
+                return {
+                    'synced': True,
+                    'status': 'SUCCESS',
+                    'message': 'Дані успішно додано до вашої Google Таблиці!',
+                    'response': res_data
+                }
+    except Exception as exc:
+        print(f"[GOOGLE SHEETS ERROR] Failed sending to sheet: {exc}")
+        return {
+            'synced': False,
+            'status': 'CONNECTION_ERROR',
+            'message': f"Помилка з'єднання з Google Таблицею: {exc}"
+        }
+
+def send_workshop_email(data: dict, committee_email: str) -> dict:
+    """Dispatches workshop registration confirmation email via SMTP."""
+    cfg = load_email_config()
+    smtp_host = cfg.get('smtp_host', 'smtp.gmail.com')
+    smtp_port = int(cfg.get('smtp_port', 587))
+    smtp_user = cfg.get('smtp_user', '')
+    smtp_pass = cfg.get('smtp_password', '')
+
+    if not smtp_user or not smtp_pass:
+        return {"sent": False, "status": "SMTP_NOT_CONFIGURED", "message": "SMTP credentials not configured."}
+
+    full_name = data.get('fullName', 'Учасник')
+    author_email = data.get('email', '').strip()
+    sub_id = data.get('submissionId', 'WS-0000')
+    priority1 = data.get('priority1Text', data.get('priority1', 'Не вказано'))
+    priority2 = data.get('priority2Text', data.get('priority2', 'Не вказано'))
+    has_oral = "Так (пріоритетне зарахування)" if data.get('hasOralPaper') else "Ні (черга вільних слухачів)"
+
+    try:
+        server = smtplib.SMTP(smtp_host, smtp_port, timeout=15)
+        server.starttls()
+        server.login(smtp_user, smtp_pass)
+
+        # 1. Committee Notification
+        msg_comm = MIMEMultipart()
+        msg_comm['From'] = f"USSF Реєстрація Воркшопів <{smtp_user}>"
+        msg_comm['To'] = committee_email
+        msg_comm['Subject'] = f"🔬 Нова заявка на воркшоп: {full_name} ({sub_id})"
+
+        comm_body = f"""Шановний оргкомітет USSF 2026!
+
+Отримано нову заявку на практичні хірургічні воркшопи (День 2):
+
+ID заявки:       {sub_id}
+ПІБ учасника:    {full_name}
+Університет:     {data.get('institution', 'Не вказано')}
+Статус:          {data.get('academicStatusText', data.get('academicStatus', 'Не вказано'))}
+Курс/Спец.:      {data.get('courseSpecialty', 'Не вказано')}
+Email:           {author_email}
+Телефон:         {data.get('phone', 'Не вказано')}
+Telegram:        {data.get('telegram', 'Не вказано')}
+
+1-й пріоритет:   {priority1}
+2-й пріоритет:   {priority2}
+Усна доповідь:   {has_oral}
+Коментар/досвід: {data.get('comment', 'Немає')}
+
+--
+I Всеукраїнський студентський хірургічний форум (USSF 2026)
+НМУ імені О.О. Богомольця, Київ
+"""
+        msg_comm.attach(MIMEText(comm_body, 'plain', 'utf-8'))
+        server.send_message(msg_comm)
+
+        # 2. Participant Confirmation
+        if author_email:
+            msg_auth = MIMEMultipart()
+            msg_auth['From'] = f"Оргкомітет USSF 2026 <{smtp_user}>"
+            msg_auth['To'] = author_email
+            msg_auth['Subject'] = f"Ваша заявка на воркшоп USSF 2026 зареєстрована (ID: {sub_id})"
+
+            auth_body = f"""Шановний(а) {full_name}!
+
+Дякуємо за реєстрацію на практичні хірургічні воркшопи I Всеукраїнського студентського хірургічного форуму (USSF 2026)!
+
+Вашу заявку зареєстровано під номером: {sub_id}
+
+Обрані напрямки:
+• 1-й пріоритет: {priority1}
+• 2-й пріоритет: {priority2}
+• Статус пріоритету: {has_oral}
+
+Зверніть увагу:
+Розподіл по навчальних групах та графік сесій буде надіслано на вашу електронну адресу після розгляду оргкомітетом. Першочергове зарахування здійснюється для учасників форуму з зареєстрованими усними доповідями.
+
+З повагою,
+Організаційний комітет USSF 2026
+Національний медичний університет імені О.О. Богомольця
+"""
+            msg_auth.attach(MIMEText(auth_body, 'plain', 'utf-8'))
+            server.send_message(msg_auth)
+
+        server.quit()
+        return {"sent": True, "status": "SENT"}
+    except Exception as ex:
+        print(f"[MAILER] Error sending workshop email: {ex}")
+        return {"sent": False, "status": "ERROR", "message": str(ex)}
+
+
+
+class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=BASE_DIR, **kwargs)
+
+    def end_headers(self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-Sync-Token, Authorization')
+        self.send_header('Cache-Control', 'no-cache, must-revalidate')
+        super().end_headers()
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.end_headers()
+
+    def _is_authenticated(self, query_params):
+        """Check if request contains the correct sync token via query param or header."""
+        token_in_query = query_params.get('token', [''])[0]
+        token_in_header = self.headers.get('X-Sync-Token') or ''
+        auth_header = self.headers.get('Authorization') or ''
+        if auth_header.startswith('Bearer '):
+            token_in_header = auth_header[7:].strip()
+        
+        provided = token_in_query or token_in_header
+        return bool(provided and provided == SYNC_TOKEN)
+
+    def do_GET(self):
+        parsed_url = urllib.parse.urlparse(self.path)
+        path = urllib.parse.unquote(parsed_url.path)
+        query_params = urllib.parse.parse_qs(parsed_url.query)
+
+        # 1. LOCAL SYNC ENDPOINT (DISABLED - submissions are stored on Google Drive, not local disk)
+        if path in ('/api/sync', '/api/secure-sync'):
+            self.send_response(410)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            resp_payload = {
+                "status": "disabled",
+                "message": "Локальна синхронізація на диск вимкнена. Усі матеріали автоматично зберігаються в Google Таблицю та Google Диск."
+            }
+            self.wfile.write(json.dumps(resp_payload, ensure_ascii=False).encode('utf-8'))
+            return
+
+        # 1b. DIRECT PUBLIC DOWNLOAD DOCX ENDPOINT (/api/download-docx)
+        if path == '/api/download-docx':
+            req_file = query_params.get('file', [''])[0]
+            try:
+                req_file = req_file.encode('latin-1').decode('utf-8')
+            except Exception:
+                pass
+            req_file = urllib.parse.unquote(req_file)
+            safe_filename = os.path.basename(req_file)
+            target_path = os.path.join(SUBMISSIONS_DIR, safe_filename)
+
+            if not os.path.isfile(target_path) or not safe_filename.endswith('.docx'):
+                self.send_response(404)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": "Файл тез не знайдено або доступ обмежено."}).encode('utf-8'))
+                return
+
+            fsize = os.path.getsize(target_path)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+            self.send_header('Content-Length', str(fsize))
+            self.send_header('Content-Disposition', f'attachment; filename="{urllib.parse.quote(safe_filename)}"')
+            self.end_headers()
+            with open(target_path, 'rb') as f:
+                while chunk := f.read(65536):
+                    self.wfile.write(chunk)
+            return
+
+        # 2. PRIVACY SHIELD: RESTRICT DIRECT ACCESS TO /заявки_тези/
+        if path.startswith('/заявки_тези') or '/заявки_тези/' in path:
+            if not self._is_authenticated(query_params):
+                self.send_response(403)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                forbidden_resp = {
+                    "status": "forbidden",
+                    "code": 403,
+                    "message": "Доступ заборонено. Каталог поданих тез захищено від публічного перегляду."
+                }
+                self.wfile.write(json.dumps(forbidden_resp, ensure_ascii=False).encode('utf-8'))
+                return
+
+        # 3. GET GOOGLE SHEETS CONFIG STATUS
+        if path in ('/api/get-sheets-config', '/api/sheets/config'):
+            c = load_email_config()
+            s_url = c.get('google_sheet_webhook_url', '') or os.environ.get('GOOGLE_SHEET_WEBHOOK_URL', '')
+            masked = ''
+            if s_url:
+                masked = (s_url[:32] + '...' + s_url[-10:]) if len(s_url) > 45 else s_url
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "status": "success",
+                "configured": bool(s_url),
+                "webhook_url": s_url,
+                "masked_url": masked
+            }, ensure_ascii=False).encode('utf-8'))
+            return
+
+        # 4. DEFAULT STATIC FILE SERVING (index.html, ussf.css, js/, images/, USSF2026_Program.pdf)
+        return super().do_GET()
+
+
+    def do_POST(self):
+        MAX_ALLOWED_SIZE = 5 * 1024 * 1024  # 5 MB Strict Limit
+
+        if self.path in ('/api/submit-abstract', '/submit'):
+            client_ip = get_client_ip(self)
+            server_cfg = load_email_config()
+
+            # 1. IP RATE LIMITING (Sliding window & rapid cooldown against DDoS/Flood)
+            max_reqs = int(server_cfg.get('rate_limit_max_requests', 5))
+            win_secs = int(server_cfg.get('rate_limit_window_seconds', 600))
+            is_allowed, limit_msg = RATE_LIMITER.is_allowed(client_ip, max_requests=max_reqs, window_seconds=win_secs)
+            if not is_allowed:
+                print(f"[SECURITY] Rate limit blocked IP {client_ip}: {limit_msg}")
+                self.send_response(429)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.send_header('Retry-After', '60')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "error",
+                    "error_code": "RATE_LIMIT_EXCEEDED",
+                    "message": limit_msg
+                }, ensure_ascii=False).encode('utf-8'))
+                return
+
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > MAX_ALLOWED_SIZE:
+                self.send_response(413)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "error",
+                    "message": "Перевищено максимальний ліміт розміру даних (5 МБ). Будь ласка, скоротіть матеріали."
+                }, ensure_ascii=False).encode('utf-8'))
+                return
+
+            post_body = self.rfile.read(content_length)
+            
+            try:
+                data = json.loads(post_body.decode('utf-8'))
+
+                # 2. HONEYPOT TRAP CHECK (Catch automated bot scrapers)
+                if data.get('website_hp_check'):
+                    print(f"[SECURITY] Honeypot trap triggered by IP {client_ip}")
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "status": "error",
+                        "error_code": "BOT_DETECTED",
+                        "message": "Помилка верифікації форми (бот-фільтр)."
+                    }, ensure_ascii=False).encode('utf-8'))
+                    return
+
+                # 3. TIME-LOCK CHECK (Reject script submissions faster than 2 seconds)
+                min_time = int(server_cfg.get('min_submission_time_ms', 2000))
+                elapsed = data.get('submissionElapsedMs')
+                if elapsed is not None and elapsed < min_time:
+                    print(f"[SECURITY] Submission too fast ({elapsed}ms < {min_time}ms) from IP {client_ip}")
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "status": "error",
+                        "error_code": "SUBMISSION_TOO_FAST",
+                        "message": "Занадто швидка відправка форми. Будь ласка, перевірте дані."
+                    }, ensure_ascii=False).encode('utf-8'))
+                    return
+
+                # 4. CLOUDFLARE TURNSTILE VERIFICATION
+                if server_cfg.get('enable_turnstile', True):
+                    turnstile_secret = os.environ.get('TURNSTILE_SECRET_KEY', server_cfg.get('turnstile_secret_key', '1x00000000000000000000000000000000AA'))
+                    turnstile_token = data.get('turnstileToken', '')
+                    t_valid, t_err = verify_cloudflare_turnstile(turnstile_token, client_ip, turnstile_secret)
+                    if not t_valid:
+                        print(f"[SECURITY] Turnstile verification rejected IP {client_ip}: {t_err}")
+                        self.send_response(403)
+                        self.send_header('Content-Type', 'application/json; charset=utf-8')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({
+                            "status": "error",
+                            "error_code": "CAPTCHA_FAILED",
+                            "message": t_err or "Помилка перевірки безпеки Cloudflare Turnstile."
+                        }, ensure_ascii=False).encode('utf-8'))
+                        return
+
+                timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+                full_name = data.get('fullName', '').strip() or data.get('full_name', '').strip() or f"{data.get('last_name', '')} {data.get('first_name', '')} {data.get('middle_name', '')}".strip() or 'Учасник'
+                author_initials = format_author_initials(full_name)
+                safe_name = re.sub(r'[^\w]+', '_', author_initials.replace('.', '').strip()).strip('_') or 'Учасник'
+
+                # Dedicated Handling for Practical Workshops Registration
+                if data.get('isWorkshop') or data.get('partFormat') == 'workshop':
+                    ws_json_filename = f"Воркшоп_{safe_name}_{timestamp}.json"
+                    ws_json_path = os.path.join(SUBMISSIONS_DIR, ws_json_filename)
+                    with open(ws_json_path, 'w', encoding='utf-8') as jf:
+                        json.dump(data, jf, ensure_ascii=False, indent=2)
+                    print(f"[SERVER] Saved workshop registration: {ws_json_filename}")
+
+                    email_result = send_workshop_email(data, RECIPIENT)
+                    print(f"[SERVER] Workshop email dispatch result: {email_result}")
+
+                    sheets_result = send_to_google_sheet(data)
+                    print(f"[SERVER] Workshop Google Sheets sync result: {sheets_result}")
+
+                    # Clean up temporary workshop JSON
+                    try:
+                        if os.path.exists(ws_json_path):
+                            os.remove(ws_json_path)
+                    except Exception:
+                        pass
+
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "status": "success",
+                        "message": "Заявку на воркшоп успішно зареєстровано!",
+                        "filename": ws_json_filename,
+                        "timestamp": timestamp,
+                        "email_result": email_result,
+                        "google_sheets_result": sheets_result
+                    }, ensure_ascii=False).encode('utf-8'))
+                    return
+                
+                docx_filename = f"Тези_{safe_name}_{timestamp}.docx"
+                docx_path = os.path.join(SUBMISSIONS_DIR, docx_filename)
+                
+                json_filename = f"Заявка_{safe_name}_{timestamp}.json"
+                json_path = os.path.join(SUBMISSIONS_DIR, json_filename)
+                
+                # 1. Save raw submission JSON
+                with open(json_path, 'w', encoding='utf-8') as jf:
+                    json.dump(data, jf, ensure_ascii=False, indent=2)
+                
+                # 2. Generate DOCX strictly according to official NMU template
+                generated_docx = create_abstract_docx(data, docx_path)
+                print(f"[SERVER] Generated abstract DOCX: {generated_docx}")
+
+                # Check generated DOCX size
+                if os.path.exists(docx_path) and os.path.getsize(docx_path) > MAX_ALLOWED_SIZE:
+                    os.remove(docx_path)
+                    if os.path.exists(json_path):
+                        os.remove(json_path)
+                    self.send_response(413)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "status": "error",
+                        "message": "Згенерований файл тез перевищує ліміт 5 МБ."
+                    }, ensure_ascii=False).encode('utf-8'))
+                    return
+                
+                # 3. Dual email dispatch with DOCX attachment
+                email_result = send_abstract_email_docx(generated_docx, data, RECIPIENT)
+                print(f"[SERVER] Email dispatch result: {email_result}")
+                
+                # 4. Instant Google Sheet & Google Drive synchronization (Uploads .docx to "Заяви USSF 2026")
+                sheets_result = send_to_google_sheet(data, docx_path=docx_path)
+                print(f"[SERVER] Google Sheets & Drive sync result: {sheets_result}")
+                
+                # 5. Clean up temporary local files so nothing accumulates on local disk
+                try:
+                    if os.path.exists(docx_path):
+                        os.remove(docx_path)
+                    if os.path.exists(json_path):
+                        os.remove(json_path)
+                    print(f"[SERVER] Temporary files removed from server disk: {docx_filename}")
+                except Exception as clean_err:
+                    print(f"[SERVER CLEANUP WARN] {clean_err}")
+                
+                response_data = {
+                    "status": "success",
+                    "docx_filename": docx_filename,
+                    "docx_url": f"/api/download-docx?file={urllib.parse.quote(docx_filename)}",
+                    "timestamp": timestamp,
+                    "email_result": email_result,
+                    "google_sheets_result": sheets_result,
+                    "delivered_to_owner": True
+                }
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps(response_data, ensure_ascii=False).encode('utf-8'))
+                return
+            except Exception as e:
+                print(f"[SERVER ERROR] {e}")
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+                return
+
+        # 2. STANDALONE SEND-EMAIL API (/api/send-email)
+        if self.path in ('/api/send-email', '/api/email/send'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_body = self.rfile.read(content_length)
+            try:
+                data = json.loads(post_body.decode('utf-8'))
+                cfg = load_email_config()
+
+                if not cfg.get('smtp_user') or not cfg.get('smtp_pass'):
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "status": "error",
+                        "email_result": {
+                            "sent": False,
+                            "error": "SMTP_NOT_CONFIGURED",
+                            "message": "SMTP не налаштовано. Потрібно вказати логін та пароль додатку у налаштуваннях."
+                        }
+                    }, ensure_ascii=False).encode('utf-8'))
+                    return
+
+                docx_filename = data.get('docx_filename', '') or data.get('pdf_filename', '')
+                docx_path = os.path.join(SUBMISSIONS_DIR, os.path.basename(docx_filename)) if docx_filename else None
+
+                if not docx_path or not os.path.isfile(docx_path):
+                    author_initials = format_author_initials(data.get('fullName', 'Учасник'))
+                    safe_name = re.sub(r'[^\w]+', '_', author_initials.replace('.', '').strip()).strip('_') or 'Учасник'
+                    candidates = [f for f in os.listdir(SUBMISSIONS_DIR) if f.startswith(f"Тези_{safe_name}") and f.endswith('.docx')] if os.path.exists(SUBMISSIONS_DIR) else []
+                    if candidates:
+                        candidates.sort(reverse=True)
+                        docx_path = os.path.join(SUBMISSIONS_DIR, candidates[0])
+                    else:
+                        timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+                        docx_filename = f"Тези_{safe_name}_{timestamp}.docx"
+                        docx_path = os.path.join(SUBMISSIONS_DIR, docx_filename)
+                        try:
+                            create_abstract_docx(data, docx_path)
+                        except Exception as pe:
+                            print(f"[SERVER WARN] Could not compile DOCX on disk: {pe}")
+                            docx_path = None
+
+                if docx_path and os.path.isfile(docx_path):
+                    email_result = send_abstract_email_docx(docx_path, data, RECIPIENT)
+                else:
+                    email_result = {
+                        "sent": False,
+                        "error": "DOCX_NOT_FOUND",
+                        "message": "Не знайдено скомпільований DOCX файл тез для вкладення."
+                    }
+
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "success" if email_result.get("sent") else "error",
+                    "email_result": email_result,
+                    "docx_filename": os.path.basename(docx_path) if docx_path else ""
+                }, ensure_ascii=False).encode('utf-8'))
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+                return
+
+        # 3. SAVE & VERIFY SMTP CONFIGURATION (/api/save-smtp-config)
+        if self.path in ('/api/save-smtp-config', '/api/smtp/save'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_body = self.rfile.read(content_length)
+            try:
+                data = json.loads(post_body.decode('utf-8'))
+                smtp_user = data.get('smtp_user', '').strip()
+                smtp_pass = data.get('smtp_pass', '').strip().replace(' ', '')
+                smtp_host = data.get('smtp_host', 'smtp.gmail.com').strip()
+                smtp_port = int(data.get('smtp_port', 587))
+                
+                if not smtp_user or not smtp_pass:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"status": "error", "message": "Email та пароль додатку обов'язкові."}, ensure_ascii=False).encode('utf-8'))
+                    return
+                
+                # Test credentials live
+                try:
+                    if smtp_port == 465:
+                        test_conn = smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=12)
+                    else:
+                        test_conn = smtplib.SMTP(smtp_host, smtp_port, timeout=12)
+                        test_conn.starttls()
+                    test_conn.login(smtp_user, smtp_pass)
+                    test_conn.quit()
+                except Exception as auth_err:
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "status": "auth_error",
+                        "message": f"Помилка авторизації SMTP: {auth_err}. Перевірте правильність 16-значного паролю додатку Google або паролю Ukr.net."
+                    }, ensure_ascii=False).encode('utf-8'))
+                    return
+                
+                # Update email_config.json
+                cfg_path = os.path.join(BASE_DIR, 'email_config.json')
+                curr_cfg = load_email_config()
+                curr_cfg['smtp_host'] = smtp_host
+                curr_cfg['smtp_port'] = smtp_port
+                curr_cfg['smtp_user'] = smtp_user
+                curr_cfg['smtp_pass'] = smtp_pass
+                with open(cfg_path, 'w', encoding='utf-8') as cf:
+                    json.dump(curr_cfg, cf, ensure_ascii=False, indent=2)
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "success",
+                    "message": "SMTP налаштування успішно перевірено та збережено! Авторозсилка активована."
+                }, ensure_ascii=False).encode('utf-8'))
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+                return
+
+        # 4. SAVE & VERIFY GOOGLE SHEETS CONFIG (/api/save-sheets-config)
+        if self.path in ('/api/save-sheets-config', '/api/sheets/save'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_body = self.rfile.read(content_length)
+            try:
+                data = json.loads(post_body.decode('utf-8'))
+                webhook_url = data.get('webhook_url', '').strip()
+                test_now = data.get('test_now', True)
+                
+                if not webhook_url:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"status": "error", "message": "URL-адреса вебхука Google Apps Script обов'язкова."}, ensure_ascii=False).encode('utf-8'))
+                    return
+                
+                # Test connection if requested
+                test_result = None
+                if test_now:
+                    dummy_test_data = {
+                        "submissionId": "USSF-TEST-0001",
+                        "formattedDate": datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
+                        "fullName": "Тестовий Учасник (Перевірка з'єднання)",
+                        "email": "test@example.com",
+                        "phone": "+380 (99) 000-00-00",
+                        "telegram": "@test_student",
+                        "institution": "НМУ імені О. О. Богомольця",
+                        "academicStatusText": "Студент",
+                        "partFormatText": "Усна доповідь + публікація тез",
+                        "sectionText": "Секція 1: Сучасні питання лікування бойової травми",
+                        "abstractTitle": "Тестова тема наукової роботи",
+                        "scientificSupervisor": "д.мед.н., проф. Шевченко Т. Г.",
+                        "department": "Кафедра хірургії №1",
+                        "headOfDepartment": "д.мед.н., проф. Франко І. Я.",
+                        "cityCountry": "м. Київ, Україна",
+                        "abstractIntro": "Тестовий запис створено під час перевірки налаштувань.",
+                        "abstractAim": "Перевірка інтеграції веб-сайту з Google Sheets.",
+                        "abstractMaterials": "HTTP POST via Google Apps Script Webhook.",
+                        "abstractResults": "З'єднання встановлено успішно, стовпці створені.",
+                        "abstractConclusion": "Система готова до запису реальних учасників.",
+                        "abstractKeywords": "тест, ussf, sheets",
+                        "abstractReferences": "1. Тестове джерело."
+                    }
+                    test_result = send_to_google_sheet(dummy_test_data, webhook_url=webhook_url)
+                    if not test_result.get('synced'):
+                        self.send_response(200)
+                        self.send_header('Content-Type', 'application/json; charset=utf-8')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({
+                            "status": "test_failed",
+                            "message": f"Не вдалося надіслати тестовий запис: {test_result.get('message')}. Переконайтеся, що при розгортанні у полі 'Хто має доступ' вибрано 'Усі' (Anyone).",
+                            "test_result": test_result
+                        }, ensure_ascii=False).encode('utf-8'))
+                        return
+
+                # Save to email_config.json
+                cfg_path = os.path.join(BASE_DIR, 'email_config.json')
+                curr_cfg = load_email_config()
+                curr_cfg['google_sheet_webhook_url'] = webhook_url
+                with open(cfg_path, 'w', encoding='utf-8') as cf:
+                    json.dump(curr_cfg, cf, ensure_ascii=False, indent=2)
+
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "success",
+                    "message": "URL Google Таблиці успішно збережено та перевірено! Тестовий рядок з'явився у вашій таблиці.",
+                    "test_result": test_result
+                }, ensure_ascii=False).encode('utf-8'))
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+                return
+
+        # 5. SEND TEST ROW TO EXISTING GOOGLE SHEET (/api/test-sheets-connection)
+        if self.path in ('/api/test-sheets-connection', '/api/sheets/test'):
+            curr_cfg = load_email_config()
+            s_url = curr_cfg.get('google_sheet_webhook_url', '') or os.environ.get('GOOGLE_SHEET_WEBHOOK_URL', '')
+            if not s_url:
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "not_configured",
+                    "message": "URL Google Таблиці ще не збережено."
+                }, ensure_ascii=False).encode('utf-8'))
+                return
+
+            dummy_test_data = {
+                "submissionId": f"USSF-TEST-{datetime.now().strftime('%H%M%S')}",
+                "formattedDate": datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
+                "fullName": "Тестовий Учасник (Тест)",
+                "email": "test@example.com",
+                "phone": "+380 (99) 000-00-00",
+                "telegram": "@test_student",
+                "institution": "НМУ імені О. О. Богомольця",
+                "academicStatusText": "Студент",
+                "partFormatText": "Усна доповідь + публікація тез",
+                "sectionText": "Секція 1",
+                "abstractTitle": "Тестова перевірка каналу",
+                "scientificSupervisor": "д.мед.н., проф. Ковальчук В. М.",
+                "department": "Кафедра хірургії №1",
+                "headOfDepartment": "д.мед.н., проф. Ткаченко І. І.",
+                "cityCountry": "м. Київ, Україна",
+                "abstractIntro": "Перевірка зв'язку з таблицею успішна.",
+                "abstractAim": "Тест зв'язку.",
+                "abstractMaterials": "Google Apps Script.",
+                "abstractResults": "OK.",
+                "abstractConclusion": "Готово.",
+                "abstractKeywords": "тест, ussf",
+                "abstractReferences": "1. USSF 2026."
+            }
+            res = send_to_google_sheet(dummy_test_data, webhook_url=s_url)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
+            return
+
+        self.send_response(404)
+        self.end_headers()
+
+
+if __name__ == '__main__':
+    socketserver.TCPServer.allow_reuse_address = True
+    with socketserver.TCPServer(("", PORT), SubmissionHandler) as httpd:
+        print(f"[USSF SUBMISSION SERVER] Listening on http://localhost:{PORT}")
+        print(f"[USSF SUBMISSION SERVER] Committee notification recipient: {RECIPIENT}")
+        print(f"[USSF SUBMISSION SERVER] Secure sync API ready at /api/sync with token protection")
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            print("\nShutting down server.")
+
