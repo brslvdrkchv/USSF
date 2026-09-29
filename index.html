@@ -485,7 +485,7 @@
         </div>
 
         <div class="workshops-grid">
-          <!-- WORKSHOP 1: E-FAST & POCUS -->          <div class="workshop-card" id="workshop-1">
+          <!-- WORKSHOP 1: E-FAST & POCUS -->          <div class="workshop-card" id="workshop-1" onclick="this.classList.toggle(\'flipped\')">
             <div class="workshop-flip-inner">
               <div class="workshop-flip-front">
                 <div class="workshop-card-header">
@@ -519,7 +519,7 @@
                   <span class="en">Hover to see skills ➔</span>
                 </div>
                 <div class="workshop-card-footer" style="margin-top: 1rem;">
-                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '1')">
+                  <button type="button" class="btn-workshop-register" onclick="event.stopPropagation(); openRegistrationModal('workshops', '1')">
                 <span class="ua">Зареєструватися на воркшоп</span>
                 <span class="en">Register for Workshop</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -544,7 +544,7 @@
               </ul>
                 </div>
                 <div class="workshop-card-footer" style="margin-top: 1rem;">
-                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '1')">
+                  <button type="button" class="btn-workshop-register" onclick="event.stopPropagation(); openRegistrationModal('workshops', '1')">
                 <span class="ua">Зареєструватися на воркшоп</span>
                 <span class="en">Register for Workshop</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -554,7 +554,7 @@
             </div>
           </div>
 
-          <!-- WORKSHOP 2: HANDS-ON LAPAROSCOPY -->          <div class="workshop-card" id="workshop-2">
+          <!-- WORKSHOP 2: HANDS-ON LAPAROSCOPY -->          <div class="workshop-card" id="workshop-2" onclick="this.classList.toggle(\'flipped\')">
             <div class="workshop-flip-inner">
               <div class="workshop-flip-front">
                 <div class="workshop-card-header">
@@ -590,7 +590,7 @@
                   <span class="en">Hover to see skills ➔</span>
                 </div>
                 <div class="workshop-card-footer" style="margin-top: 1rem;">
-                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '2')">
+                  <button type="button" class="btn-workshop-register" onclick="event.stopPropagation(); openRegistrationModal('workshops', '2')">
                 <span class="ua">Зареєструватися на воркшоп</span>
                 <span class="en">Register for Workshop</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -619,7 +619,7 @@
               </ul>
                 </div>
                 <div class="workshop-card-footer" style="margin-top: 1rem;">
-                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '2')">
+                  <button type="button" class="btn-workshop-register" onclick="event.stopPropagation(); openRegistrationModal('workshops', '2')">
                 <span class="ua">Зареєструватися на воркшоп</span>
                 <span class="en">Register for Workshop</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -629,7 +629,7 @@
             </div>
           </div>
 
-          <!-- WORKSHOP 3: RECONSTRUCTIVE GI SURGERY -->          <div class="workshop-card" id="workshop-3">
+          <!-- WORKSHOP 3: RECONSTRUCTIVE GI SURGERY -->          <div class="workshop-card" id="workshop-3" onclick="this.classList.toggle(\'flipped\')">
             <div class="workshop-flip-inner">
               <div class="workshop-flip-front">
                 <div class="workshop-card-header">
@@ -663,7 +663,7 @@
                   <span class="en">Hover to see skills ➔</span>
                 </div>
                 <div class="workshop-card-footer" style="margin-top: 1rem;">
-                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '3')">
+                  <button type="button" class="btn-workshop-register" onclick="event.stopPropagation(); openRegistrationModal('workshops', '3')">
                 <span class="ua">Зареєструватися на воркшоп</span>
                 <span class="en">Register for Workshop</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -684,7 +684,7 @@
               </ul>
                 </div>
                 <div class="workshop-card-footer" style="margin-top: 1rem;">
-                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '3')">
+                  <button type="button" class="btn-workshop-register" onclick="event.stopPropagation(); openRegistrationModal('workshops', '3')">
                 <span class="ua">Зареєструватися на воркшоп</span>
                 <span class="en">Register for Workshop</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -694,7 +694,7 @@
             </div>
           </div>
 
-          <!-- WORKSHOP 4: SURGICAL AIRWAY -->          <div class="workshop-card" id="workshop-4">
+          <!-- WORKSHOP 4: SURGICAL AIRWAY -->          <div class="workshop-card" id="workshop-4" onclick="this.classList.toggle(\'flipped\')">
             <div class="workshop-flip-inner">
               <div class="workshop-flip-front">
                 <div class="workshop-card-header">
@@ -730,7 +730,7 @@
                   <span class="en">Hover to see skills ➔</span>
                 </div>
                 <div class="workshop-card-footer" style="margin-top: 1rem;">
-                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '4')">
+                  <button type="button" class="btn-workshop-register" onclick="event.stopPropagation(); openRegistrationModal('workshops', '4')">
                 <span class="ua">Зареєструватися на воркшоп</span>
                 <span class="en">Register for Workshop</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -759,7 +759,7 @@
               </ul>
                 </div>
                 <div class="workshop-card-footer" style="margin-top: 1rem;">
-                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '4')">
+                  <button type="button" class="btn-workshop-register" onclick="event.stopPropagation(); openRegistrationModal('workshops', '4')">
                 <span class="ua">Зареєструватися на воркшоп</span>
                 <span class="en">Register for Workshop</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -769,7 +769,7 @@
             </div>
           </div>
 
-          <!-- WORKSHOP 5: NPWT & OPEN ABDOMEN -->          <div class="workshop-card" id="workshop-5">
+          <!-- WORKSHOP 5: NPWT & OPEN ABDOMEN -->          <div class="workshop-card" id="workshop-5" onclick="this.classList.toggle(\'flipped\')">
             <div class="workshop-flip-inner">
               <div class="workshop-flip-front">
                 <div class="workshop-card-header">
@@ -803,7 +803,7 @@
                   <span class="en">Hover to see skills ➔</span>
                 </div>
                 <div class="workshop-card-footer" style="margin-top: 1rem;">
-                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '5')">
+                  <button type="button" class="btn-workshop-register" onclick="event.stopPropagation(); openRegistrationModal('workshops', '5')">
                 <span class="ua">Зареєструватися на воркшоп</span>
                 <span class="en">Register for Workshop</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -832,7 +832,7 @@
               </ul>
                 </div>
                 <div class="workshop-card-footer" style="margin-top: 1rem;">
-                  <button type="button" class="btn-workshop-register" onclick="openRegistrationModal('workshops', '5')">
+                  <button type="button" class="btn-workshop-register" onclick="event.stopPropagation(); openRegistrationModal('workshops', '5')">
                 <span class="ua">Зареєструватися на воркшоп</span>
                 <span class="en">Register for Workshop</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>

@@ -7153,6 +7153,8 @@ footer#contacts {
   flex: 0 1 calc(33.333% - 1rem); /* 3 items per row on desktop */
   min-width: 320px;
   max-width: 400px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .workshop-card:hover {
@@ -7170,7 +7172,8 @@ footer#contacts {
   flex-grow: 1;
 }
 
-.workshop-card:hover .workshop-flip-inner {
+.workshop-card:hover .workshop-flip-inner,
+.workshop-card.flipped .workshop-flip-inner {
   transform: rotateY(180deg);
 }
 
@@ -7189,7 +7192,9 @@ footer#contacts {
 }
 
 .workshop-card:hover .workshop-flip-front,
-.workshop-card:hover .workshop-flip-back {
+.workshop-card:hover .workshop-flip-back,
+.workshop-card.flipped .workshop-flip-front,
+.workshop-card.flipped .workshop-flip-back {
   box-shadow: var(--shadow-md);
 }
 
