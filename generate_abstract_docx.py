@@ -456,7 +456,8 @@ def create_abstract_docx(data: dict, output_path: str = None) -> str:
         ("Матеріали і методи:", clean_section_text(materials, "Матеріали і методи", ["Матеріали та методи", "Методи дослідження", "Методи дослідження:"])),
         ("Результати:", clean_section_text(results, "Результати", ["Результати:"])),
         ("Висновок:", clean_section_text(conclusion, "Висновок", ["Висновки", "Висновок:", "Висновки:"])),
-        ("Ключові слова:", clean_section_text(keywords, "Ключові слова", ["Ключові слова:"]))
+        ("Ключові слова:", clean_section_text(keywords, "Ключові слова", ["Ключові слова:"])),
+        ("Література:", clean_section_text(references, "Література", ["Література:", "Список літератури", "Список літератури:"]))
     ]
 
     for heading, sec_text in sections_data:
