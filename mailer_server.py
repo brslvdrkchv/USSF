@@ -221,7 +221,12 @@ def send_to_google_sheet(data, docx_path=None, webhook_url=None):
         'abstractConclusion': clean_sheet_val(data.get('abstractConclusion', '')),
         'abstractKeywords': clean_sheet_val(data.get('abstractKeywords', '')),
         'abstractReferences': clean_sheet_val(data.get('abstractReferences', '')),
-        'driveFolderName': 'Заяви USSF 2026'
+        'driveFolderName': 'Заяви USSF 2026',
+        'isWorkshop': is_ws,
+        'workshopPriority1': clean_sheet_val(data.get('priority1Text') or data.get('priority1', '')),
+        'workshopPriority2': clean_sheet_val(data.get('priority2Text') or data.get('priority2', '')),
+        'workshopHasOral': clean_sheet_val('Так' if data.get('hasOralPaper') else 'Ні'),
+        'workshopComment': clean_sheet_val(data.get('comment', ''))
     }
 
     # Attach base64 DOCX if provided
