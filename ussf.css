@@ -1915,7 +1915,7 @@ nav#mainNav.scrolled {
 
 .section-overview-banner p {
   font-size: 0.94rem;
-  color: var(--text-muted);
+  color: #000000;
 }
 
 .topics-grid {
@@ -1975,7 +1975,7 @@ nav#mainNav.scrolled {
 
 .topic-card p {
   font-size: 0.88rem;
-  color: var(--text-muted);
+  color: #000000;
   line-height: 1.6;
 }
 
