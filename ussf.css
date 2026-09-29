@@ -5958,8 +5958,9 @@ footer#contacts {
 }
 
 .workshops-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1.5rem;
 }
 
@@ -6150,8 +6151,9 @@ footer#contacts {
   .workshops-banner-title {
     font-size: 1.45rem;
   }
-  .workshops-grid {
-    grid-template-columns: 1fr;
+  .workshop-card {
+    flex: 1 1 100%;
+    max-width: 100%;
   }
 }
 
@@ -7148,6 +7150,9 @@ footer#contacts {
   box-shadow: none !important;
   display: flex;
   flex-direction: column;
+  flex: 0 1 calc(33.333% - 1rem); /* 3 items per row on desktop */
+  min-width: 320px;
+  max-width: 400px;
 }
 
 .workshop-card:hover {
@@ -7259,4 +7264,18 @@ footer#contacts {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+}
+
+@media (max-width: 991px) {
+  .workshop-card {
+    flex: 0 1 calc(50% - 0.75rem);
+    max-width: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .workshop-card {
+    flex: 1 1 100%;
+    max-width: none;
+  }
 }
