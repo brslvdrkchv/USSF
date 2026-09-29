@@ -1614,7 +1614,7 @@ function toggleAbstractField(format) {
 }
 
 // Default Google Sheets Webhook URL for direct client synchronization
-window.GOOGLE_SHEET_WEBHOOK_URL = window.GOOGLE_SHEET_WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbyquEMH-6X0a0Vu3bHQMvdZu_0Hll0UbXh05kZaSxVp8a3ZHuYNFl6Tlc0Cp7demWzVmA/exec';
+window.GOOGLE_SHEET_WEBHOOK_URL = window.GOOGLE_SHEET_WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbz7JNUZxiuF1nSCqIy__XQEbOvhj551WUW5VxIIiReEJc42NdSvvanDwctgYXeM-B-cgA/exec';
 
 // Handle Form Review & 2-Step Confirmation Flow
 let currentSubmission = null;
