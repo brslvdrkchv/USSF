@@ -7228,6 +7228,12 @@ footer#contacts {
   background: #f1f5f9;
 }
 
+.speaker-avatar-placeholder svg {
+  width: 32px !important;
+  height: 32px !important;
+  stroke-width: 2px !important;
+}
+
 .speaker-info-text {
   display: flex;
   flex-direction: column;
