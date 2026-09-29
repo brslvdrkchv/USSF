@@ -536,8 +536,12 @@ function switchRegistrationTab(tab) {
       tabBtnWorkshops.classList.add('active');
       tabBtnWorkshops.setAttribute('aria-selected', 'true');
     }
+    
     if (panelAbstracts) panelAbstracts.style.display = 'none';
     if (panelWorkshops) panelWorkshops.style.display = 'block';
+    const formSuccessMessage = document.getElementById('formSuccessMessage');
+    if (formSuccessMessage) formSuccessMessage.style.display = 'none';
+
     
     // AUTO-FILL WORKSHOP FORM FROM ABSTRACT FORM
     const copyVal = (fromId, toId) => {
