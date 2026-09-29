@@ -2207,29 +2207,32 @@
           <!-- Honeypot trap against automated bot submissions -->
           <input type="text" name="website_hp_check" id="websiteHpCheck" class="form-hp-trap" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-          <!-- Cloudflare Turnstile Anti-Bot Security Widget -->
-          <div class="turnstile-security-box" id="turnstileSecurityBox">
-            <div class="cf-turnstile" id="cfTurnstileWidget" data-sitekey="1x00000000000000000000AA" data-theme="light" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired"></div>
-          </div>
-
-          <!-- Згода на обробку персональних даних -->
-          <div class="consent-checkbox-card" id="consentCardMain">
-            <label class="switch-checkbox-label" for="consentPersonalData">
-              <input type="checkbox" id="consentPersonalData" required>
-              <span class="custom-checkbox-marker">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-              </span>
-              <span class="switch-text">
-                <strong>
-                  <span class="ua">Згода на обробку персональних даних *</span>
-                  <span class="en">Consent to Personal Data Processing *</span>
-                </strong>
-                <small>
-                  <span class="ua">Я надаю добровільну згоду оргкомітету на збір, реєстрацію та обробку моїх даних відповідно до <a href="#" class="privacy-policy-link" onclick="openPrivacyModal(event)">Політики конфіденційності</a> та Закону України «Про захист персональних даних».</span>
-                  <span class="en">I voluntarily consent to the collection and processing of my data in accordance with the <a href="#" class="privacy-policy-link" onclick="openPrivacyModal(event)">Privacy Policy</a> and the Law of Ukraine "On Personal Data Protection".</span>
-                </small>
-              </span>
-            </label>
+          <!-- Cloudflare Turnstile & Consent Row -->
+          <div class="security-and-consent-row">
+            <!-- Згода на обробку персональних даних -->
+            <div class="consent-checkbox-card" id="consentCardMain">
+              <label class="switch-checkbox-label" for="consentPersonalData">
+                <input type="checkbox" id="consentPersonalData" required>
+                <span class="custom-checkbox-marker">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span class="switch-text">
+                  <strong>
+                    <span class="ua">Згода на обробку персональних даних *</span>
+                    <span class="en">Consent to Personal Data Processing *</span>
+                  </strong>
+                  <small>
+                    <span class="ua">Я надаю добровільну згоду оргкомітету на збір, реєстрацію та обробку моїх даних відповідно до <a href="#" class="privacy-policy-link" onclick="openPrivacyModal(event)">Політики конфіденційності</a> та Закону України «Про захист персональних даних».</span>
+                    <span class="en">I voluntarily consent to the collection and processing of my data in accordance with the <a href="#" class="privacy-policy-link" onclick="openPrivacyModal(event)">Privacy Policy</a> and the Law of Ukraine "On Personal Data Protection".</span>
+                  </small>
+                </span>
+              </label>
+            </div>
+            
+            <!-- Cloudflare Turnstile Anti-Bot Security Widget -->
+            <div class="turnstile-security-box" id="turnstileSecurityBox">
+              <div class="cf-turnstile" id="cfTurnstileWidget" data-sitekey="1x00000000000000000000AA" data-theme="light" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired"></div>
+            </div>
           </div>
 
           <div class="form-actions-row" style="margin-top: 1.5rem; text-align: right;">

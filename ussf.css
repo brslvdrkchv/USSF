@@ -7017,3 +7017,41 @@ footer#contacts {
     margin-bottom: 2vh;
   }
 }
+
+/* ========================================================
+   SECURITY AND CONSENT ROW (SIDE BY SIDE)
+   ======================================================== */
+.security-and-consent-row {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 1.2rem;
+  margin: 1.25rem 0 1rem 0;
+}
+
+.security-and-consent-row .consent-checkbox-card {
+  margin: 0;
+  flex: 1;
+}
+
+.security-and-consent-row .turnstile-security-box {
+  margin: 0;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .security-and-consent-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .security-and-consent-row .turnstile-security-box {
+    padding: 0.5rem;
+  }
+}
