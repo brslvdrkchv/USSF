@@ -4168,9 +4168,9 @@ footer#contacts {
 
   .hero-3d-art {
     position: absolute;
-    right: -10vw;
-    top: -5vh;
-    width: clamp(450px, 135vw, 600px);
+    right: -15vw;
+    top: -12vh;
+    width: clamp(380px, 110vw, 480px);
     height: auto;
     max-height: none;
     max-width: none;
@@ -4331,9 +4331,9 @@ footer#contacts {
       padding-bottom: calc(0.45rem + env(safe-area-inset-bottom, 0px));
     }
     .hero-3d-art {
-      top: -5vh;
-      right: -10vw;
-      width: clamp(380px, 120vw, 480px);
+      top: -10vh;
+      right: -15vw;
+      width: clamp(320px, 100vw, 420px);
     }
     .hero-title {
       font-size: 0.98rem;
