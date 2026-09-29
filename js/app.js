@@ -457,7 +457,12 @@ function openRegistrationModal(tab = 'abstracts', workshopId = null) {
         pf.value = 'listener';
         toggleAbstractField('listener');
       }
-    } else if (tab === 'workshops') {
+    } else 
+  const formContent = document.getElementById('formContent');
+  if (formContent) formContent.style.display = 'block';
+  
+  if (tab === 'workshops') {
+
       switchRegistrationTab('workshops');
       if (workshopId) {
         const wsSelect = document.getElementById('wsWorkshopSelect');
@@ -527,7 +532,12 @@ function switchRegistrationTab(tab) {
   const panelAbstracts = document.getElementById('panelAbstractsForm');
   const panelWorkshops = document.getElementById('panelWorkshopsForm');
 
+  
+  const formContent = document.getElementById('formContent');
+  if (formContent) formContent.style.display = 'block';
+  
   if (tab === 'workshops') {
+
     if (tabBtnAbstracts) {
       tabBtnAbstracts.classList.remove('active');
       tabBtnAbstracts.setAttribute('aria-selected', 'false');
@@ -537,10 +547,14 @@ function switchRegistrationTab(tab) {
       tabBtnWorkshops.setAttribute('aria-selected', 'true');
     }
     
+    
+    const formContent = document.getElementById('formContent');
+    if (formContent) formContent.style.display = 'block';
     if (panelAbstracts) panelAbstracts.style.display = 'none';
     if (panelWorkshops) panelWorkshops.style.display = 'block';
     const formSuccessMessage = document.getElementById('formSuccessMessage');
     if (formSuccessMessage) formSuccessMessage.style.display = 'none';
+
 
     
     // AUTO-FILL WORKSHOP FORM FROM ABSTRACT FORM
