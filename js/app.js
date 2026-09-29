@@ -1518,6 +1518,11 @@ function syncReferencesToHidden() {
   hiddenTextarea.value = formattedItems.join('\n');
 }
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function escapeHtmlAttr(str) {
   if (!str) return '';
   return String(str)
