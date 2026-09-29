@@ -6759,7 +6759,7 @@ footer#contacts {
    ======================================================== */
 .reg-modal-tabs-header {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.6rem;
   margin-bottom: 2rem;
   background: #f1f5f9;
