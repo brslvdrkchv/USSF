@@ -538,6 +538,34 @@ function switchRegistrationTab(tab) {
     }
     if (panelAbstracts) panelAbstracts.style.display = 'none';
     if (panelWorkshops) panelWorkshops.style.display = 'block';
+    
+    // AUTO-FILL WORKSHOP FORM FROM ABSTRACT FORM
+    const copyVal = (fromId, toId) => {
+      const fromEl = document.getElementById(fromId);
+      const toEl = document.getElementById(toId);
+      if (fromEl && toEl && !toEl.value && fromEl.value) {
+        toEl.value = fromEl.value;
+      }
+    };
+    copyVal('fullName', 'wsFullName');
+    copyVal('institution', 'wsInstitution');
+    copyVal('courseFaculty', 'wsCourseSpecialty');
+    copyVal('email', 'wsEmail');
+    copyVal('phone', 'wsPhone');
+    copyVal('telegram', 'wsTelegram');
+    
+    const fromStatus = document.getElementById('academicStatus');
+    const toStatus = document.getElementById('wsAcademicStatus');
+    if (fromStatus && toStatus && !toStatus.value && fromStatus.value) {
+      toStatus.value = fromStatus.value;
+    }
+    
+    const fromAcc = document.getElementById('needsAccommodation');
+    const toAcc = document.getElementById('wsAccommodation');
+    if (fromAcc && toAcc && fromAcc.checked) {
+      toAcc.checked = true;
+    }
+
     window.trackGAEvent('registration_tab_switch', { tab: 'workshops' });
   } else {
     if (tabBtnWorkshops) {
@@ -1753,12 +1781,16 @@ function handleFormReview(e) {
     try {
       const sheetWebhook = localStorage.getItem('ussf_google_sheet_url') || window.GOOGLE_SHEET_WEBHOOK_URL;
       if (sheetWebhook) {
-        fetch(sheetWebhook, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(listenerSubmission)
-        }).catch(e => console.warn('Sheet webhook note:', e));
+              const sheetSubmission = Object.assign({}, listenerSubmission);
+      if (sheetSubmission.phone && !sheetSubmission.phone.startsWith("'") && (sheetSubmission.phone.startsWith('+') || sheetSubmission.phone.startsWith('='))) {
+        sheetSubmission.phone = "'" + sheetSubmission.phone;
+      }
+      fetch(sheetWebhook, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sheetSubmission)
+      }).catch(e => console.warn('Sheet webhook note:', e));
       }
     } catch (e) {}
 
@@ -2957,11 +2989,15 @@ async function handleListenerSubmit(e) {
   try {
     const sheetWebhook = localStorage.getItem('ussf_google_sheet_url') || window.GOOGLE_SHEET_WEBHOOK_URL;
     if (sheetWebhook) {
+            const sheetSubmission = Object.assign({}, listenerSubmission);
+      if (sheetSubmission.phone && !sheetSubmission.phone.startsWith("'") && (sheetSubmission.phone.startsWith('+') || sheetSubmission.phone.startsWith('='))) {
+        sheetSubmission.phone = "'" + sheetSubmission.phone;
+      }
       fetch(sheetWebhook, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(listenerSubmission)
+        body: JSON.stringify(sheetSubmission)
       }).catch(e => console.warn('Sheet webhook note:', e));
     }
 
@@ -3132,11 +3168,15 @@ async function handleWorkshopSubmit(e) {
   try {
     const sheetWebhook = localStorage.getItem('ussf_google_sheet_url') || window.GOOGLE_SHEET_WEBHOOK_URL;
     if (sheetWebhook) {
+            const sheetSubmission = Object.assign({}, workshopSubmission);
+      if (sheetSubmission.phone && !sheetSubmission.phone.startsWith("'") && (sheetSubmission.phone.startsWith('+') || sheetSubmission.phone.startsWith('='))) {
+        sheetSubmission.phone = "'" + sheetSubmission.phone;
+      }
       fetch(sheetWebhook, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(workshopSubmission)
+        body: JSON.stringify(sheetSubmission)
       }).catch(e => console.warn('Sheet webhook note:', e));
     }
 
