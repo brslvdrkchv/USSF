@@ -4168,13 +4168,13 @@ footer#contacts {
 
   .hero-3d-art {
     position: absolute;
-    right: -15vw;
-    top: -12vh;
-    width: clamp(380px, 110vw, 480px);
+    right: -11vw;
+    top: -4vh;
+    width: clamp(380px, 120vw, 800px);
     height: auto;
     max-height: none;
     max-width: none;
-    transform: rotate(-44deg);
+    transform: rotate(-30deg);
     transform-origin: 64% 36%;
     z-index: 2;
     pointer-events: none;
