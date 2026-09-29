@@ -775,7 +775,7 @@ nav#mainNav.scrolled {
 .about-needle-bg {
   position: absolute;
   top: 50%;
-  left: -2vw;
+  left: -15vw;
   transform: translateY(-50%) rotate(15deg) scaleX(-1);
   width: 105vw;
   max-width: 1800px;
@@ -4346,7 +4346,7 @@ footer#contacts {
 
   .about-needle-bg {
     position: absolute;
-    left: -5vw;
+    left: -20vw;
     top: 50%;
     transform: translateY(-50%) rotate(-25deg) scaleX(-1);
     width: 150vw;
