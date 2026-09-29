@@ -7055,3 +7055,66 @@ footer#contacts {
     padding: 0.5rem;
   }
 }
+
+/* ========================================================
+   EVALUATION CRITERIA BLOCK
+   ======================================================== */
+.evaluation-criteria-block {
+  margin-top: 1.5rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1.5px solid #e2e8f0;
+}
+
+.evaluation-intro {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1.2rem;
+  line-height: 1.45;
+}
+
+.evaluation-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.evaluation-list li {
+  position: relative;
+  padding-left: 1.7rem;
+}
+
+.evaluation-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--brand-cyan);
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.evaluation-list li strong {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--brand-main);
+  margin-bottom: 0.35rem;
+}
+
+.evaluation-list li p {
+  font-size: 0.88rem;
+  color: #475569;
+  line-height: 1.45;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .evaluation-criteria-block {
+    padding: 1.2rem;
+  }
+}
