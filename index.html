@@ -29,9 +29,325 @@
   gtag('js', new Date());
   gtag('config', 'G-HZ5FZD38VT');
 </script>
+
+  <!-- ============ INVITE ACCESS GATE (UNDER CONSTRUCTION) STYLES ============ -->
+  <style>
+    html.invite-unlocked #inviteGateOverlay {
+      display: none !important;
+    }
+    .invite-gate-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99999999;
+      background: radial-gradient(circle at 50% 25%, rgba(27, 154, 170, 0.22) 0%, rgba(0, 8, 27, 0.98) 75%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.45s ease;
+    }
+    .invite-gate-overlay.unlocked {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .invite-gate-card {
+      background: rgba(3, 13, 36, 0.95);
+      border: 1.5px solid rgba(27, 154, 170, 0.4);
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85), 0 0 50px rgba(27, 154, 170, 0.2);
+      border-radius: 20px;
+      max-width: 540px;
+      width: 100%;
+      padding: 2.8rem 2.2rem 2.2rem;
+      text-align: center;
+      color: #ffffff;
+      position: relative;
+      transform: translateY(0) scale(1);
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .invite-gate-overlay.unlocked .invite-gate-card {
+      transform: translateY(-25px) scale(0.95);
+    }
+    .invite-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      color: #fbbf24;
+      padding: 0.45rem 1rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1.4rem;
+    }
+    .invite-logo-wrapper {
+      margin-bottom: 1.2rem;
+    }
+    .invite-logo-img {
+      max-height: 56px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 16px rgba(27, 154, 170, 0.45));
+    }
+    .invite-gate-title {
+      font-family: 'Russo One', 'Inter', sans-serif;
+      font-size: 1.65rem;
+      font-weight: 400;
+      line-height: 1.25;
+      margin-bottom: 0.9rem;
+      color: #ffffff;
+      letter-spacing: 0.02em;
+    }
+    .invite-gate-desc {
+      font-size: 0.96rem;
+      line-height: 1.55;
+      color: #94a3b8;
+      margin-bottom: 0.9rem;
+    }
+    .invite-gate-desc strong {
+      color: #f1f5f9;
+    }
+    .invite-gate-instruction {
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: #38bdf8;
+      margin-bottom: 1.3rem;
+    }
+    .invite-gate-form {
+      margin-bottom: 1.2rem;
+    }
+    .invite-input-row {
+      display: flex;
+      gap: 0.6rem;
+    }
+    .invite-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1.5px solid rgba(27, 154, 170, 0.4);
+      border-radius: 12px;
+      padding: 0.9rem 1.15rem;
+      font-size: 1.05rem;
+      color: #ffffff;
+      outline: none;
+      transition: all 0.25s ease;
+      min-width: 0;
+      font-family: inherit;
+    }
+    .invite-input::placeholder {
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+    .invite-input:focus {
+      border-color: #1b9aaa;
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 20px rgba(27, 154, 170, 0.4);
+    }
+    .invite-input.error {
+      border-color: #ef4444;
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+      animation: inviteShake 0.4s ease;
+    }
+    @keyframes inviteShake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-7px); }
+      40%, 80% { transform: translateX(7px); }
+    }
+    .invite-btn {
+      background: linear-gradient(135deg, #1b9aaa 0%, #0284c7 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 0.9rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 16px rgba(27, 154, 170, 0.35);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      font-family: inherit;
+    }
+    .invite-btn:hover {
+      background: linear-gradient(135deg, #22acc0 0%, #0369a1 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(27, 154, 170, 0.55);
+    }
+    .invite-btn:active {
+      transform: translateY(1px);
+    }
+    .invite-error-msg {
+      color: #f87171;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-top: 0.75rem;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      padding: 0.6rem 0.9rem;
+      border-radius: 10px;
+    }
+    .invite-gate-footer {
+      font-size: 0.78rem;
+      color: #64748b;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-top: 1rem;
+    }
+    @media (max-width: 540px) {
+      .invite-gate-card {
+        padding: 2.2rem 1.4rem 1.6rem;
+      }
+      .invite-gate-title {
+        font-size: 1.35rem;
+      }
+      .invite-input-row {
+        flex-direction: column;
+      }
+      .invite-btn {
+        width: 100%;
+        padding: 0.85rem 1rem;
+      }
+    }
+  </style>
+  <script>
+    (function() {
+      try {
+        if (window.location.search.includes('lock=1')) {
+          localStorage.removeItem('ussf_preview_unlocked');
+        }
+        if (localStorage.getItem('ussf_preview_unlocked') === 'true') {
+          document.documentElement.classList.add('invite-unlocked');
+        }
+      } catch(e) {}
+    })();
+  </script>
 </head>
 
 <body class="lang-ua">
+  <!-- ============ INVITE ACCESS GATE (UNDER CONSTRUCTION) ============ -->
+  <div id="inviteGateOverlay" class="invite-gate-overlay">
+    <div class="invite-gate-card">
+      <div class="invite-badge">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <span class="ua">Сайт у розробці</span>
+        <span class="en">Website Under Development</span>
+      </div>
+
+      <div class="invite-logo-wrapper">
+        <img src="images/Myroniuk/logo_ussf_light.png" alt="USSF 2026 Logo" class="invite-logo-img">
+      </div>
+
+      <h2 class="invite-gate-title">
+        <span class="ua">Закритий передпоказ USSF 2026</span>
+        <span class="en">Private Preview Access</span>
+      </h2>
+
+      <p class="invite-gate-desc">
+        <span class="ua">Офіційний веб-портал <strong>I Всеукраїнського студентського хірургічного форуму</strong> зараз перебуває на етапі активного наповнення та тестування оргкомітетом.</span>
+        <span class="en">The official web portal of the <strong>1st All-Ukrainian Student Surgical Forum</strong> is currently undergoing active preparation and committee testing.</span>
+      </p>
+
+      <p class="invite-gate-instruction">
+        <span class="ua">Для входу на сайт введіть інвайт-код:</span>
+        <span class="en">To access the site, please enter your invite code:</span>
+      </p>
+
+      <form id="inviteGateForm" onsubmit="handleInviteCodeSubmit(event)" class="invite-gate-form">
+        <div class="invite-input-row">
+          <input 
+            type="text" 
+            id="inviteCodeInput" 
+            class="invite-input" 
+            placeholder="Введіть інвайт-код..." 
+            autocomplete="off" 
+            autocapitalize="off"
+            spellcheck="false"
+            required
+            aria-label="Інвайт-код"
+          >
+          <button type="submit" id="inviteSubmitBtn" class="invite-btn">
+            <span class="ua">Увійти 🚀</span>
+            <span class="en">Unlock 🚀</span>
+          </button>
+        </div>
+        <div id="inviteErrorMsg" class="invite-error-msg" style="display: none;"></div>
+      </form>
+
+      <div class="invite-gate-footer">
+        <span>Bogomolets National Medical University &bull; USSF 2026</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const USSF_REQUIRED_CODE = "USSF is cool";
+
+    function handleInviteCodeSubmit(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('inviteCodeInput');
+      const errorMsg = document.getElementById('inviteErrorMsg');
+      const overlay = document.getElementById('inviteGateOverlay');
+      if (!input) return;
+
+      const entered = (input.value || '').trim();
+      // Case-insensitive check: accepts "USSF is cool", "ussf is cool", etc.
+      if (entered.toLowerCase() === USSF_REQUIRED_CODE.toLowerCase()) {
+        localStorage.setItem('ussf_preview_unlocked', 'true');
+        document.documentElement.classList.add('invite-unlocked');
+        if (errorMsg) errorMsg.style.display = 'none';
+        if (overlay) {
+          overlay.classList.add('unlocked');
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+          }, 450);
+        }
+      } else {
+        input.classList.remove('error');
+        void input.offsetWidth; // re-flow animation
+        input.classList.add('error');
+        if (errorMsg) {
+          errorMsg.style.display = 'block';
+          const isEn = document.body && document.body.classList.contains('lang-en');
+          errorMsg.innerHTML = isEn 
+            ? '❌ Invalid invite code. Please check and try again!' 
+            : '❌ Невірний інвайт-код. Перевірте написання та спробуйте знову!';
+        }
+      }
+    }
+
+    (function initInviteCheck() {
+      try {
+        if (window.location.search.includes('lock=1')) {
+          localStorage.removeItem('ussf_preview_unlocked');
+        }
+        if (localStorage.getItem('ussf_preview_unlocked') === 'true') {
+          const overlay = document.getElementById('inviteGateOverlay');
+          if (overlay) overlay.style.display = 'none';
+        } else {
+          document.body.style.overflow = 'hidden';
+          setTimeout(() => {
+            const input = document.getElementById('inviteCodeInput');
+            if (input) input.focus();
+          }, 400);
+        }
+      } catch (err) {}
+    })();
+  </script>
+
   <!-- Scroll Reading Progress Bar -->
   <div id="scrollProgressBar"></div>
 
@@ -1766,7 +2082,7 @@
         </button>
         <button type="button" class="reg-modal-tab-btn" id="tabBtnWorkshops" onclick="switchRegistrationTab('workshops')">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-          <span class="ua">2. Хірургічні воркшопи (v2)</span>
+          <span class="ua">2. Хірургічні воркшопи (День 2)</span>
           <span class="en">2. Surgical Workshops (Day 2)</span>
         </button>
       </div>
@@ -2273,7 +2589,7 @@
         <!-- ============ TAB 3: PRACTICAL WORKSHOPS REGISTRATION ============ -->
         <div id="panelWorkshopsForm" style="display: none;">
           <h3 class="modal-title">
-            <span class="ua">Реєстрація на участь у хірургічному воркшопі (День 2) (v2)</span>
+            <span class="ua">Реєстрація на участь у хірургічному воркшопі (День 2)</span>
             <span class="en">Registration for Practical Surgical Workshop (Day 2)</span>
           </h3>
           <p class="modal-subtitle">
