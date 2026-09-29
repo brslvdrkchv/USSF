@@ -7209,6 +7209,7 @@ footer#contacts {
   flex-shrink: 0;
   border-radius: 50%;
   object-fit: cover;
+  object-position: center 15%; /* Keep faces in view for portrait photos */
   border: 2px solid rgba(29, 66, 138, 0.2);
 }
 
