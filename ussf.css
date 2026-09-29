@@ -762,7 +762,11 @@ nav#mainNav.scrolled {
 
 /* ============ ABOUT SECTION (Designer Logobook Page 8) ============ */
 #about {
-  padding: 7.5rem 0 5.5rem;
+  min-height: 100vh;
+  padding: 5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: var(--brand-main);
   position: relative;
   overflow: hidden;
@@ -791,10 +795,9 @@ nav#mainNav.scrolled {
 }
 
 .about-left {
-  position: sticky;
-  top: 6.5rem;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .about-emblem-container {
@@ -4332,7 +4335,11 @@ footer#contacts {
      ======================================================== */
   #about {
     background: #00081b;
-    padding: 3.5rem 0 3.8rem;
+    min-height: 100vh;
+    padding: 3.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: relative;
     overflow: hidden;
   }
