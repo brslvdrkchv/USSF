@@ -7019,12 +7019,12 @@ footer#contacts {
 }
 
 /* ========================================================
-   SECURITY AND CONSENT ROW (SIDE BY SIDE)
+   SECURITY AND CONSENT ROW
    ======================================================== */
 .security-and-consent-row {
   display: flex;
+  flex-direction: column;
   align-items: stretch;
-  justify-content: space-between;
   gap: 1.2rem;
   margin: 1.25rem 0 1rem 0;
 }
@@ -7043,7 +7043,7 @@ footer#contacts {
   background: #f8fafc;
   border: 1.5px solid #cbd5e1;
   border-radius: 8px;
-  padding: 0 0.5rem;
+  padding: 0.8rem 0.5rem;
 }
 
 @media (max-width: 768px) {
