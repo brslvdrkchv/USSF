@@ -7204,6 +7204,9 @@ footer#contacts {
 .workshop-speaker-profile img {
   width: 65px;
   height: 65px;
+  min-width: 65px;
+  min-height: 65px;
+  flex-shrink: 0;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid rgba(29, 66, 138, 0.2);
@@ -7212,6 +7215,9 @@ footer#contacts {
 .speaker-avatar-placeholder {
   width: 65px;
   height: 65px;
+  min-width: 65px;
+  min-height: 65px;
+  flex-shrink: 0;
   border-radius: 50%;
   border: 2px dashed #94a3b8;
   display: flex;
