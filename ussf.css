@@ -3898,8 +3898,7 @@ footer#contacts {
 }
 
 .about-emblem-container {
-  border: 1px solid rgba(27, 154, 170, 0.28);
-  border-radius: 16px;
+  border: none;
 }
 
 /* ============ MOBILE STICKY REGISTRATION BAR ============ */
