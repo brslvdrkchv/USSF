@@ -4806,18 +4806,38 @@ footer#contacts {
     gap: 2rem;
   }
 
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
   .modal-window {
-    width: 95%;
-    max-height: 92vh;
-    padding: 2rem 1.1rem 1.5rem;
-    border-radius: 12px;
+    width: 100%;
+    max-width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    padding: 1.5rem 1.1rem 2rem;
+    border-radius: 0;
+    margin: 0;
+    transform: translateY(100%);
+    border: none;
+  }
+
+  .modal-overlay.open .modal-window {
+    transform: translateY(0);
   }
 
   .modal-close-btn {
-    top: 0.65rem;
-    right: 0.65rem;
-    width: 36px;
-    height: 36px;
+    position: sticky;
+    top: 0.5rem;
+    left: 100%; /* Push to the right edge */
+    transform: translateX(-0.5rem);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 15px rgba(0, 8, 27, 0.15);
+    border: 1px solid #e2e8f0;
+    z-index: 9999;
+    width: 40px;
+    height: 40px;
   }
 
   /* Mobile Sticky Action Bar */
@@ -4915,7 +4935,7 @@ footer#contacts {
   }
 
   .modal-window {
-    padding: 1.8rem 0.9rem 1.4rem;
+    padding: 1rem 0.9rem 2rem;
   }
 }
 
