@@ -2585,6 +2585,8 @@ footer#contacts {
   max-width: 680px;
   max-height: 90vh;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   border-radius: 12px;
   padding: 2.6rem;
   position: relative;
@@ -4817,10 +4819,12 @@ footer#contacts {
     height: 100dvh;
     max-height: 100dvh;
     padding: 1.5rem 1.1rem 2rem;
-    border-radius: 0;
+    border-radius: 20px 20px 0 0; /* slight rounding on top looks premium */
     margin: 0;
     transform: translateY(100%);
     border: none;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+    will-change: transform;
   }
 
   .modal-overlay.open .modal-window {
@@ -7307,4 +7311,14 @@ footer#contacts {
     flex: 1 1 100%;
     max-width: none;
   }
+}
+
+/* Lock body scrolling completely for iOS and mobile */
+html.no-scroll {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+html.no-scroll body {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
 }

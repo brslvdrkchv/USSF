@@ -439,6 +439,7 @@ function openRegistrationModal(tab = 'abstracts', workshopId = null) {
   if (regModal) {
     regModal.classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.documentElement.classList.add('no-scroll');
     const mobileStickyBar = document.getElementById('mobileStickyBar');
     if (mobileStickyBar) mobileStickyBar.classList.remove('visible');
     const floatingActionDock = document.getElementById('floatingActionDock');
@@ -478,6 +479,7 @@ function closeRegistrationModal(resetForm = false) {
   if (regModal) {
     regModal.classList.remove('open');
     document.body.style.overflow = '';
+    document.documentElement.classList.remove('no-scroll');
     const modalWindow = document.querySelector('.modal-window');
     if (modalWindow) modalWindow.classList.remove('has-preview');
     const mobileStickyBar = document.getElementById('mobileStickyBar');
@@ -617,6 +619,7 @@ function openAcademicGuideModal() {
   if (modal) {
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.documentElement.classList.add('no-scroll');
     window.trackGAEvent('academic_guide_modal_open', { event_category: 'engagement' });
   }
 }
@@ -627,6 +630,7 @@ function closeAcademicGuideModal() {
     modal.classList.remove('open');
     if (!regModal || !regModal.classList.contains('open')) {
       document.body.style.overflow = '';
+    document.documentElement.classList.remove('no-scroll');
     }
   }
 }
@@ -640,6 +644,7 @@ function openPrivacyModal(e) {
   if (modal) {
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.documentElement.classList.add('no-scroll');
     if (typeof window.trackGAEvent === 'function') {
       window.trackGAEvent('privacy_modal_open', { event_category: 'engagement' });
     }
@@ -652,6 +657,7 @@ function closePrivacyModal() {
     modal.classList.remove('open');
     if (!regModal || !regModal.classList.contains('open')) {
       document.body.style.overflow = '';
+    document.documentElement.classList.remove('no-scroll');
     }
   }
 }
@@ -2419,6 +2425,7 @@ function openSmtpModal() {
   if (modal) {
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.documentElement.classList.add('no-scroll');
   }
 }
 
@@ -2429,6 +2436,7 @@ function closeSmtpModal() {
     const regModal = document.getElementById('registrationModal');
     if (!regModal || !regModal.classList.contains('open')) {
       document.body.style.overflow = '';
+    document.documentElement.classList.remove('no-scroll');
     }
   }
   const statusMsg = document.getElementById('smtpStatusMsg');
