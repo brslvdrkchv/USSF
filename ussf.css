@@ -7322,3 +7322,20 @@ html.no-scroll body {
   overflow: hidden !important;
   overscroll-behavior: none !important;
 }
+
+.form-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+@media (max-width: 640px) {
+  .form-actions-row {
+    flex-direction: column-reverse;
+  }
+  .form-actions-row button {
+    width: 100%;
+    margin-right: 0 !important;
+    text-align: center;
+    justify-content: center;
+  }
+}
