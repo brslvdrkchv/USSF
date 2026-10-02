@@ -703,6 +703,7 @@
 
       <!-- PANEL 4: DAY 2 WORKSHOPS -->
       <div class="program-panel" id="panel-workshops">
+        <div id="programWorkshopsContainer" style="display: none;">
         <div class="workshops-banner-card">
           <div class="workshops-banner-inner">
             <span class="workshop-priority-badge">
@@ -1091,6 +1092,34 @@
             </div>
           </div>
         </div>
+        </div><!-- /programWorkshopsContainer -->
+        
+        <div id="programWorkshopsPlaceholder" style="text-align: center; padding: 6rem 1rem; background: #ffffff; border-radius: 16px; border: 1px dashed #cbd5e1; margin-top: 1rem;">
+          <div style="width: 72px; height: 72px; border-radius: 50%; background: #F8FAFC; border: 1px solid #E2E8F0; color: #64748B; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <h3 style="margin-bottom: 1rem; font-family: var(--font-headings); font-size: 1.5rem; color: #0F172A;">
+            <span class="ua">Програма воркшопів формується</span>
+            <span class="en">Workshops program is being finalized</span>
+          </h3>
+          <p style="color: #475569; line-height: 1.6; font-size: 1.05rem; max-width: 500px; margin: 0 auto 2rem;">
+            <span class="ua">Експерти та викладачі НМУ готують для вас унікальні практичні станції з відпрацювання хірургічних навичок. <strong>Повний перелік воркшопів та реєстрація на них стануть доступні 1 листопада 2026.</strong></span>
+            <span class="en">NMU experts and faculty are preparing unique practical surgical skills stations. <strong>The full list of workshops and registration will be available on November 1, 2026.</strong></span>
+          </p>
+        </div>
+
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+              const wsDate = new Date('2026-11-01T00:00:00+02:00');
+              if (new Date() >= wsDate) {
+                  const wsCont = document.getElementById('programWorkshopsContainer');
+                  const wsPlace = document.getElementById('programWorkshopsPlaceholder');
+                  if (wsCont) wsCont.style.display = 'block';
+                  if (wsPlace) wsPlace.style.display = 'none';
+              }
+          });
+        </script>
+
       </div>
 
     </div>
