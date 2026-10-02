@@ -2587,6 +2587,7 @@
 
         <!-- ============ TAB 3: PRACTICAL WORKSHOPS REGISTRATION ============ -->
         <div id="panelWorkshopsForm" style="display: none;">
+          <div id="workshopFormContainer" style="display: none;">
           <h3 class="modal-title">
             <span class="ua">Реєстрація на участь у хірургічному воркшопі (День 2)</span>
             <span class="en">Registration for Practical Surgical Workshop (Day 2)</span>
@@ -2709,6 +2710,37 @@
               <span class="ua">Гаразд, закрити</span><span class="en">Done, Close</span>
             </button>
           </div>
+          </div><!-- /workshopFormContainer -->
+
+          <div id="workshopPlaceholder" style="text-align: center; padding: 4rem 1rem;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: #EFF6FF; color: #1D428A; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <h3 style="margin-bottom: 0.8rem; font-family: var(--font-headings); font-size: 1.3rem; color: #0F172A;">
+              <span class="ua">Реєстрація на воркшопи незабаром</span>
+              <span class="en">Workshop registration coming soon</span>
+            </h3>
+            <p style="color: #64748B; line-height: 1.5; font-size: 0.95rem; max-width: 400px; margin: 0 auto;">
+              <span class="ua">Офіційне відкриття реєстрації на практичні хірургічні майстер-класи відбудеться <strong>1 листопада 2026 року</strong>. Слідкуйте за оновленнями у нашому Telegram-каналі!</span>
+              <span class="en">Official registration for practical surgical workshops will open on <strong>November 1, 2026</strong>. Stay tuned to our Telegram channel!</span>
+            </p>
+            <a href="https://t.me/ussf_2026" target="_blank" rel="noopener noreferrer" class="btn-primary" style="display: inline-flex; margin-top: 1.8rem; text-decoration: none;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:0.4rem"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              <span class="ua">Перейти в Telegram</span>
+              <span class="en">Join Telegram</span>
+            </a>
+          </div>
+
+          <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Automatic feature toggle based on date
+                const workshopOpenDate = new Date('2026-11-01T00:00:00+02:00'); // Kyiv time
+                if (new Date() >= workshopOpenDate) {
+                    document.getElementById('workshopFormContainer').style.display = 'block';
+                    document.getElementById('workshopPlaceholder').style.display = 'none';
+                }
+            });
+          </script>
         </div>
       </div>
 
