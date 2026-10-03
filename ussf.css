@@ -4913,6 +4913,54 @@ footer#contacts {
     line-height: 1.2;
     margin: 0 !important;
   }
+  
+  /* GRID REWRITE FOR COMPACT AVATAR + BADGE ON MOBILE */
+  .leader-card {
+    display: grid !important;
+    grid-template-columns: 44px 1fr !important;
+    grid-template-rows: auto auto auto !important;
+    column-gap: 0.4rem !important;
+    row-gap: 0.2rem !important;
+    align-items: center !important;
+    text-align: left !important;
+    padding: 0.75rem 0.6rem !important;
+  }
+
+  .leader-info {
+    display: contents !important;
+  }
+
+  .leader-avatar {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    margin: 0 !important;
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .leader-role-badge {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    margin: 0 !important;
+    justify-self: start !important;
+    text-align: left !important;
+    width: auto !important; 
+    max-width: 95px !important;
+  }
+
+  .leader-card h3 {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    margin-top: 0.3rem !important;
+    text-align: left !important;
+  }
+
+  .leader-bio {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+    text-align: left !important;
+  }
+
 
 
   .form-row {
