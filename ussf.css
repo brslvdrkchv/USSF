@@ -4844,7 +4844,7 @@ footer#contacts {
     grid-template-rows: repeat(2, 1fr);
     grid-auto-flow: column;
     /* 43vw means 2 cards take 86vw. The remaining 14vw will show the edge of the 3rd card, acting as a natural hint! */
-    grid-auto-columns: max-content; 
+    grid-auto-columns: 44vw; 
     gap: 0.5rem;
     width: 100%;
     box-sizing: border-box;
@@ -4861,7 +4861,7 @@ footer#contacts {
   
   .leader-card {
     scroll-snap-align: center;
-    min-width: 125px;
+    
     background: #00081b !important;
     border: 1px solid rgba(27, 154, 170, 0.25) !important;
     border-radius: 14px !important;
