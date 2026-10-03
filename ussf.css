@@ -1272,7 +1272,7 @@ nav#mainNav.scrolled {
 }
 
 #program .section-title {
-  color: #ffffff;
+  color: #00081b;
 }
 
 #program .divider {
@@ -7240,7 +7240,7 @@ footer#contacts {
   margin: 0 0 0.35rem;
   font-size: 1.05rem;
   font-family: var(--font-headings);
-  color: #ffffff;
+  color: #00081b;
 }
 .program-schedule-notice-banner .schedule-notice-content p {
   margin: 0;
