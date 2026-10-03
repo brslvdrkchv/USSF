@@ -905,7 +905,7 @@ nav#mainNav.scrolled {
 .organizers-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.8rem;
+  gap: 2.5rem;
   margin-top: 3.5rem;
 }
 
@@ -943,8 +943,8 @@ nav#mainNav.scrolled {
 }
 
 .organizer-logo-box {
-  width: 140px;
-  height: 96px;
+  width: 180px;
+  height: 120px;
   margin: 0 auto 1.8rem;
   display: flex;
   align-items: center;
@@ -1002,8 +1002,10 @@ nav#mainNav.scrolled {
 
 .committee-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.25rem;
+  max-width: 1050px;
+  margin: 0 auto;
 }
 
 .leader-card {
@@ -2302,8 +2304,8 @@ nav#mainNav.scrolled {
     gap: 0.85rem;
   }
   .reg-note-icon {
-    width: 44px;
-    height: 44px;
+    width: 72px;
+    height: 72px;
   }
 }
 
@@ -4791,8 +4793,8 @@ footer#contacts {
   .organizer-logo-box {
     background: #ffffff;
     border-radius: 9px;
-    width: 44px;
-    height: 44px;
+    width: 72px;
+    height: 72px;
     margin: 0 auto 0.4rem;
     display: flex;
     align-items: center;
@@ -4841,12 +4843,10 @@ footer#contacts {
   }
 
   .committee-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
     width: 100%;
-    max-width: 300px; /* Make committee strictly narrower */
-    margin: 0 auto;
     box-sizing: border-box;
   }
 
