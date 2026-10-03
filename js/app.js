@@ -2470,7 +2470,7 @@ async function saveSmtpConfig(e) {
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
     const apiBase = isLocal
       ? 'http://localhost:5050'
-      : (window.location.origin.includes('onrender.com') ? '' : 'https://ussf-n7ui.onrender.com');
+      : ('');
 
     const res = await fetch(`${apiBase}/api/save-smtp-config`, {
       method: 'POST',
@@ -2616,7 +2616,7 @@ async function handleSendEmailClick(forceSend = false) {
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
     const apiBase = isLocal
       ? 'http://localhost:5050'
-      : (window.location.origin.includes('onrender.com') ? '' : 'https://ussf-n7ui.onrender.com');
+      : ('');
 
     const res = await fetch(`${apiBase}/api/send-email`, {
       method: 'POST',
@@ -2777,7 +2777,7 @@ async function openGoogleSheetsModal() {
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
     const apiBase = isLocal
       ? 'http://localhost:5050'
-      : (window.location.origin.includes('onrender.com') ? '' : 'https://ussf-n7ui.onrender.com');
+      : ('');
 
     const res = await fetch(`${apiBase}/api/get-sheets-config`);
     if (res.ok) {
@@ -2836,7 +2836,7 @@ async function saveGoogleSheetsConfig(e) {
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
     const apiBase = isLocal
       ? 'http://localhost:5050'
-      : (window.location.origin.includes('onrender.com') ? '' : 'https://ussf-n7ui.onrender.com');
+      : ('');
 
     const res = await fetch(`${apiBase}/api/save-sheets-config`, {
       method: 'POST',
