@@ -1648,7 +1648,7 @@ nav#mainNav.scrolled {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0;
   transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
   box-shadow: 0 4px 15px rgba(0, 8, 27, 0.04);
   position: relative;
@@ -1693,24 +1693,49 @@ nav#mainNav.scrolled {
   box-shadow: 0 0 10px rgba(27, 154, 170, 0.6);
 }
 
+.day-nav-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: 0.2rem;
+}
+
 .day-nav-badge {
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--nmu-gold);
+  color: var(--brand-cyan);
+  background: rgba(27, 154, 170, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 50px;
 }
 
 .day-nav-btn.active .day-nav-badge {
-  color: var(--nmu-gold-light);
+  background: rgba(255, 255, 255, 0.15);
+  color: #a5f3fc; /* Bright cyan tint for dark mode */
+}
+
+.day-nav-date {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #64748b; /* Slate gray */
+}
+
+.day-nav-btn.active .day-nav-date {
+  color: #cbd5e1; /* Lighter slate gray for dark background */
 }
 
 .day-nav-label {
   font-family: var(--font-headings);
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: var(--nmu-navy);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--brand-main);
+  line-height: 1.1;
+  letter-spacing: 0.01em;
 }
 
 .day-nav-btn.active .day-nav-label {
