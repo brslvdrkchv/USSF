@@ -3442,32 +3442,3 @@ function initGAOutboundTracking() {
 
 
 
-/* ==========================================================================
-   DARK THEME LOGIC
-   ========================================================================== */
-function initTheme() {
-  const isDark = localStorage.getItem('ussf_dark_theme') === 'true';
-  if (isDark) {
-    document.body.classList.add('dark-mode');
-  }
-}
-
-function toggleTheme() {
-  document.body.classList.toggle('dark-mode');
-  const isDark = document.body.classList.contains('dark-mode');
-  localStorage.setItem('ussf_dark_theme', isDark);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  initTheme();
-  const themeToggle = document.getElementById('themeToggle');
-  const themeToggleMobile = document.getElementById('themeToggleMobile');
-  
-  if (themeToggle) {
-    themeToggle.addEventListener('click', toggleTheme);
-  }
-  if (themeToggleMobile) {
-    themeToggleMobile.addEventListener('click', toggleTheme);
-  }
-});
-
