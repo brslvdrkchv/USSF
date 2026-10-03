@@ -4669,50 +4669,44 @@ footer#contacts {
 
   /* Day 1 Section 1, 2, 3 tabs - fit screen width in 3-column segmented grid */
   .day1-tracks-nav {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.45rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
     width: 100%;
-    margin-bottom: 1.3rem;
+    margin-bottom: 2rem;
     box-sizing: border-box;
-    overflow-x: visible;
     padding: 0;
   }
 
   .day1-tracks-nav .track-nav-btn {
     width: 100%;
-    min-width: 0;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 0.65rem 0.2rem;
-    border-radius: 8px;
+    justify-content: flex-start;
+    padding: 1.1rem 1.5rem;
+    border-radius: 50px;
     box-sizing: border-box;
-    white-space: normal;
+    text-align: left;
   }
 
   .day1-tracks-nav .track-nav-btn .track-badge {
-    font-size: 0.78rem;
+    font-size: 0.95rem;
     font-weight: 800;
-    line-height: 1.2;
     white-space: nowrap;
   }
 
   .day1-tracks-nav .track-nav-btn .track-badge::after {
-    content: ""; /* No colon on stacked mobile layout */
+    content: ":";
+    margin-right: 0.4rem;
   }
 
   .day1-tracks-nav .track-nav-btn .track-label {
-    font-size: 0.68rem;
-    line-height: 1.2;
-    margin-top: 0.2rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    color: var(--brand-main); /* ТЕМНИЙ КОЛІР */
-    text-align: center;
+    color: var(--brand-main);
     white-space: normal;
-    word-break: normal;
+    margin-top: 0;
   }
   
   .reg-steps-timeline {
@@ -5019,24 +5013,20 @@ footer#contacts {
   }
 
   .day1-tracks-nav {
-    gap: 0.35rem;
-    margin-bottom: 1.1rem;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
   }
 
   .day1-tracks-nav .track-nav-btn {
-    padding: 0.52rem 0.15rem;
-    border-radius: 6px;
+    padding: 0.9rem 1.2rem;
   }
 
   .day1-tracks-nav .track-nav-btn .track-badge {
-    font-size: 0.72rem;
+    font-size: 0.85rem;
   }
 
   .day1-tracks-nav .track-nav-btn .track-label {
-    font-size: 0.62rem;
-    margin-top: 0.15rem;
-    font-weight: 700;
-    color: var(--brand-main);
+    font-size: 0.85rem;
   }
 
   .hero-subtitle {
