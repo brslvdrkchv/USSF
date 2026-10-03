@@ -866,7 +866,7 @@ nav#mainNav.scrolled {
 #organizers {
   padding: 7.5rem 0;
   background-color: #eef2f5;
-  background-image: url('images/Myroniuk/back_cells.jpeg');
+  background-image: linear-gradient(rgba(0, 8, 27, 0.75), rgba(0, 8, 27, 0.75)), url('images/Myroniuk/back_cells.jpeg');
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -2272,7 +2272,7 @@ nav#mainNav.scrolled {
   font-family: var(--font-headings);
   font-size: clamp(1.02rem, 1.35vw, 1.16rem);
   font-weight: 600;
-  color: #ffffff;
+  color: #00081b;
   line-height: 1.65;
   margin: 0;
 }
@@ -2496,7 +2496,7 @@ footer[style*="background-image"] {
   padding: 0.8rem 1.5rem;
   background: #ffffff;
   border: 1.5px solid #cbd5e1;
-  color: #ffffff;
+  color: #00081b;
   font-size: 0.88rem;
   font-weight: 600;
   text-decoration: none;
@@ -2812,7 +2812,7 @@ footer#contacts {
 
 .btn-back-edit:hover {
   background: #e2e8f0;
-  color: #ffffff;
+  color: #0f172a;
   border-color: #94a3b8;
   transform: translateX(-2px);
 }
@@ -2944,7 +2944,7 @@ footer#contacts {
 
 .modal-window .btn-outline-dark:hover {
   background: #e2e8f0;
-  color: #ffffff;
+  color: #0f172a;
   border-color: #94a3b8;
 }
 
@@ -4721,7 +4721,7 @@ footer#contacts {
     padding-top: 0 !important;
     padding-bottom: 3.5rem;
     background-color: #0c101a;
-    background-image: url('images/Myroniuk/back_cells.jpeg');
+    background-image: linear-gradient(rgba(0, 8, 27, 0.75), rgba(0, 8, 27, 0.75)), url('images/Myroniuk/back_cells.jpeg');
     background-size: cover;
     background-position: center;
     position: relative;
@@ -5354,7 +5354,7 @@ footer#contacts {
 
 .spec-pill.spec-live {
   background: rgba(27, 154, 170, 0.12);
-  color: #ffffff;
+  color: var(--brand-cyan);
   border-color: rgba(27, 154, 170, 0.35);
 }
 
