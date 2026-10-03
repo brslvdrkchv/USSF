@@ -1000,15 +1000,35 @@ nav#mainNav.scrolled {
   text-shadow: none;
 }
 
+/* Custom scrollbar for webkit */
+.committee-grid::-webkit-scrollbar {
+  height: 8px;
+}
+.committee-grid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+.committee-grid::-webkit-scrollbar-thumb {
+  background: var(--brand-cyan);
+  border-radius: 4px;
+}
+
 .committee-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: 340px;
   gap: 1.25rem;
-  max-width: 1050px;
-  margin: 0 auto;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand-cyan) rgba(255, 255, 255, 0.05);
+  max-width: 100%;
 }
 
 .leader-card {
+  scroll-snap-align: start;
   background: var(--brand-dark-card);
   border: 1px solid var(--brand-dark-card-border);
   padding: 1.25rem 1.4rem;
@@ -4106,9 +4126,7 @@ footer#contacts {
     margin-right: auto;
   }
 
-  .committee-grid {
-    grid-template-columns: 1fr;
-  }
+
 
   .topics-grid {
     grid-template-columns: 1fr;
@@ -4844,13 +4862,18 @@ footer#contacts {
 
   .committee-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
+    grid-template-rows: repeat(2, 1fr);
+    grid-auto-flow: column;
+    grid-auto-columns: 85vw; /* Almost full screen width per card so it snaps nicely */
+    gap: 0.8rem;
     width: 100%;
     box-sizing: border-box;
+    scroll-padding-left: 1rem;
+    padding: 0 1rem 1.5rem 1rem;
   }
-
+  
   .leader-card {
+    scroll-snap-align: center;
     background: #00081b !important;
     border: 1px solid rgba(27, 154, 170, 0.25) !important;
     border-radius: 14px !important;
