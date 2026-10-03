@@ -4775,16 +4775,19 @@ footer#contacts {
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-radius: 14px !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65) !important;
-    padding: 0.75rem 0.35rem !important;
+    padding: 1rem !important;
     max-width: none !important;
     width: 100% !important;
     box-sizing: border-box;
     opacity: 1 !important;
     transform: none !important;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: grid !important;
+    grid-template-columns: 72px 1fr !important;
+    grid-template-rows: auto auto !important;
+    column-gap: 1rem !important;
+    row-gap: 0.3rem !important;
+    align-items: center !important;
+    text-align: left !important;
   }
 
   .organizer-logo-box {
@@ -4792,13 +4795,15 @@ footer#contacts {
     border-radius: 9px;
     width: 72px;
     height: 72px;
-    margin: 0 auto 0.4rem;
+    margin: 0 !important;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0.3rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    flex: 0 0 auto;
+    grid-column: 1 !important;
+    grid-row: 1 / -1 !important;
+    align-self: center !important;
   }
 
   .organizer-logo-box img {
@@ -4810,18 +4815,25 @@ footer#contacts {
   .organizer-card h3 {
     color: #ffffff;
     font-family: var(--font-headings);
-    font-size: clamp(0.68rem, 2.2vw, 0.78rem);
-    margin-bottom: 0.25rem;
+    font-size: 0.75rem !important;
+    margin: 0 !important;
     line-height: 1.2;
     word-break: break-word;
-    hyphens: auto;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    text-align: left !important;
+    align-self: end !important;
   }
 
   .organizer-card p {
     color: #94a3b8;
-    font-size: clamp(0.56rem, 1.8vw, 0.64rem);
+    font-size: 0.6rem !important;
     line-height: 1.25;
-    margin: 0;
+    margin: 0 !important;
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    text-align: left !important;
+    align-self: start !important;
   }
 
   .organizers-committee-block {
