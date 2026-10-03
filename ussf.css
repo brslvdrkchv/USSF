@@ -1803,7 +1803,7 @@ nav#mainNav.scrolled {
 .track-nav-btn.active {
   background: #ffffff;
   border: 2px solid var(--brand-cyan);
-  color: #ffffff;
+  color: #00081b;
   box-shadow: 0 0 15px rgba(27, 154, 170, 0.3), inset 0 0 10px rgba(27, 154, 170, 0.1);
 }
 
@@ -1813,7 +1813,7 @@ nav#mainNav.scrolled {
 }
 
 .track-nav-btn.active .track-label {
-  color: #ffffff; /* ТЕМНИЙ КОЛІР ДЛЯ НАЗВ СЕКЦІЙ */
+  color: #00081b;
   font-weight: 800;
 }
 
