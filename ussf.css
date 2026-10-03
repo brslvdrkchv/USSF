@@ -2660,7 +2660,7 @@ footer#contacts {
 
 .modal-window {
   background: #ffffff;
-  color: #ffffff;
+  color: #0f172a;
   width: 100%;
   max-width: 680px;
   max-height: 90vh;
@@ -2718,7 +2718,7 @@ footer#contacts {
   font-family: var(--font-headings);
   font-size: clamp(1.1rem, 2.3vw, 1.55rem);
   font-weight: 800;
-  color: #ffffff;
+  color: #0f172a;
   margin-bottom: 0.35rem;
   white-space: nowrap;
 }
@@ -2744,7 +2744,7 @@ footer#contacts {
 }
 
 .preview-meta-item strong {
-  color: #ffffff;
+  color: #0f172a;
   margin-right: 0.25rem;
 }
 
@@ -2853,7 +2853,7 @@ footer#contacts {
   border-radius: 50%;
   background: #F1F5F9;
   border: 1px solid #cbd5e1;
-  color: #ffffff;
+  color: #64748b;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2880,7 +2880,7 @@ footer#contacts {
   font-family: var(--font-headings);
   font-size: clamp(1.05rem, 2.2vw, 1.65rem);
   font-weight: 800;
-  color: #ffffff;
+  color: #0f172a;
   margin-bottom: 0.35rem;
   white-space: nowrap;
 }
@@ -2901,7 +2901,7 @@ footer#contacts {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #ffffff;
+  color: #1e293b;
   margin-bottom: 0.45rem;
 }
 
@@ -3027,7 +3027,7 @@ footer#contacts {
   font-family: var(--font-headings);
   font-size: 0.98rem;
   font-weight: 800;
-  color: #ffffff;
+  color: #0f172a;
   margin-bottom: 0.8rem;
   display: flex;
   align-items: center;
@@ -3062,7 +3062,7 @@ footer#contacts {
   font-family: var(--font-headings);
   font-size: 0.86rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #0f172a;
   display: flex;
   align-items: center;
   gap: 0.45rem;
@@ -3165,7 +3165,7 @@ footer#contacts {
   font-family: var(--font-headings);
   font-size: 0.8rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--brand-cyan);
   background: rgba(27, 154, 170, 0.1);
   border: 1px solid rgba(27, 154, 170, 0.25);
   padding: 0.28rem 0.75rem;
@@ -3187,7 +3187,7 @@ footer#contacts {
 }
 
 .abstract-tip-message strong {
-  color: #ffffff;
+  color: #00081b;
 }
 
 /* Interactive Character Counter */
@@ -3217,7 +3217,7 @@ footer#contacts {
 .counter-digits {
   font-family: var(--font-headings);
   font-size: 0.95rem;
-  color: #ffffff;
+  color: #0f172a;
 }
 
 .counter-digits strong {
@@ -6959,7 +6959,7 @@ footer#contacts {
 .privacy-section-card h4 {
   font-size: 0.96rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #0f172a;
   margin-bottom: 0.45rem;
   display: flex;
   align-items: center;
@@ -7381,7 +7381,7 @@ footer#contacts {
 .evaluation-list li strong {
   display: block;
   font-size: 0.92rem;
-  color: #ffffff;
+  color: #0f172a;
   margin-bottom: 0.35rem;
 }
 
