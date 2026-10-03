@@ -7355,6 +7355,7 @@ body.dark-mode {
 }
 
 body.dark-mode #program,
+body.dark-mode #registration,
 body.dark-mode #formats,
 body.dark-mode #organizers,
 body.dark-mode #venue,
@@ -7380,6 +7381,8 @@ body.dark-mode .hamburger span { background: #f8fafc !important; }
 
 /* Modals & Cards */
 body.dark-mode .modal-window,
+body.dark-mode .reg-step-card,
+body.dark-mode .reg-note-box,
 body.dark-mode .program-card,
 body.dark-mode .organizer-card,
 body.dark-mode .leader-card,
@@ -7397,12 +7400,15 @@ body.dark-mode .form-success-message {
 body.dark-mode .modal-window h2,
 body.dark-mode .modal-window h3,
 body.dark-mode .modal-window h4,
+body.dark-mode .reg-step-card h4,
 body.dark-mode .modal-window p,
+body.dark-mode .reg-step-card p,
 body.dark-mode .modal-window span,
 body.dark-mode .program-card h3,
 body.dark-mode .leader-info h3,
 body.dark-mode .leader-info p,
 body.dark-mode .faq-q-text,
+body.dark-mode .reg-note-text,
 body.dark-mode .faq-answer-panel {
   color: #f8fafc !important;
 }
@@ -7457,4 +7463,22 @@ body.dark-mode .organizer-logo-box {
   background-color: #ffffff !important;
   border-radius: 12px;
   padding: 10px;
+}
+
+body.dark-mode .reg-step-card h4,
+body.dark-mode .reg-step-card p,
+body.dark-mode .reg-note-text,
+body.dark-mode .venue-info h3,
+body.dark-mode .venue-address,
+body.dark-mode .venue-route-block h4,
+body.dark-mode .venue-route-block li,
+body.dark-mode .venue-route-block li span,
+body.dark-mode .venue-route-block li strong,
+body.dark-mode .nav-map-btn,
+body.dark-mode .faq-answer-content p {
+  color: #f8fafc !important;
+}
+body.dark-mode .nav-map-btn:hover {
+  background: #111827 !important;
+  color: #1b9aaa !important;
 }
