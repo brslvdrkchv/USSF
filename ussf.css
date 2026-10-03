@@ -624,7 +624,7 @@ nav#mainNav.scrolled {
   transform: scaleX(-1);
   -webkit-mask-image: linear-gradient(to bottom, black 0%, black 70%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 0%, black 70%, transparent 100%);
-  opacity: 0.2;
+  opacity: 0.5;
   z-index: 1;
   pointer-events: none;
 }
@@ -781,7 +781,7 @@ nav#mainNav.scrolled {
   transform: translateY(-50%) rotate(15deg) scaleX(-1);
   width: 105vw;
   max-width: 1800px;
-  opacity: 0.2;
+  opacity: 0.5;
   pointer-events: none;
   z-index: 1;
   filter: drop-shadow(0 0 35px rgba(27, 154, 170, 0.4));
@@ -1105,7 +1105,7 @@ nav#mainNav.scrolled {
 /* ============ PARTICIPATION FORMATS ============ */
 #formats {
   padding: 6.5rem 0;
-  background-color: var(--brand-main);
+  background-color: var(--cream-warm);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -1118,13 +1118,9 @@ nav#mainNav.scrolled {
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(180deg, #ffffff 0%, rgba(2, 10, 28, 0.8) 15%, rgba(2, 10, 28, 0.8) 85%, #eef2f5 100%);
+  background: linear-gradient(180deg, var(--cream-warm) 0%, rgba(2, 10, 28, 0.75) 40%, rgba(2, 10, 28, 0.75) 60%, var(--cream-warm) 100%);
   z-index: -1;
   pointer-events: none;
-}
-
-#formats .section-title, #formats .section-title span, #formats .committee-note p {
-  color: #ffffff !important;
 }
 
 #formats .section-label {
@@ -6210,22 +6206,6 @@ footer#contacts {
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-color: var(--brand-main);
-  z-index: 1;
-}
-
-.faq-section::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(180deg, #ffffff 0%, rgba(2, 10, 28, 0.8) 15%, rgba(2, 10, 28, 0.8) 85%, #eef2f5 100%);
-  z-index: -1;
-  pointer-events: none;
-}
-
-.faq-section .section-title, .faq-section .section-title span {
-  color: #ffffff !important;
 }
 
 .faq-search-wrapper {
@@ -7376,10 +7356,8 @@ html.no-scroll body {
   }
 }
 
-
 @media (max-width: 768px) {
-  #formats, .faq-section {
+  #formats {
     background-attachment: scroll;
   }
 }
-
