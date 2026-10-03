@@ -7340,3 +7340,121 @@ html.no-scroll body {
     justify-content: center;
   }
 }
+
+/* ========================================================
+   DARK MODE OVERRIDES (Time-bombed or Manual Toggle)
+   ======================================================== */
+body.dark-mode {
+  --cream: #00081b;
+  --cream-warm: #040914;
+  --bg-dark: #000000;
+  --text-dark: #f8fafc;
+  --text-muted: #94a3b8;
+  background-color: #00081b !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode #program,
+body.dark-mode #formats,
+body.dark-mode #organizers,
+body.dark-mode #venue,
+body.dark-mode #faq,
+body.dark-mode #contacts {
+  background-color: #00081b !important;
+  background-image: none !important; /* Removes bright backgrounds */
+  color: #f8fafc !important;
+}
+
+/* Navbar */
+body.dark-mode #mainNav.scrolled {
+  background: rgba(0, 8, 27, 0.96) !important;
+  border-bottom: 1px solid rgba(27, 154, 170, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+}
+body.dark-mode #mainNav:not(.scrolled) {
+  background: rgba(0, 8, 27, 0.8) !important;
+}
+body.dark-mode .nav-links a { color: #f8fafc !important; }
+body.dark-mode .nav-brand-logo { filter: brightness(0) invert(1) !important; }
+body.dark-mode .hamburger span { background: #f8fafc !important; }
+
+/* Modals & Cards */
+body.dark-mode .modal-window,
+body.dark-mode .program-card,
+body.dark-mode .organizer-card,
+body.dark-mode .leader-card,
+body.dark-mode .format-card,
+body.dark-mode .venue-card,
+body.dark-mode .faq-item,
+body.dark-mode #programWorkshopsPlaceholder,
+body.dark-mode .form-success-message {
+  background-color: #0a0f1d !important;
+  border-color: rgba(27, 154, 170, 0.25) !important;
+  color: #f8fafc !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-mode .modal-window h2,
+body.dark-mode .modal-window h3,
+body.dark-mode .modal-window h4,
+body.dark-mode .modal-window p,
+body.dark-mode .modal-window span,
+body.dark-mode .program-card h3,
+body.dark-mode .leader-info h3,
+body.dark-mode .leader-info p,
+body.dark-mode .faq-q-text,
+body.dark-mode .faq-answer-panel {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .faq-answer-panel,
+body.dark-mode .leader-bio {
+  color: #cbd5e1 !important;
+}
+
+/* Forms */
+body.dark-mode .form-control {
+  background-color: #111827 !important;
+  border-color: #334155 !important;
+  color: #ffffff !important;
+}
+body.dark-mode .form-control::placeholder { color: #64748b !important; }
+body.dark-mode .switch-checkbox-label {
+  background-color: #0a0f1d !important;
+  border-color: rgba(27, 154, 170, 0.25) !important;
+}
+body.dark-mode .btn-outline-dark {
+  background-color: transparent !important;
+  color: #f8fafc !important;
+  border-color: #475569 !important;
+}
+body.dark-mode .btn-outline-dark:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+body.dark-mode .modal-close-btn {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+}
+
+/* Fix mobile sticky bar */
+body.dark-mode .mobile-menu {
+  background: #00081b !important;
+}
+body.dark-mode .mobile-menu a {
+  color: #f8fafc !important;
+}
+
+/* Pre-emptive contrast fixes */
+body.dark-mode .section-title,
+body.dark-mode .workshops-banner-title {
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+/* Safety for JPG logos in dark mode */
+body.dark-mode .organizer-logo-box {
+  background-color: #ffffff !important;
+  border-radius: 12px;
+  padding: 10px;
+}

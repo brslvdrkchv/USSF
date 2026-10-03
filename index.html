@@ -362,7 +362,7 @@
     <a href="#venue" onclick="closeMobileMenu()"><span class="ua">Локація</span><span class="en">Venue</span></a>
     <a href="#faq" onclick="closeMobileMenu()"><span class="ua">FAQ</span><span class="en">FAQ</span></a>
     <a href="#contacts" onclick="closeMobileMenu()"><span class="ua">Контакти</span><span class="en">Contacts</span></a>
-    <button class="lang-btn" id="langToggleMobile" style="margin-top: 1rem;">EN</button>
+    <div style="display: flex; gap: 10px; margin-top: 1rem; justify-content: center;"><button class="lang-btn" id="themeToggleMobile" aria-label="Toggle Dark Mode">🌓</button><button class="lang-btn" id="langToggleMobile">EN</button></div>
   </div>
 
   <!-- ============ NAVIGATION ============ -->
@@ -382,6 +382,7 @@
     </ul>
 
     <div class="nav-actions">
+      <button class="lang-btn" id="themeToggle" aria-label="Toggle Dark Mode" style="margin-right: 10px; padding: 0.35rem 0.6rem;">🌓</button>
       <button class="lang-btn" id="langToggle" aria-label="Перемкнути мову">EN</button>
       <div class="hamburger" id="hamburger" aria-label="Відкрити меню">
         <span></span><span></span><span></span>
