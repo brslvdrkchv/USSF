@@ -300,6 +300,82 @@ def send_to_google_sheet(data, docx_path=None, webhook_url=None):
             'message': f"Помилка з'єднання з Google Таблицею: {exc}"
         }
 
+
+def send_listener_email(data: dict, committee_email: str) -> dict:
+    """Dispatches free listener registration confirmation email via SMTP."""
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    from email.mime.application import MIMEApplication
+    import smtplib
+
+    cfg = load_email_config()
+    smtp_host = cfg.get('smtp_host', 'smtp.gmail.com')
+    smtp_port = int(cfg.get('smtp_port', 587))
+    smtp_user = cfg.get('smtp_user', '')
+    smtp_pass = cfg.get('smtp_password', '')
+
+    if not smtp_user or not smtp_pass:
+        return {"sent": False, "status": "SMTP_NOT_CONFIGURED", "message": "SMTP credentials not configured."}
+
+    full_name = data.get('fullName', 'Слухач')
+    author_email = data.get('email', '').strip()
+    sub_id = data.get('submissionId', 'LS-0000')
+
+    try:
+        server = smtplib.SMTP(smtp_host, smtp_port, timeout=15)
+        server.starttls()
+        server.login(smtp_user, smtp_pass)
+        sent_results = []
+
+        if author_email and cfg.get('send_copy_to_author', True):
+            msg_auth = MIMEMultipart()
+            msg_auth['From'] = f"Оргкомітет USSF 2026 <{smtp_user}>"
+            msg_auth['To'] = author_email
+            msg_auth['Subject'] = f"Реєстрація слухача USSF 2026 успішна (ID: {sub_id})"
+
+            auth_body = f"""Шановний(а) {full_name}!
+
+Дякуємо за реєстрацію на I Всеукраїнський студентський хірургічний форум (USSF 2026) у якості вільного слухача.
+Ваша участь безкоштовна. Ви матимете змогу відвідувати усі пленарні засідання першого дня форуму.
+
+Ваш ідентифікатор реєстрації: {sub_id}
+
+Чекаємо на Вас за адресою:
+Національний медичний університет імені О.О. Богомольця (Морфологічний корпус)
+м. Київ, Берестейський проспект, 34.
+
+З повагою,
+Оргкомітет USSF 2026
+"""
+            msg_auth.attach(MIMEText(auth_body, 'plain', 'utf-8'))
+
+            # Attach Program PDF if available
+            program_path = cfg.get('program_pdf_path', 'USSF2026_Program.pdf')
+            if os.path.exists(program_path):
+                with open(program_path, 'rb') as pf:
+                    att_prog = MIMEApplication(pf.read(), _subtype='pdf')
+                    att_prog.add_header('Content-Disposition', 'attachment', filename=('utf-8', '', 'USSF2026_Program.pdf'))
+                    msg_auth.attach(att_prog)
+
+            server.send_message(msg_auth)
+            sent_results.append(f"Підтвердження надіслано на {author_email}")
+        
+        # Committee email
+        msg_comm = MIMEMultipart()
+        msg_comm['From'] = f"USSF Server <{smtp_user}>"
+        msg_comm['To'] = committee_email
+        msg_comm['Subject'] = f"Нова реєстрація слухача: {full_name}"
+        comm_body = f"Зареєстровано нового вільного слухача:\nIм'я: {full_name}\nEmail: {author_email}\nТелефон: {data.get('phone', '')}\nВНЗ: {data.get('institution', '')}"
+        msg_comm.attach(MIMEText(comm_body, 'plain', 'utf-8'))
+        server.send_message(msg_comm)
+        sent_results.append(f"Сповіщення оргкомітету надіслано на {committee_email}")
+
+        server.quit()
+        return {"sent": True, "status": "SENT", "messages": sent_results}
+    except Exception as e:
+        return {"sent": False, "error": "SMTP_SEND_FAILED", "message": str(e)}
+
+
 def send_workshop_email(data: dict, committee_email: str) -> dict:
     """Dispatches workshop registration confirmation email via SMTP."""
     cfg = load_email_config()
@@ -587,6 +663,39 @@ class SubmissionHandler(http.server.SimpleHTTPRequestHandler):
                 full_name = data.get('fullName', '').strip() or data.get('full_name', '').strip() or f"{data.get('last_name', '')} {data.get('first_name', '')} {data.get('middle_name', '')}".strip() or 'Учасник'
                 author_initials = format_author_initials(full_name)
                 safe_name = re.sub(r'[^\w]+', '_', author_initials.replace('.', '').strip()).strip('_') or 'Учасник'
+
+
+                # Dedicated Handling for Listener Registration
+                if data.get('partFormat') == 'listener' or data.get('isListener') or data.get('listenerFormat') or ('abstractTitle' not in data and 'isWorkshop' not in data and data.get('academicStatusText') == 'Студент медичного університету (1–6 курс)'):
+                    ls_json_filename = f"Слухач_{safe_name}_{timestamp}.json"
+                    ls_json_path = os.path.join(SUBMISSIONS_DIR, ls_json_filename)
+                    with open(ls_json_path, 'w', encoding='utf-8') as jf:
+                        json.dump(data, jf, ensure_ascii=False, indent=2)
+                    print(f"[SERVER] Saved listener registration: {ls_json_filename}")
+
+                    email_result = send_listener_email(data, RECIPIENT)
+                    print(f"[SERVER] Listener email dispatch result: {email_result}")
+
+                    sheets_result = send_to_google_sheet(data)
+                    
+                    try:
+                        if os.path.exists(ls_json_path):
+                            os.remove(ls_json_path)
+                    except Exception:
+                        pass
+
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "status": "success",
+                        "message": "Реєстрацію слухача успішно зафіксовано!",
+                        "filename": ls_json_filename,
+                        "timestamp": timestamp,
+                        "email_result": email_result,
+                        "google_sheets_result": sheets_result
+                    }, ensure_ascii=False).encode('utf-8'))
+                    return
 
                 # Dedicated Handling for Practical Workshops Registration
                 if data.get('isWorkshop') or data.get('partFormat') == 'workshop':
