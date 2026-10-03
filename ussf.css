@@ -624,7 +624,7 @@ nav#mainNav.scrolled {
   transform: scaleX(-1);
   -webkit-mask-image: linear-gradient(to bottom, black 0%, black 70%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 0%, black 70%, transparent 100%);
-  opacity: 0.5;
+  opacity: 0.25;
   z-index: 1;
   pointer-events: none;
 }
@@ -781,7 +781,7 @@ nav#mainNav.scrolled {
   transform: translateY(-50%) rotate(15deg) scaleX(-1);
   width: 105vw;
   max-width: 1800px;
-  opacity: 0.5;
+  opacity: 0.25;
   pointer-events: none;
   z-index: 1;
   filter: drop-shadow(0 0 35px rgba(27, 154, 170, 0.4));
@@ -7341,3 +7341,22 @@ html.no-scroll body {
   }
 }
 
+
+/* Uniform Darkened Backgrounds */
+#formats.dark-bg-section {
+  background-image: linear-gradient(rgba(0, 8, 27, 0.75), rgba(0, 8, 27, 0.75)), url('images/Myroniuk/back2_dark.jpeg');
+  background-size: cover;
+  background-position: center;
+}
+
+#faq.dark-bg-section {
+  background-image: linear-gradient(rgba(0, 8, 27, 0.75), rgba(0, 8, 27, 0.75)), url('images/Myroniuk/back3_dark.jpeg');
+  background-size: cover;
+  background-position: center;
+}
+
+.dark-bg-section .section-title,
+.dark-bg-section .section-title span,
+.dark-bg-section .committee-note p {
+  color: #ffffff !important;
+}
