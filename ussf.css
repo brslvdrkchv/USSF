@@ -1654,16 +1654,16 @@ nav#mainNav.scrolled {
 }
 
 .day-nav-btn:hover {
-  border-color: var(--nmu-blue);
+  border-color: var(--brand-main);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
 
 .day-nav-btn.active {
-  background: var(--nmu-blue);
-  border-color: var(--nmu-blue);
+  background: var(--brand-main);
+  border-color: var(--brand-main);
   color: var(--white);
-  box-shadow: 0 6px 20px rgba(29, 66, 138, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 8, 27, 0.35);
 }
 
 .day-nav-badge {
