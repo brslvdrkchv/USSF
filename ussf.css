@@ -4627,6 +4627,37 @@ footer#contacts {
     font-size: 0.95rem;
   }
 
+  
+  /* Mobile Registration CTA Fixes */
+  .reg-cta-center {
+    padding: 0 1rem;
+    margin-top: 2rem;
+  }
+  
+  .reg-cta-center .btn-primary {
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+    width: 100%;
+    max-width: 320px;
+    white-space: nowrap;
+  }
+
+  .reg-cta-center .btn-primary .btn-icon-arrow {
+    width: 18px;
+    height: 18px;
+    margin-left: 0.2rem !important;
+  }
+  
+  @keyframes pulse-ring-mobile {
+    0% { box-shadow: 0 0 0 0 rgba(27, 154, 170, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(27, 154, 170, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(27, 154, 170, 0); }
+  }
+  
+  .reg-cta-center .btn-primary {
+    animation: pulse-ring-mobile 2.5s infinite;
+  }
+
   .schedule-notice-content h4 {
     font-size: 0.85rem;
     line-height: 1.4;
@@ -7102,7 +7133,38 @@ footer#contacts {
 .program-schedule-notice-banner .schedule-notice-icon {
   font-size: 1.8rem;
 }
-.program-schedule-notice-banner .schedule-notice-content h4 {
+.program-schedule-notice-banner 
+  /* Mobile Registration CTA Fixes */
+  .reg-cta-center {
+    padding: 0 1rem;
+    margin-top: 2rem;
+  }
+  
+  .reg-cta-center .btn-primary {
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+    width: 100%;
+    max-width: 320px;
+    white-space: nowrap;
+  }
+
+  .reg-cta-center .btn-primary .btn-icon-arrow {
+    width: 18px;
+    height: 18px;
+    margin-left: 0.2rem !important;
+  }
+  
+  @keyframes pulse-ring-mobile {
+    0% { box-shadow: 0 0 0 0 rgba(27, 154, 170, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(27, 154, 170, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(27, 154, 170, 0); }
+  }
+  
+  .reg-cta-center .btn-primary {
+    animation: pulse-ring-mobile 2.5s infinite;
+  }
+
+  .schedule-notice-content h4 {
   margin: 0 0 0.35rem;
   font-size: 1.05rem;
   font-family: var(--font-headings);
